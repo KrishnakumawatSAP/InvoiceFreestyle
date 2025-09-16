@@ -1,0 +1,229 @@
+_schema-version: 3.3.0
+ID: dashboards
+description: Vendor Invoice Administration.
+version: 0.0.1
+modules:
+  - name: dashboards-srv
+    type: nodejs
+    path: gen/srv
+    requires:
+      - name: dashboards-logging
+      - name: dashboards-auth
+      - name: dashboards-connectivity
+      - name: dashboards-destination-service
+      - name: dashboards-db
+      - name: dashboards-metadata
+      - name: dashboards-auditlog
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: '${default-url}'
+    parameters:
+      buildpack: nodejs_buildpack
+      readiness-health-check-http-endpoint: /health
+      readiness-health-check-type: http
+      disk-quota: 2G
+      keep-existing-routes: true
+      memory: 100M
+    build-parameters:
+      builder: npm
+  - name: dashboards-approuter
+    type: approuter.nodejs
+    path: app/router
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          forwardAuthToken: true
+          name: srv-api
+          url: '~{srv-url}'
+      - name: dashboards-logging
+      - name: dashboards-auth
+      - name: dashboards-destination-service
+        group: destinations
+        properties:
+          forwardAuthToken: false
+          name: ui5
+          url: 'https://ui5.sap.com'
+      - name: dashboards-html5-runtime
+    parameters:
+      disk-quota: 2G
+      keep-existing-routes: true
+      memory: 100M
+    build-parameters:
+      ignore:
+        - .env
+        - node_modules/
+        - default-env.json
+    provides:
+      - name: app-api
+        properties:
+          app-protocol: ${protocol}
+          app-uri: ${default-uri}
+  - name: dashboards-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: dashboards-db
+    parameters:
+      buildpack: nodejs_buildpack
+  - name: dashboards-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: srv-api
+      - name: dashboards-destination-service
+        parameters:
+          content-target: true
+      - name: dashboards-html5-repo-host
+        parameters:
+          service-key:
+            name: dashboards-repo-host-key
+      - name: dashboards-auth
+        parameters:
+          service-key:
+            name: uaa_dashboards-key
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Name: hana_app_dashboards_repo_host
+              ServiceInstanceName: dashboards-html5-srv
+              ServiceKeyName: dashboards-repo-host-key
+              sap.cloud.service: hana.app
+            - Authentication: OAuth2UserTokenExchange
+              Name: hana_app_uaa_dashboards
+              ServiceInstanceName: dashboards-xsuaa-service
+              ServiceKeyName: uaa_dashboards-key
+              sap.cloud.service: hana.app
+          existing_destinations_policy: ignore
+        subaccount:
+          destinations:
+            - AppgyverEnabled: true
+              Authentication: OAuth2UserTokenExchange
+              HTML5.DynamicDestination: true
+              HTML5.Timeout: 120000
+              MobileEnabled: true
+              Name: dashboards
+              TokenServiceInstanceName: dashboards-xsuaa-service
+              TokenServiceKeyName: uaa_dashboards-key
+              URL: '~{srv-api/srv-url}/'
+              WebIDEEnabled: true
+              sap.applicationdevelopment.actions.enabled: true
+              sap.build.usage: CAP
+              sap.cloud.service: lcap.dashboards
+              sap.processautomation.enabled: true
+          existing_destinations_policy: update
+    build-parameters:
+      no-source: true
+  - name: dashboards-app-deployer
+    type: com.sap.application.content
+    path: gen
+    requires:
+      - name: dashboards-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: app/
+      requires:
+        - artifacts:
+            - zdashboard.zip
+          name: zdashboard
+          target-path: app/
+  - name: zdashboard
+    type: html5
+    path: app/zdashboard
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build:cf
+      supported-platforms:
+        []
+resources:
+  - name: dashboards-logging
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: application-logs
+      service-plan: lite
+  - name: dashboards-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        tenant-mode: dedicated
+        xsappname: 'dashboards-${space}'
+      path: ./xs-security.json
+      service: xsuaa
+      service-plan: application
+      service-name: dashboards-xsuaa-service
+  - name: dashboards-connectivity
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: connectivity
+      service-plan: lite
+  - name: dashboards-destination-service
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: srv-api
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Authentication: NoAuthentication
+                HTML5.DynamicDestination: true
+                HTML5.ForwardAuthToken: true
+                HTML5.Timeout: 120000
+                Name: dashboards-srv
+                ProxyType: Internet
+                Type: HTTP
+                URL: '~{srv-api/srv-url}'
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: 'https://ui5.sap.com'
+            existing_destinations_policy: update
+      service: destination
+      service-plan: lite
+      service-name: dashboards-destination-service
+  - name: dashboards-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: dashboards-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: dashboards-html5-srv
+      service-plan: app-host
+  - name: dashboards-html5-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
+  - name: dashboards-metadata
+    type: org.cloudfoundry.user-provided-service
+    parameters:
+      service: metadata
+      service-plan: standard
+      service-name: dashboards-api-metadata
+      config:
+        default-domain: ${default-domain}
+  - name: dashboards-auditlog
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: auditlog
+      service-plan: premium
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+        - npx rimraf gen/db/src/gen/data
