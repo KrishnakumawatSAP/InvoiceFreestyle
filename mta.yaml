@@ -14,6 +14,7 @@ modules:
       - name: dashboards-db
       - name: dashboards-metadata
       - name: dashboards-auditlog
+      - name: dashboards-attachments
     provides:
       - name: srv-api
         properties:
@@ -152,10 +153,15 @@ resources:
       config:
         tenant-mode: dedicated
         xsappname: 'dashboards-${space}'
+        oauth2-configuration:
+          redirect-uris:
+            - https://*~{app-api/app-uri}/**
       path: ./xs-security.json
       service: xsuaa
       service-plan: application
       service-name: dashboards-xsuaa-service
+    requires:
+      - name: app-api
   - name: dashboards-connectivity
     type: org.cloudfoundry.managed-service
     parameters:
@@ -217,6 +223,11 @@ resources:
     parameters:
       service: auditlog
       service-plan: premium
+  - name: dashboards-attachments
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: objectstore
+      service-plan: standard
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true

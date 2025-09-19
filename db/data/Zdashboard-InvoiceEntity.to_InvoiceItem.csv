@@ -1,0 +1,1 @@
+up__ID,ID,createdAt,createdBy,modifiedAt,modifiedBy,supplierInvoice,fiscalYear,sup_InvoiceItem,purchaseOrder,purchaseOrderItem,referenceDocument,refDocFiscalYear,refDocItem,taxCode,documentCurrency_code,supInvItemAmount,poQuantityUnit,quantityPOUnit,Plant,TaxJurisdiction,ProductType

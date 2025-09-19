@@ -9,6 +9,7 @@
     "@cap-js-community/odata-v2-adapter": "^1.13.8",
     "@cap-js/audit-logging": ">=0",
     "@cap-js/hana": "^1",
+    "@cap-js/sdm": "^1.7.0",
     "@sap-cloud-sdk/connectivity": "^3.9.0",
     "@sap-cloud-sdk/generator": "^3.16.0",
     "@sap-cloud-sdk/http-client": "^3.16.0",

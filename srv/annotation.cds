@@ -46,6 +46,14 @@ annotate service.Segments with {
   ChangeDate  @title: 'Date';
   ChangeTime  @title: 'Time';
 }
+annotate service.InvoiceEntity with {
+  InvoicingParty @UI.selectionField: [{ position: 10 }] @title: 'Invoicing Party';
+  status         @UI.selectionField: [{ position: 20 }] @title: 'Status';
+  statusFlag     @UI.selectionField: [{ position: 30 }] @title: 'Status Flag';
+  mode           @UI.selectionField: [{ position: 40 }] @title: 'Mode';
+  dmsFolder      @UI.selectionField: [{ position: 50 }] @title: 'DMS Folder';
+  senderMail     @UI.selectionField: [{ position: 60 }] @title: 'Sender Email';
+};
 annotate service.Users with @UI.LineItem: [
   {
     Value: Id,
