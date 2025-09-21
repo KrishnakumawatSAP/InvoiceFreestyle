@@ -1,0 +1,210 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "zdashboard",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v2/dashboard/",
+        "type": "OData",
+        "settings": {
+          "annotations": [
+            "annotation"
+          ],
+          "odataVersion": "2.0"
+        }
+      },
+      "annotation": {
+        "type": "ODataAnnotation",
+        "uri": "annotations/annotation.xml",
+        "settings": {
+          "localUri": "annotations/annotation.xml"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "ZDashboard-manage": {
+          "semanticObject": "ZDashboard",
+          "action": "manage",
+          "title": "{{flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "rootView": {
+      "viewName": "zdashboard.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "app"
+    },
+    "dependencies": {
+      "minUI5Version": "1.60.16",
+      "libs": {
+        "sap.ui.core": {},
+        "sap.ui.comp": {},
+        "sap.ui.layout": {},
+        "sap.m": {},
+        "sap.f": {},
+        "sap.uxap": {},
+        "sap.tnt": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "zdashboard.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+              "operationMode": "Server",
+              "autoExpandSelect": true,
+              "earlyRequests": true,
+              "refreshAfterChange": false,
+              "defaultBindingMode": "TwoWay",
+              "defaultCountMode": "Inline",
+              "useBatch": true
+        }
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "zdashboard.view",
+        "bypassed": {
+          "target": [
+            "notFound"
+          ]
+        },
+        "async": true
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "main",
+          "target": [
+            "home"
+          ]
+        },
+        {
+          "pattern": "files/:objectId:",
+          "name": "files",
+          "target": [
+            "files"
+          ]
+        },
+        {
+          "pattern": "parameters/contacts",
+          "name": "contacts",
+          "target": [
+            "contacts"
+          ]
+        },
+        {
+          "pattern": "parameters/segments",
+          "name": "segments",
+          "target": [
+            "segments"
+          ]
+        },
+         {
+          "pattern": "filesDetail/{objectId}",
+          "name": "fileDetail",
+          "target": ["fileDetail"]
+        }
+      ],
+      "targets": {
+        "home": {
+          "viewName": "Home",
+          "viewId": "home",
+          "viewLevel": 1,
+          "title": "{i18n>homeViewTitle}"
+        },
+        "files": {
+          "viewName": "Files",
+          "viewId": "files",
+          "viewLevel": 1,
+          "title": "{i18n>filesViewTitle}"
+        },
+        "contacts": {
+          "viewName": "Contacts",
+          "viewId": "contacts",
+          "viewLevel": 1,
+          "title": "{i18n>contactsViewTitle}"
+        },
+        "segments": {
+          "viewName": "Segments",
+          "viewId": "segments",
+          "viewLevel": 1,
+          "title": "{i18n>segmentsViewTitle}"
+        },
+        "notFound": {
+          "viewName": "NotFound",
+          "viewId": "notFound"
+        },
+        "fileDetail": {
+          "viewName": "FilesDetail",
+          "viewId": "FilesDetail",
+          "viewLevel": 2,
+          "title": "{i18n>fileDetailViewTitle}"
+        }
+      }
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "hana.app"
+  },
+  "sap.fiori": {
+    "registrationIds": [],
+    "archeType": "transactional"
+  }
+}

@@ -1,0 +1,229 @@
+<mvc:View
+    xmlns:smartform="sap.ui.comp.smartform"
+    xmlns:smartfield="sap.ui.comp.smartfield"
+    xmlns:tnt="sap.tnt"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:data="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    xmlns:uxap="sap.uxap"
+    height="100%"
+    controllerName="zdashboard.controller.FilesDetail"
+    xmlns:core="sap.ui.core"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+>
+    <uxap:ObjectPageLayout
+        id="_IDGenObjectPageLayout3"
+        busyIndicatorDelay="{filesDetailView>/delay}"
+        busy="{filesDetailView>/busy}"
+        flexEnabled="true"
+        enableLazyLoading="true"
+        showFooter="{filesDetailView>/editable}"
+    >
+        <uxap:headerTitle>
+            <uxap:ObjectPageDynamicHeaderTitle
+                id="_IDGenObjectPageDynamicHeaderTitle1"
+            >
+                <uxap:heading>
+                    <Title
+                        id="_IDGenTitle1"
+                        text="File {Title}"
+                        wrapping="true"
+                    />
+                </uxap:heading>
+                <uxap:navigationActions>
+                    <OverflowToolbarButton
+                        type="Transparent"
+                        icon="sap-icon://decline"
+                        press=".onClose"
+                        tooltip="Close"
+                        id="idCloseButton"
+                    />
+                </uxap:navigationActions>
+                <uxap:actions>
+                    <Button
+                        id="_IDGenButton10"
+                        text="Edit"
+                        press=".onEdit"
+                        visible="{= !${filesDetailView>/editable} }"
+                    />
+                </uxap:actions>
+            </uxap:ObjectPageDynamicHeaderTitle>
+        </uxap:headerTitle>
+
+        <uxap:headerContent>
+            <smartform:SmartForm
+                id="_IDGenSmartForm"
+                editable="false"
+            >
+                <smartform:Group id="_IDGenGroup">
+                    <smartform:GroupElement id="_IDGenGroupElement">
+                        <smartfield:SmartField
+                            id="_IDGenSmartField8"
+                            value="{ModifiedAt}"
+                        />
+                    </smartform:GroupElement>
+                    <smartform:GroupElement id="_IDGenGroupElement1">
+                        <smartfield:SmartField
+                            id="_IDGenSmartField9"
+                            value="{ModifiedBy}"
+                        />
+                    </smartform:GroupElement>
+                </smartform:Group>
+            </smartform:SmartForm>
+        </uxap:headerContent>
+
+        <uxap:sections>
+            <!-- General Section -->
+            <uxap:ObjectPageSection id="_IDGenObjectPageSection2">
+                <uxap:ObjectPageSubSection
+                    id="_IDGenObjectPageSubSection2"
+                    title="General"
+                >
+                    <uxap:blocks>
+                        <smartform:SmartForm
+                            id="_IDGenSmartForm1"
+                            editable="{filesDetailView>/editable}"
+                        >
+                            <smartform:Group id="_IDGenGroup1">
+                                <smartform:GroupElement
+                                    id="_IDGenGroupElement2"
+                                >
+                                    <smartfield:SmartField
+                                        id="_IDGenSmartField10"
+                                        value="{Structure}"
+                                        contextEditable="true"
+                                    />
+                                </smartform:GroupElement>
+                            </smartform:Group>
+                        </smartform:SmartForm>
+                    </uxap:blocks>
+                </uxap:ObjectPageSubSection>
+            </uxap:ObjectPageSection>
+
+            <!-- Users Section -->
+            <uxap:ObjectPageSection id="_IDGenObjectPageSection3">
+                <uxap:ObjectPageSubSection
+                    id="_IDGenObjectPageSubSection3"
+                    title="Users"
+                >
+                    <Table
+                        id="idFilesUsersTable"
+                        mode="{= ${filesDetailView>/editable} ? 'Delete' : 'None' }"
+                        items="{path: 'toUsers', parameters: { expand: 'toLevel' } }"
+                        delete="onDeleteUser"
+                    >
+                        <headerToolbar>
+                            <OverflowToolbar id="_IDGenOverflowToolbar1">
+                                <content>
+                                    <ToolbarSpacer id="_IDGenToolbarSpacer3" />
+                                    <Button
+                                        id="_IDGenButton11"
+                                        type="Transparent"
+                                        icon="sap-icon://add"
+                                        text="Add"
+                                        press="onAddUser"
+                                        visible="{filesDetailView>/editable}"
+                                    />
+                                </content>
+                            </OverflowToolbar>
+                        </headerToolbar>
+                        <columns>
+                            <Column id="_IDGenColumn3">
+                                <Text
+                                    id="_IDGenText3"
+                                    text="UserId"
+                                />
+                            </Column>
+                            <Column id="_IDGenColumn4">
+                                <Text
+                                    id="_IDGenText4"
+                                    text="Level"
+                                />
+                            </Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem
+                                id="idFilesUsersColumnListItem"
+                                visible="{= ${Level} !== ${filesDetailView>/DELETED_LEVEL} }"
+                            >
+                                <cells>
+                                    <VBox id="_IDGenVBox1">
+                                        <Text
+                                            id="_IDGenText5"
+                                            text="{UserId}"
+                                            visible="{= !${filesDetailView>/editable} }"
+                                        />
+                                        <smartfield:SmartField
+                                            id="_IDGenSmartField11"
+                                            value="{UserId}"
+                                            enabled="true"
+                                            visible="{filesDetailView>/editable}"
+                                            fieldGroupIds="fileUser"
+                                        >
+                                            <smartfield:configuration>
+                                                <smartfield:Configuration
+                                                    id="_IDGenConfiguration1"
+                                                    displayBehaviour="idAndDescription"
+                                                    preventInitialDataFetchInValueHelpDialog="false"
+                                                />
+                                            </smartfield:configuration>
+                                        </smartfield:SmartField>
+                                    </VBox>
+                                    <VBox id="_IDGenVBox2">
+                                        <smartfield:SmartField
+                                            id="_IDGenSmartField12"
+                                            value="{Level}"
+                                            enabled="true"
+                                            fieldGroupIds="fileUser"
+                                            editable="{filesDetailView>/editable}"
+                                        >
+                                            <smartfield:configuration>
+                                                <smartfield:Configuration
+                                                    id="_IDGenConfiguration2"
+                                                    displayBehaviour="descriptionOnly"
+                                                    preventInitialDataFetchInValueHelpDialog="false"
+                                                />
+                                            </smartfield:configuration>
+                                        </smartfield:SmartField>
+                                    </VBox>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </uxap:ObjectPageSubSection>
+            </uxap:ObjectPageSection>
+        </uxap:sections>
+
+        <uxap:footer>
+            <OverflowToolbar
+                id="_IDGenOverflowToolbar2"
+                visible="{filesDetailView>/editable}"
+            >
+                <content>
+                    <Button
+                        id="_IDGenButton12"
+                        icon="sap-icon://alert"
+                        text="{=${message>/}.length}"
+                        visible="{=${message>/}.length > 0}"
+                        type="Reject"
+                        press=".onShowMessages"
+                    />
+                    <ToolbarSpacer id="_IDGenToolbarSpacer4" />
+                    <Button
+                        id="_IDGenButton13"
+                        text="Cancel"
+                        type="Transparent"
+                        press=".onCancel"
+                    />
+                    <Button
+                        id="_IDGenButton14"
+                        text="Save"
+                        type="Emphasized"
+                        press=".onSave"
+                    />
+                </content>
+            </OverflowToolbar>
+        </uxap:footer>
+    </uxap:ObjectPageLayout>
+</mvc:View>

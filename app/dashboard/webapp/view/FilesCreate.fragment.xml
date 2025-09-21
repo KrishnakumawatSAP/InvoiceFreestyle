@@ -1,0 +1,37 @@
+<core:FragmentDefinition
+    xmlns:form="sap.ui.layout.form"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <Dialog
+        id="idFilesCreateDialog"
+        title="Create File"
+        afterClose="onCloseCreateDialog"
+    >
+        <form:SimpleForm id="_IDGenSimpleForm1">
+            <Label
+                id="_IDGenLabel"
+                text="Title"
+                labelFor="idCreateTitle"
+            />
+            <Input
+                id="idCreateTitle"
+                value="{Title}"
+            />
+        </form:SimpleForm>
+        <buttons>
+            <Button
+                id="_IDGenButton8"
+                text="Cancel"
+                press="onCloseCreateDialog"
+                type="Transparent"
+            />
+            <Button
+                id="_IDGenButton9"
+                text="Save"
+                press="onCreate"
+                type="Emphasized"
+            />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

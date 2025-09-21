@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx"
+    xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"
+    xmlns:sap="http://www.sap.com/Protocols/SAPData" Version="1.0">
+    <edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+        <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+    </edmx:Reference>
+    <edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml">
+        <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+    </edmx:Reference>
+    <edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+        <edmx:Include Alias="UI" Namespace="com.sap.vocabularies.UI.v1"/>
+    </edmx:Reference>
+    <edmx:DataServices m:DataServiceVersion="2.0">
+        <Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="DashboardService">
+            <Annotation xmlns="http://docs.oasis-open.org/odata/ns/edm" Term="Core.Links">
+                <Collection>
+                    <Record>
+                        <PropertyValue Property="rel" String="author"/>
+                        <PropertyValue Property="href" String="https://cap.cloud.sap"/>
+                    </Record>
+                </Collection>
+            </Annotation>
+            <EntityContainer Name="EntityContainer" m:IsDefaultEntityContainer="true">
+                <EntitySet Name="Segments" EntityType="DashboardService.Segments"/>
+                <EntitySet Name="Users" EntityType="DashboardService.Users"/>
+                <EntitySet Name="Files" EntityType="DashboardService.Files"/>
+                <EntitySet Name="FileUsers" EntityType="DashboardService.FileUsers"/>
+                <EntitySet Name="Levels" EntityType="DashboardService.Levels"/>
+                <EntitySet Name="Contacts" EntityType="DashboardService.Contacts"/>
+                <EntitySet Name="ContactTypes" EntityType="DashboardService.ContactTypes"/>
+                <AssociationSet Name="Users_toFiles" Association="DashboardService.Users_toFiles">
+                    <End Role="Users" EntitySet="Users"/>
+                    <End Role="FileUsers" EntitySet="FileUsers"/>
+                </AssociationSet>
+                <AssociationSet Name="Files_toUsers" Association="DashboardService.Files_toUsers">
+                    <End Role="Files" EntitySet="Files"/>
+                    <End Role="FileUsers" EntitySet="FileUsers"/>
+                </AssociationSet>
+                <AssociationSet Name="FileUsers_toFile" Association="DashboardService.FileUsers_toFile">
+                    <End Role="FileUsers" EntitySet="FileUsers"/>
+                    <End Role="Files" EntitySet="Files"/>
+                </AssociationSet>
+                <AssociationSet Name="FileUsers_toUser" Association="DashboardService.FileUsers_toUser">
+                    <End Role="FileUsers" EntitySet="FileUsers"/>
+                    <End Role="Users" EntitySet="Users"/>
+                </AssociationSet>
+                <AssociationSet Name="FileUsers_toLevel" Association="DashboardService.FileUsers_toLevel">
+                    <End Role="FileUsers" EntitySet="FileUsers"/>
+                    <End Role="Levels" EntitySet="Levels"/>
+                </AssociationSet>
+                <AssociationSet Name="Contacts_ContactType" Association="DashboardService.Contacts_ContactType">
+                    <End Role="Contacts" EntitySet="Contacts"/>
+                    <End Role="ContactTypes" EntitySet="ContactTypes"/>
+                </AssociationSet>
+            </EntityContainer>
+            <EntityType Name="Segments">
+                <Key>
+                    <PropertyRef Name="Id"/>
+                </Key>
+                <Property Name="Id" Type="Edm.String" MaxLength="3" Nullable="false"/>
+                <Property Name="Title" Type="Edm.String" MaxLength="50"/>
+                <Property Name="Description" Type="Edm.String" MaxLength="250"/>
+                <Property Name="Username" Type="Edm.String" MaxLength="12"/>
+                <Property Name="ChangeDate" Type="Edm.DateTimeOffset"/>
+                <Property Name="ChangeTime" Type="Edm.Time"/>
+            </EntityType>
+            <EntityType Name="Users">
+                <Key>
+                    <PropertyRef Name="Id"/>
+                </Key>
+                <Property Name="Id" Type="Edm.String" Nullable="false"/>
+                <Property Name="Name" Type="Edm.String"/>
+                <NavigationProperty Name="toFiles" Relationship="DashboardService.Users_toFiles" FromRole="Users" ToRole="FileUsers"/>
+            </EntityType>
+            <EntityType Name="Files">
+                <Key>
+                    <PropertyRef Name="Id"/>
+                </Key>
+                <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="Title" Type="Edm.String" MaxLength="100"/>
+                <Property Name="ModifiedAt" Type="Edm.DateTimeOffset"/>
+                <Property Name="ModifiedBy" Type="Edm.String" MaxLength="12"/>
+                <NavigationProperty Name="toUsers" Relationship="DashboardService.Files_toUsers" FromRole="Files" ToRole="FileUsers"/>
+            </EntityType>
+            <EntityType Name="FileUsers">
+                <Key>
+                    <PropertyRef Name="FileId"/>
+                    <PropertyRef Name="UserId"/>
+                </Key>
+                <Property Name="FileId" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="UserId" Type="Edm.String" MaxLength="12" Nullable="false"/>
+                <Property Name="Level" Type="Edm.String" MaxLength="1"/>
+                <NavigationProperty Name="toFile" Relationship="DashboardService.FileUsers_toFile" FromRole="FileUsers" ToRole="Files"/>
+                <NavigationProperty Name="toUser" Relationship="DashboardService.FileUsers_toUser" FromRole="FileUsers" ToRole="Users"/>
+                <NavigationProperty Name="toLevel" Relationship="DashboardService.FileUsers_toLevel" FromRole="FileUsers" ToRole="Levels"/>
+            </EntityType>
+            <EntityType Name="Levels">
+                <Key>
+                    <PropertyRef Name="Id"/>
+                </Key>
+                <Property Name="Id" Type="Edm.String" MaxLength="1" Nullable="false"/>
+                <Property Name="Title" Type="Edm.String" MaxLength="100"/>
+            </EntityType>
+            <EntityType Name="Contacts">
+                <Key>
+                    <PropertyRef Name="Email"/>
+                </Key>
+                <Property Name="Email" Type="Edm.String" MaxLength="50" Nullable="false"/>
+                <Property Name="Type" Type="Edm.String" MaxLength="1"/>
+                <Property Name="Job" Type="Edm.String" MaxLength="50"/>
+                <Property Name="Name" Type="Edm.String" MaxLength="50"/>
+                <Property Name="Phone" Type="Edm.String" MaxLength="50"/>
+                <Property Name="Username" Type="Edm.String" MaxLength="12"/>
+                <Property Name="ChangeDate" Type="Edm.DateTimeOffset"/>
+                <Property Name="ChangeTime" Type="Edm.Time"/>
+                <NavigationProperty Name="ContactType" Relationship="DashboardService.Contacts_ContactType" FromRole="Contacts" ToRole="ContactTypes"/>
+            </EntityType>
+            <EntityType Name="ContactTypes">
+                <Key>
+                    <PropertyRef Name="Id"/>
+                </Key>
+                <Property Name="Id" Type="Edm.String" MaxLength="1" Nullable="false"/>
+                <Property Name="Title" Type="Edm.String"/>
+            </EntityType>
+            <Association Name="Users_toFiles">
+                <End Role="Users" Type="DashboardService.Users" Multiplicity="*"/>
+                <End Role="FileUsers" Type="DashboardService.FileUsers" Multiplicity="*"/>
+            </Association>
+            <Association Name="Files_toUsers">
+                <End Role="Files" Type="DashboardService.Files" Multiplicity="*"/>
+                <End Role="FileUsers" Type="DashboardService.FileUsers" Multiplicity="*"/>
+            </Association>
+            <Association Name="FileUsers_toFile">
+                <End Role="FileUsers" Type="DashboardService.FileUsers" Multiplicity="*"/>
+                <End Role="Files" Type="DashboardService.Files" Multiplicity="0..1"/>
+                <ReferentialConstraint>
+                    <Principal Role="Files">
+                        <PropertyRef Name="Id"/>
+                    </Principal>
+                    <Dependent Role="FileUsers">
+                        <PropertyRef Name="FileId"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <Association Name="FileUsers_toUser">
+                <End Role="FileUsers" Type="DashboardService.FileUsers" Multiplicity="*"/>
+                <End Role="Users" Type="DashboardService.Users" Multiplicity="0..1"/>
+                <ReferentialConstraint>
+                    <Principal Role="Users">
+                        <PropertyRef Name="Id"/>
+                    </Principal>
+                    <Dependent Role="FileUsers">
+                        <PropertyRef Name="UserId"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <Association Name="FileUsers_toLevel">
+                <End Role="FileUsers" Type="DashboardService.FileUsers" Multiplicity="*"/>
+                <End Role="Levels" Type="DashboardService.Levels" Multiplicity="0..1"/>
+                <ReferentialConstraint>
+                    <Principal Role="Levels">
+                        <PropertyRef Name="Id"/>
+                    </Principal>
+                    <Dependent Role="FileUsers">
+                        <PropertyRef Name="Level"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <Association Name="Contacts_ContactType">
+                <End Role="Contacts" Type="DashboardService.Contacts" Multiplicity="*"/>
+                <End Role="ContactTypes" Type="DashboardService.ContactTypes" Multiplicity="0..1"/>
+                <ReferentialConstraint>
+                    <Principal Role="ContactTypes">
+                        <PropertyRef Name="Id"/>
+                    </Principal>
+                    <Dependent Role="Contacts">
+                        <PropertyRef Name="Type"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="DashboardService.Segments">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Id"/>
+                            <PropertyValue Property="Label" String="Segment Code"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Title"/>
+                            <PropertyValue Property="Label" String="Segment Name"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Description"/>
+                            <PropertyValue Property="Label" String="Segment Description"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Username"/>
+                            <PropertyValue Property="Label" String="User Name"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ChangeDate"/>
+                            <PropertyValue Property="Label" String="Date"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ChangeTime"/>
+                            <PropertyValue Property="Label" String="Time"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="DashboardService.Files/Id">
+                <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+            </Annotations>
+            <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="DashboardService.FileUsers/FileId">
+                <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+            </Annotations>
+            <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="DashboardService.Contacts">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Name"/>
+                            <PropertyValue Property="Label" String="Name"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Job"/>
+                            <PropertyValue Property="Label" String="Job Title"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Email"/>
+                            <PropertyValue Property="Label" String="Email"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Phone"/>
+                            <PropertyValue Property="Label" String="Phone"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Type"/>
+                            <PropertyValue Property="Label" String="Type"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Username"/>
+                            <PropertyValue Property="Label" String="Modified By"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ChangeDate"/>
+                            <PropertyValue Property="Label" String="Change Date"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ChangeTime"/>
+                            <PropertyValue Property="Label" String="Change Time"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>
