@@ -39,7 +39,7 @@
                 id="_IDGenSideNavigation"
                 itemSelect=".onItemSelect" 
                 selectedItem="{appView>/selectedItem}"
-                selectedKey="main"
+                selectedKey="{appView>/selectedItem}"
             >
                 <tnt:NavigationList id="_IDGenNavigationList">
                     <tnt:NavigationListItem

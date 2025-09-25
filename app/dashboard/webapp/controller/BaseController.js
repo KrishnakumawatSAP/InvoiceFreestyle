@@ -50,8 +50,10 @@ sap.ui.define([
 			 * @param {sap.ui.base.Event} oEvent
 			 */
 			onLinkPress: function (oEvent) {
-				debugger;
 				var sKey = oEvent.getSource().data("key");
+				if(this.getView().getParent() && this.getView().getParent().getModel("appView")){
+					this.getView().getParent().getModel("appView").setProperty("/selectedItem", sKey)
+				}
 				this.getRouter().navTo(sKey);
 			},
 

@@ -35,11 +35,17 @@ sap.ui.define([
 			onInit: function () {
 				//    this._applyTabFilter("all");
 				this.setModel(new JSONModel({
-					layout: LayoutType.OneColumn
+					layout: LayoutType.TwoColumnsBeginExpanded
 				}), "filesView");
+				this.oRouter = this.getOwnerComponent().getRouter();
+				this.oRouter.getRoute("files").attachPatternMatched(this._onProductMatched, this);
 			},
-
-		        onTabSelect: function (oEvent) {
+		_onProductMatched: function(oEvent){
+			var sObject = oEvent.getParameter("arguments").objectId || "0",
+			oTable = this.byId("InvoiceTable");
+			oTable.getItems()[oTable.getBinding("items").aIndices.indexOf(+sObject)].setSelected(true);
+		},
+		onTabSelect: function (oEvent) {
             var sKey = oEvent.getParameter("key"); // tab key (all, pdf, email, posted, error)
             var oSmartTable = this.byId("InvoiceSmartTable");
 
@@ -83,49 +89,7 @@ sap.ui.define([
             });
         },
 
-			// _applyTabFilter: function (key) {
-			// 	const oSmartTableMap = {
-			// 		all: "smartTableAll",
-			// 		pdf: "smartTablePdf",
-			// 		email: "smartTableEmail",
-			// 		posted: "smartTablePosted",
-			// 		error: "smartTableError"
-			// 	};
-
-			// 	const oSmartTableId = oSmartTableMap[key];
-			// 	const oSmartTable = this.byId(oSmartTableId);
-			// 	if (!oSmartTable) return;
-
-			// 	const oTable = oSmartTable.getTable();
-			// 	if (!oTable) return;
-
-			// 	const aFilters = [];
-
-			// 	switch (key) {
-			// 		case "pdf":
-			// 			aFilters.push(new sap.ui.model.Filter("mode", sap.ui.model.FilterOperator.EQ, "pdf"));
-			// 			break;
-			// 		case "email":
-			// 			aFilters.push(new sap.ui.model.Filter("mode", sap.ui.model.FilterOperator.EQ, "email"));
-			// 			break;
-			// 		case "posted":
-			// 			aFilters.push(new sap.ui.model.Filter("statusFlag", sap.ui.model.FilterOperator.EQ, "S"));
-			// 			break;
-			// 		case "error":
-			// 			aFilters.push(new sap.ui.model.Filter("statusFlag", sap.ui.model.FilterOperator.EQ, "E"));
-			// 			break;
-			// 		// "all" -> no filter
-			// 	}
-
-			// 	oSmartTable.rebindTable(); // rebind (in case previous data exists)
-
-			// 	// Apply filters manually on inner table
-			// 	if (oTable.bindItems) {
-			// 		oTable.getBinding("items").filter(aFilters);
-			// 	} else if (oTable.bindRows) {
-			// 		oTable.getBinding("rows").filter(aFilters);
-			// 	}
-			// },
+			
 
 			/* =========================================================== */
 			/* event handlers                                              */
