@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: dashboards
 description: Vendor Invoice Administration.
-version: 0.0.1
+version: 0.0.2
 modules:
   - name: dashboards-srv
     type: nodejs
@@ -13,7 +13,6 @@ modules:
       - name: dashboards-destination-service
       - name: dashboards-db
       - name: dashboards-metadata
-      - name: dashboards-auditlog
       - name: dashboards-attachments
     provides:
       - name: srv-api
@@ -132,7 +131,7 @@ modules:
           target-path: app/
   - name: zdashboard
     type: html5
-    path: app/zdashboard
+    path: app/dashboard
     build-parameters:
       build-result: dist
       builder: custom
@@ -199,6 +198,7 @@ resources:
     parameters:
       service: hana
       service-plan: hdi-shared
+      service-name: dashboards-db
   - name: dashboards-html5-repo-host
     type: org.cloudfoundry.managed-service
     parameters:
@@ -218,11 +218,6 @@ resources:
       service-name: dashboards-api-metadata
       config:
         default-domain: ${default-domain}
-  - name: dashboards-auditlog
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: auditlog
-      service-plan: premium
   - name: dashboards-attachments
     type: org.cloudfoundry.managed-service
     parameters:
