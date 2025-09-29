@@ -37,7 +37,8 @@ sap.ui.define([
                     busy: true,
                     delay: 0,
                     editable: false,
-                    DELETED_LEVEL: this.DELETED_LEVEL
+                    DELETED_LEVEL: this.DELETED_LEVEL,
+                    data: []
                 });
 
                 this.getRouter().getRoute("fileDetail").attachPatternMatched(this._onObjectMatched, this);
@@ -171,7 +172,7 @@ sap.ui.define([
                 // @ts-ignore
                 var sId = oOpenedBy ? oOpenedBy.getId() : oEvent.getSource().getId();
                 if (sId.includes("idCloseButton")) {
-                    this.getModel("filesView").setProperty("/layout", LayoutType.OneColumn);
+                    this.getModel("appView").setProperty("/layout", LayoutType.OneColumn);
                     this.getRouter().navTo("files");
                 }
             },
@@ -211,7 +212,7 @@ sap.ui.define([
            _onObjectMatched: function (oEvent) {
     var sObjectId = oEvent.getParameter("arguments").objectId; // comes from router
     var sLayout = sObjectId ? LayoutType.TwoColumnsBeginExpanded : LayoutType.OneColumn;
-    this.getModel("filesView").setProperty("/layout", sLayout);
+    this.getModel("appView").setProperty("/layout", sLayout);
     this.getModel("filesDetailView").setProperty("/editable", false);
 
     if (!sObjectId) {
@@ -219,9 +220,7 @@ sap.ui.define([
     }
 
     // 🔑 Build the correct key for Invoice entity
-    var sObjectPath = this.getModel().createKey("/Invoice", {
-        Id: sObjectId   // <-- assumes key is 'Id' (GUID)
-    });
+    var sObjectPath = this.getModel().createKey("/Invoice(" + sObjectId + ")");
 
     var oViewModel = this.getModel("filesDetailView");
 

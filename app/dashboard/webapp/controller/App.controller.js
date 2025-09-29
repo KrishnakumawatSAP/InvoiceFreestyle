@@ -1,3 +1,4 @@
+// @ts-ignore
 sap.ui.define([
 	"./BaseController",
 	"sap/ui/model/json/JSONModel",
@@ -40,7 +41,8 @@ sap.ui.define([
 					selectedItem: "files",
 					paramsExpanded: true,
 					sideBarExpanded: true,
-					breadcrumbLinks: [{}]
+					breadcrumbLinks: [{}],
+					layout: "TwoColumnsBeginExpanded"
 				});
 				this.setModel(oViewModel, "appView");
 

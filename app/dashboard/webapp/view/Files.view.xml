@@ -14,7 +14,7 @@
 >
     <f:FlexibleColumnLayout
         id="_IDGenFlexibleColumnLayout1"
-        layout="{filesView>/layout}"
+        layout="{appView>/layout}"
     >
         <f:beginColumnPages>
             <FlexBox>
@@ -76,7 +76,8 @@
                                 sticky="ColumnHeaders"
                                 growing="true"
                                 growingScrollToLoad="true"
-                                itemPress="showDetail"
+                                itemPress="onListItemPress"
+                             
                             >
                                 <headerToolbar>
                                    <Toolbar>
@@ -121,7 +122,8 @@
                                 </columns>
 
                                 <items>
-                                    <ColumnListItem type="Navigation">
+                                    <ColumnListItem type="Active"
+                                    >
                                         <cells>
                                             <ObjectIdentifier
                                                 title="{documentId}"

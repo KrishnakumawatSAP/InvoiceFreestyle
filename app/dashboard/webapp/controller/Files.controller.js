@@ -33,12 +33,39 @@ sap.ui.define([
 			 * @public
 			 */
 			onInit: function () {
-				//    this._applyTabFilter("all");
 				this.setModel(new JSONModel({
 					layout: LayoutType.TwoColumnsBeginExpanded
 				}), "filesView");
 				this.oRouter = this.getOwnerComponent().getRouter();
 				this.oRouter.getRoute("files").attachPatternMatched(this._onProductMatched, this);
+				var oInnerTable = this.byId("InvoiceTable");
+				if (oInnerTable) {
+					oInnerTable.attachEventOnce("updateFinished", this.onTableUpdateFinished, this);
+				}
+			},
+			onTableUpdateFinished: function (oEvent) {
+				var oTable = oEvent.getSource();
+				var aItems = oTable.getItems();
+				if (aItems.length > 0) {
+					var oFirstItem = aItems[0];
+					oTable.setSelectedItem(oFirstItem);
+
+					//this is for the first row
+					this._bindDetail(oFirstItem.getBindingContext());
+				}
+			},
+			 _bindDetail: function (oContext) {
+				var oDetailView = this.byId("FilesDetailView"); 
+				if (oDetailView) {
+					oDetailView.setBindingContext(oContext);
+				}
+				this.getView().getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			},
+			onListItemPress: function (oEvent) {
+		
+				var oContext = oEvent.getParameter("listItem").getBindingContext()
+
+				this._bindDetail(oContext);
 			},
 		_onProductMatched: function(oEvent){
 			var sObject = oEvent.getParameter("arguments").objectId || "0",

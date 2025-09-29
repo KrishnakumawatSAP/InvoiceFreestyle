@@ -1,120 +1,267 @@
 <mvc:View
-            xmlns:mvc="sap.ui.core.mvc"
-		   xmlns="sap.uxap"
-		   xmlns:layout="sap.ui.layout"
-		   xmlns:m="sap.m"
-		  
-		
-		 
-        height="100%">  
-   	<ObjectPageLayout id="ObjectPageLayout"
-		enableLazyLoading="true"
-		useIconTabBar="true"
-		showTitleInHeaderContent="true"
-		upperCaseAnchorBar="false">
-		<headerTitle>
-			<ObjectPageDynamicHeaderTitle>
-				<expandedHeading>
-					<m:Title text="Denise Smith" wrapping="true"/>
-				</expandedHeading>
-				<snappedHeading>
-					<m:FlexBox fitContainer="true" alignItems="Center">
-						<m:Title text="Denise Smith" wrapping="true" />
-					</m:FlexBox>
-				</snappedHeading>
-
-				<expandedContent>
-					<m:Text text="Senior UI Developer"/>
-				</expandedContent>
-
-				<snappedContent>
-					<m:Text text="Senior UI Developer"/>
-				</snappedContent>
-
-				<snappedTitleOnMobile>
-					<m:Title text="Senior UI Developer"/>
-				</snappedTitleOnMobile>
-
-				<actions>
-					<m:Button text="Edit" type="Emphasized" press="onEdit"/>
-					<m:Button type="Transparent" text="Delete"/>
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.uxap"
+    xmlns:layout="sap.ui.layout"
+    xmlns:m="sap.m"
+    xmlns:sf="sap.ui.layout.form"
+    height="100%"
+    controllerName="zdashboard.controller.FilesDetail"
+>
+    <ObjectPageLayout
+        id="ObjectPageLayout"
+        showTitleInHeaderContent="true"
+        enableLazyLoading="true"
+    >
+        <!-- Header -->
+        <headerTitle>
+            <ObjectPageHeader
+                id="ObjectPageHeader"
+                objectTitle="{DocumentHeaderText}"
+                
+                objectSubtitle="{CompanyCode}"
+            >
+      
+              <actions>
+					<m:Button text="Edit" type="Emphasized" press="onEdit" visible="{=! ${filesDetailView>/editable}}"/>
+                    <m:Button text="Save" type="Emphasized" press="onSave" visible="{filesDetailView>/editable}"/>
+					<m:Button text="Delete"/>
+					<m:Button text="Copy"/>
 					<m:OverflowToolbarButton icon="sap-icon://action" type="Transparent" text="Share" tooltip="action"/>
 				</actions>
-			</ObjectPageDynamicHeaderTitle>
-		</headerTitle>
+               	
 
-		<headerContent>
-			<m:FlexBox wrap="Wrap" fitContainer="true" >
-			
+            </ObjectPageHeader>
+            	
+        </headerTitle>
 
-				<layout:VerticalLayout class="sapUiSmallMarginBeginEnd">
-					<m:Link text="+33 6 4512 5158"/>
-					<m:Link text="DeniseSmith@sap.com"/>
-				</layout:VerticalLayout>
+        <!-- Header Content -->
+        <headerContent>
 
-				<layout:HorizontalLayout class="sapUiSmallMarginBeginEnd">
-					<m:Image src="./test-resources/sap/uxap/images/linkedin.png"/>
-					<m:Image src="./test-resources/sap/uxap/images/Twitter.png" class="sapUiSmallMarginBegin"/>
-			    </layout:HorizontalLayout>
+            <layout:VerticalLayout>
+               <m:ObjectStatus title="Admin Data" />
+               <m:ObjectStatus title="Company Code" id="CompCode" text="{companyCode}"/>
+               <m:ObjectStatus title="Gross Amount" id="FiscalYear" text="{fiscalYear}"/>
+                <m:ObjectStatus title="Create By" id="CreatedBy"  text="{senderMail}" />
+               <m:ObjectStatus title="Invoice Number" id="InvoiceNumber" text="{documentId}"/>
+                <m:ObjectStatus title="Status"  id="Status"  text="{Status}" />
+          
+				
+				
+                <!-- <m:Label text="Company Code" labelFor="CompCode" />
+                <m:Text id="CompCode" text="{companyCode}" />
+           
+                <m:Label text="Gross Amount" labelFor="FiscalYear" />
+                <m:Text id="FiscalYear"   />
 
-				<layout:VerticalLayout class="sapUiSmallMarginBeginEnd">
-					<m:Label text="Hello! I am Denise and I use UxAP"/>
-					<m:VBox>
-						<m:Label text="Achieved goals"/>
-						<m:ProgressIndicator percentValue="30" displayValue="30%"/>
-					</m:VBox>
-				</layout:VerticalLayout>
+                <m:Label text="Create By" labelFor="CreatedBy" />
+                <m:ObjectAttribute id="CreatedBy" text="{senderMail}" />
 
-				<layout:VerticalLayout class="sapUiSmallMarginBeginEnd">
-					<m:Label text="San Jose, USA"/>
-				</layout:VerticalLayout>
-			</m:FlexBox>
-		</headerContent>
+                <m:Label text="Invoice Number" labelFor="InvoiceNumber" />
+                <m:Text id="InvoiceNumber" text="{documentId}" />
 
-		<sections>
-			<ObjectPageSection titleUppercase="false" id="goals" title="2014 Goals Plan">
-			<subSections>
-				<ObjectPageSubSection id="goalsSS1" titleUppercase="false">
-					
-				</ObjectPageSubSection>
-			</subSections>
-			</ObjectPageSection>
+                <m:Label text="Status" labelFor="Status" />
+                <m:Text id="Status" text="{Status}" /> -->
+                
+            </layout:VerticalLayout>
+        </headerContent>
 
-			
+        <!-- Sections -->
+        <sections>
+            <!-- General Info -->
+            <ObjectPageSection
+                title="General Information"
+                titleUppercase="false"
+            >
+                <subSections>
+                    <ObjectPageSubSection>
+                        <blocks>
+                            <sf:SimpleForm editable="true">
+                                <m:Label text="Company Code" />
+                                <m:Input value="{CompanyCode}" visible="{filesDetailView>/editable}" />
+                                <m:Text text="{CompanyCode}" />
 
-			<ObjectPageSection titleUppercase="false" id="employment" title="Employment">
-				<subSections>
-					<ObjectPageSubSection id="employmentSS1" title="Job information" titleUppercase="false">
-						<blocks>
-							
-						</blocks>
-					</ObjectPageSubSection>
+                                <m:Label text="Fiscal Year" />
+                                <m:Input value="{fiscalYear}" visible="{filesDetailView>/editable}" />
+                                <m:Text text="{fiscalYear}" />
 
-					<ObjectPageSubSection id="employmentSS2" title="Employee Details" titleUppercase="false">
-						<blocks>
-						
-						</blocks>
-						<moreBlocks>
-						
-						</moreBlocks>
-					</ObjectPageSubSection>
+                                <m:Label text="Document Date" />
+                                <m:DatePicker
+                                    value="{documentDate}"
+                                    displayFormat="long" visible="{filesDetailView>/editable}"
+                                />
+                                <m:Text text="{documentDate}" />
 
-					<ObjectPageSubSection id="employmentSS3" title="Job Relationship" titleUppercase="false">
-						<blocks>
-						
-						</blocks>
-					</ObjectPageSubSection>
-				</subSections>
-			</ObjectPageSection>
-			<ObjectPageSection titleUppercase="false" id="connections" title="Connections">
-				<subSections>
-					<ObjectPageSubSection id="connectionsSS1" titleUppercase="false" title="Connections">
-						<blocks>
-							
-						</blocks>
-					</ObjectPageSubSection>
-				</subSections>
-			</ObjectPageSection>
-		</sections>
-	</ObjectPageLayout>
+                                <m:Label text="Posting Date" />
+                                <m:DatePicker
+                                    value="{postingDate}"
+                                    displayFormat="long" visible="{filesDetailView>/editable}"
+                                />
+                                <m:Text text="{postingDate}" />
+
+                                <m:Label text="Supplier Invoice Party" />
+                                <m:Input value="{supInvParty}"  visible="{filesDetailView>/editable}"/>
+                                <m:Text text="{supInvParty}" />
+
+                                <m:Label text="Invoicing Party" />
+                                <m:Input value="{supInvParty}" visible="{filesDetailView>/editable}" />
+                                <m:Text text="{supInvParty}" />
+                            </sf:SimpleForm>
+                        </blocks>
+                         <blocks>
+                            <sf:SimpleForm editable="true">
+                                <m:Label text="Currency" />
+                                <m:Input value="{documentCurrency}" visible="{filesDetailView>/editable}" />
+                                <m:Text text="{documentCurrency}" />
+
+                                <m:Label text="Gross Amount" />
+                                <m:Input value="{invGrossAmount}" visible="{filesDetailView>/editable}" />
+                                <m:Text text="{invGrossAmount}" />
+
+                                <m:Label text="Accounting Document Type" />
+                                <m:Input value="{AccountingDocumentType}" visible="{filesDetailView>/editable}" />
+                                <m:Text text="{AccountingDocumentType}" />
+
+                                <m:Label text="Invoicing Party" />
+                                <m:Input value="{InvoicingParty}" visible="{filesDetailView>/editable}" />
+                                <m:Text text="{InvoicingParty}" />
+                                
+
+                                <m:Label text="Document Header Text" />
+                                <m:Input value="{DocumentHeaderText}" visible="{filesDetailView>/editable}" />
+                                <m:Text text="{DocumentHeaderText}" />
+
+                              
+                            </sf:SimpleForm>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+
+            <!-- Item Details -->
+            <ObjectPageSection
+                title="Item Details"
+                titleUppercase="false"
+            >
+                <subSections>
+                    <ObjectPageSubSection>
+                        <blocks>
+                            <m:Table
+                                id="ItemTable"
+                                items="{to_InvoiceItem}"
+                                inset="false"
+                            >
+                                <m:columns>
+                                    <m:Column>
+                                        <m:Text text="Purchase Order" />
+                                    </m:Column>
+                                     <m:Column>
+                                        <m:Text text="Unit of Measure" />
+                                    </m:Column>
+                                    <m:Column>
+                                        <m:Text text="Quantity" />
+                                    </m:Column>
+                                      <m:Column>
+                                        <m:Text text="Invoice Item" />
+                                    </m:Column>
+                                      <m:Column>
+                                        <m:Text text="Invoice Item Amount" />
+                                    </m:Column>
+                                       <m:Column>
+                                        <m:Text text="Plant" />
+                                    </m:Column>
+                                       <m:Column>
+                                        <m:Text text="Product Type" />
+                                    </m:Column> 
+                                    <m:Column>
+                                        <m:Text text="Tax Jurisdicary" />
+                                    </m:Column> 
+                                    <m:Column>
+                                        <m:Text text="Amount" />
+                                    </m:Column>
+                                    <m:Column>
+                                        <m:Text text="Tax Code" />
+                                    </m:Column>
+                                </m:columns>
+                                <m:items>
+                                    <m:ColumnListItem>
+                                        <m:Input value="{PurchaseOrder}" />
+                                           <m:Input value="{PurchaseOrder}" />
+                                        <m:Input
+                                            value="{Quantity}"
+                                            type="Number"
+                                        />
+                                         <m:Input
+                                            value="{Quantity}"
+                                            type="Number"
+                                        />
+                                         <m:Input
+                                            value="{Quantity}"
+                                            type="Number"
+                                        />
+                                         <m:Input
+                                            value="{Quantity}"
+                                            type="Number"
+                                        />
+                                         <m:Input
+                                            value="{Quantity}"
+                                            type="Number"
+                                        />
+                                         <m:Input
+                                            value="{Quantity}"
+                                            type="Number"
+                                        />
+                                         <m:Input
+                                            value="{Quantity}"
+                                            type="Number"
+                                        />
+                                        
+                                        <m:Input
+                                            value="{Amount}"
+                                            type="Number"
+                                        />
+                                        <m:Input value="{TaxCode}" />
+                                    </m:ColumnListItem>
+                                </m:items>
+                            </m:Table>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+
+            <!-- Logs -->
+            <ObjectPageSection
+                title="Invoice Logs"
+                titleUppercase="false"
+            >
+                <subSections>
+                    <ObjectPageSubSection>
+                        <blocks>
+                            <m:List items="{to_InvoiceLogs}">
+                                <m:items>
+                                    <m:StandardListItem title="{Message}" />
+                                </m:items>
+                            </m:List>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+
+            <ObjectPageSection
+                title="Attachment"
+                titleUppercase="false"
+            >
+                <subSections>
+                    <ObjectPageSubSection>
+                        <blocks>
+                            <m:List items="{to_InvoiceLogs}">
+                                <m:items>
+                                    <m:StandardListItem title="{Message}" />
+                                </m:items>
+                            </m:List>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+        </sections>
+    </ObjectPageLayout>
 </mvc:View>
