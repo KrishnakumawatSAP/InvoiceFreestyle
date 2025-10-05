@@ -130,21 +130,43 @@ sap.ui.define([
 			 * @public
 			 */
 			onOpenCreateDialog: function (oEvent) {
-				var oContext = this.getModel().createEntry("/Invoice", {
-					properties: {},
-					success: function (oData) {
-						this.onCloseCreateDialog();
-						MessageToast.show("Arquivo criado com sucesso");
-					}.bind(this),
-					error: function (oError) {
-						MessageBox.error("Ocorreu um erro ao tentar criar um arquivo");
+				// var oContext = this.getModel().createEntry("/Invoice", {
+				// 	properties: {},
+				// 	success: function (oData) {
+				// 		this.onCloseCreateDialog();
+				// 		MessageToast.show("Arquivo criado com sucesso");
+				// 	}.bind(this),
+				// 	error: function (oError) {
+				// 		MessageBox.error("Ocorreu um erro ao tentar criar um arquivo");
+				// 	}
+				// });
+
+				// this.openFragment("zdashboard.view.FilesCreate", {
+				// 	id: "idFilesCreateDialog",
+				// 	bindingPath: oContext.getPath()
+				// });
+				    var oModel = this.getView().getModel();
+
+				var oContext = oModel.createEntry("/Invoice", {
+					properties: {
+						CompanyCode: "",
+						companyCode: new Date().getFullYear(),
+						documentDate: new Date(),
+						postingDate: new Date(),
+						invGrossAmount: 0,
+						documentCurrency: "",
+						supInvParty: "",
+						InvoicingParty: ""
 					}
 				});
+				this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
 
-				this.openFragment("zdashboard.view.FilesCreate", {
-					id: "idFilesCreateDialog",
-					bindingPath: oContext.getPath()
-				});
+				this.getRouter().navTo("fileDetail", {
+					objectId: "new"
+				}, false);
+
+				// store context for new object
+				this.getOwnerComponent()._oCreateContext = oContext;
 			},
 
 			/**
@@ -233,42 +255,7 @@ sap.ui.define([
 			 * @param {sap.ui.base.Event} oEvent 
 			 * @public
 			 */
-			showDetail: function (oEvent) {
-
-
-				//Doesn't work as the fileDetail view is not ready yet
-				var oCtx = oEvent.getParameter("listItem").getBindingContext();
-    			var sPath = oCtx.getPath(); // "/Invoice(guid'0891c370-62dc-4cf0-a220-1d88686baa94')"
-
-				
-				var sGuid = sPath.match(/guid'([^']+)'/)[1];
-
-
-				function navToDetail() {
-
-					this.getModel().resetChanges();
-					this.getRouter().navTo("fileDetail", {
-						objectId: sGuid   // GUID or documentId
-					});
-				}
-				
-
-				//  this.getOwnerComponent().getRouter().navTo("files", {
-				// 	objectId: sGuid
-				// });
-
-				if (this.getModel().hasPendingChanges()) {
-					MessageBox.confirm("Os dados não salvos serão perdidos.", {
-						onClose: function (sAction) {
-							if (sAction == MessageBox.Action.OK) {
-								navToDetail.call(this);
-							}
-						}.bind(this)
-					})
-				} else {
-					navToDetail.call(this);
-				}
-			},
+			
 
 			/**
 			 * Evento chamado ao realizar uma busca

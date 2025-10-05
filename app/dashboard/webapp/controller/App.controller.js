@@ -42,7 +42,8 @@ sap.ui.define([
 					paramsExpanded: true,
 					sideBarExpanded: true,
 					breadcrumbLinks: [{}],
-					layout: "TwoColumnsBeginExpanded"
+					layout: "TwoColumnsBeginExpanded",
+					isEditable: false
 				});
 				this.setModel(oViewModel, "appView");
 

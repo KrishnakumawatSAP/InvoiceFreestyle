@@ -183,22 +183,45 @@ sap.ui.define([
              * @param {sap.ui.base.Event} oEvent 
              */
             onSave: function (oEvent) {
-                if (!this.isValid("fileUser")) {
-                    MessageBox.error("Verifique os erros e tente novamente");
-                    return
-                }
+                // if (!this.isValid("fileUser")) {
+                //     MessageBox.error("Verifique os erros e tente novamente");
+                //     return
+                // }
 
-                // Atualiza data de modificação
-                this.getModel().setProperty(this.getView().getBindingContext().getPath() + "/ModifiedAt", new Date());
+                // // Atualiza data de modificação
+                // this.getModel().setProperty(this.getView().getBindingContext().getPath() + "/ModifiedAt", new Date());
 
-                this.getModel().submitChanges({
-                    success: function (oData) {
-                        if (!this.getModel().hasPendingChanges()) {
-                            MessageToast.show("Atualizado com sucesso");
-                            this._toggleEdit();
+                // this.getModel().submitChanges({
+                //     success: function (oData) {
+                //         if (!this.getModel().hasPendingChanges()) {
+                //             MessageToast.show("Atualizado com sucesso");
+                //             this._toggleEdit();
+                //         }
+                //     }.bind(this)
+                // });
+
+                    var oModel = this.getView().getModel();
+                    var oViewModel = this.getModel("filesDetailView");
+                    var that = this;
+
+                    // commit pending changes
+                    oModel.submitChanges({
+                        success: function (oData) {
+                            if (!oModel.hasPendingChanges()) {
+                                sap.m.MessageToast.show("Invoice updated successfully");
+
+                                // back to display mode
+                                oViewModel.setProperty("/editable", false);
+
+                                // reset flag (in case it was new before)
+                                that._bHandlingNew = false;
+                                delete that.getOwnerComponent()._oCreateContext;
+                            }
+                        },
+                        error: function (oError) {
+                            sap.m.MessageBox.error("Error while updating invoice. Please try again.");
                         }
-                    }.bind(this)
-                });
+                    });
             },
 
             /* =========================================================== */
@@ -210,33 +233,53 @@ sap.ui.define([
              * @private
              */
            _onObjectMatched: function (oEvent) {
-    var sObjectId = oEvent.getParameter("arguments").objectId; // comes from router
-    var sLayout = sObjectId ? LayoutType.TwoColumnsBeginExpanded : LayoutType.OneColumn;
-    this.getModel("appView").setProperty("/layout", sLayout);
-    this.getModel("filesDetailView").setProperty("/editable", false);
+                var sObjectId = oEvent.getParameter("arguments").objectId;
+                var oViewModel = this.getModel("filesDetailView");
+                var oComponent = this.getOwnerComponent();
+                var oCreateContext = oComponent._oCreateContext; // set earlier by list controller
 
-    if (!sObjectId) {
-        return;
-    }
+        
+                this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
 
-    // 🔑 Build the correct key for Invoice entity
-    var sObjectPath = this.getModel().createKey("/Invoice(" + sObjectId + ")");
+                if (sObjectId === "new") {
+                    if (!oCreateContext) {
+                        this.getRouter().navTo("files");
+                        return;
+                    }
 
-    var oViewModel = this.getModel("filesDetailView");
+                    if (oCurrentContext && oCurrentContext.getPath() === oCreateContext.getPath()) {
+                        return; 
+                    }
 
-    this.getView().bindElement({
-        path: sObjectPath,
-        events: {
-            change: this._onBindingChange.bind(this),
-            dataRequested: function () {
-                oViewModel.setProperty("/busy", true);
+                    this.getView().setBindingContext(oCreateContext);
+                    oViewModel.setProperty("/editable", true);
+                    var oHeader = this.byId("ObjectPageHeader");
+                    if (oHeader) {
+                        oHeader.setObjectTitle("New Invoice");
+                    }
+
+    
+
+                    return;
+                }
+                oViewModel.setProperty("/editable", false);
+                
+                delete oComponent._oCreateContext;
+
+                
+                var sObjectPath = this.getModel().createKey("/Invoice", {
+                    DocumentId: sObjectId 
+                });
+
+                this.getView().bindElement({
+                    path: sObjectPath,
+                    events: {
+                        change: this._onBindingChange.bind(this),
+                        dataRequested: function () { oViewModel.setProperty("/busy", true); },
+                        dataReceived: function () { oViewModel.setProperty("/busy", false); }
+                    }
+                });
             },
-            dataReceived: function () {
-                oViewModel.setProperty("/busy", false);
-            }
-        }
-    });
-},
 
             /**
              * Validações realizadas ao trocar o bind da view
