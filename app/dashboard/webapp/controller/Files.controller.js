@@ -146,7 +146,7 @@ sap.ui.define([
 				// 	bindingPath: oContext.getPath()
 				// });
 				    var oModel = this.getView().getModel();
-
+				var oAppViewModel = this.getModel("appView");
 				var oContext = oModel.createEntry("/Invoice", {
 					properties: {
 						CompanyCode: "",
@@ -160,7 +160,7 @@ sap.ui.define([
 					}
 				});
 				this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
-
+				oAppViewModel.setProperty("/isEditable", true);
 				this.getRouter().navTo("fileDetail", {
 					objectId: "new"
 				}, false);

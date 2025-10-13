@@ -33,6 +33,7 @@ sap.ui.define([
              * @public
              */
             onInit: function () {
+                var oView = this.getView();
                 var oViewModel = new JSONModel({
                     busy: true,
                     delay: 0,
@@ -51,6 +52,72 @@ sap.ui.define([
                     // Restore original busy indicator delay for the object view
                     oViewModel.setProperty("/delay", iOriginalBusyDelay);
                 });
+
+                 var oData = {
+                    lanes: [
+                        {
+                            id: "0",
+                            icon: "sap-icon://document",
+                            label: "Draft",
+                            position: 0
+                        },
+                        {
+                            id: "1",
+                            icon: "sap-icon://approvals",
+                            label: "Approval",
+                            position: 1
+                        },
+                        {
+                            id: "2",
+                            icon: "sap-icon://accept",
+                            label: "Completed",
+                            position: 2
+                        }
+                    ],
+                    nodes: [
+                        {
+                            id: "1",
+                            lane: "0",
+                            title: "Created",
+                            titleAbbreviation: "C",
+                            state: "Positive",
+                            stateText: "Done",
+                            children: ["2"],
+                            texts: ["Created by user"],
+                            highlighted: false,
+                            focused: true
+                        },
+                        {
+                            id: "2",
+                            lane: "1",
+                            title: "Approval in Progress",
+                            titleAbbreviation: "A",
+                            state: "Neutral",
+                            stateText: "Pending",
+                            children: ["3"],
+                            texts: ["Sent for approval"],
+                            highlighted: false,
+                            focused: false
+                        },
+                        {
+                            id: "3",
+                            lane: "2",
+                            title: "Completed",
+                            titleAbbreviation: "D",
+                            state: "Positive",
+                            stateText: "Finished",
+                            texts: ["Approved and closed"],
+                            highlighted: false,
+                            focused: false
+                        }
+                    ]
+                };
+
+                var oModel = new sap.ui.model.json.JSONModel(oData);
+                oView.setModel(oModel, "ProcessFlow");
+
+                // Optional: a second process flow model (pf2)
+               
             },
 
             /* =========================================================== */
@@ -167,8 +234,8 @@ sap.ui.define([
                     oConfirmationPopover.close();
                     oOpenedBy = oConfirmationPopover.getOpenedBy();
                 }
-
-                this.getModel("filesDetailView").setProperty("/editable", false);
+                this.getModel("appView").setProperty("/isEditable", true);
+                //this.getModel("filesDetailView").setProperty("/editable", false);
                 // @ts-ignore
                 var sId = oOpenedBy ? oOpenedBy.getId() : oEvent.getSource().getId();
                 if (sId.includes("idCloseButton")) {
@@ -201,7 +268,7 @@ sap.ui.define([
                 // });
 
                     var oModel = this.getView().getModel();
-                    var oViewModel = this.getModel("filesDetailView");
+                    var oViewModel = this.getModel("appView");
                     var that = this;
 
                     // commit pending changes
@@ -211,7 +278,7 @@ sap.ui.define([
                                 sap.m.MessageToast.show("Invoice updated successfully");
 
                                 // back to display mode
-                                oViewModel.setProperty("/editable", false);
+                                oViewModel.setProperty("/isEditable", false);
 
                                 // reset flag (in case it was new before)
                                 that._bHandlingNew = false;
@@ -235,6 +302,7 @@ sap.ui.define([
            _onObjectMatched: function (oEvent) {
                 var sObjectId = oEvent.getParameter("arguments").objectId;
                 var oViewModel = this.getModel("filesDetailView");
+                var oAppViewModel = this.getModel("appView");
                 var oComponent = this.getOwnerComponent();
                 var oCreateContext = oComponent._oCreateContext; // set earlier by list controller
 
@@ -252,7 +320,7 @@ sap.ui.define([
                     }
 
                     this.getView().setBindingContext(oCreateContext);
-                    oViewModel.setProperty("/editable", true);
+                    oAppViewModel.setProperty("/isEditable", true);
                     var oHeader = this.byId("ObjectPageHeader");
                     if (oHeader) {
                         oHeader.setObjectTitle("New Invoice");
@@ -262,7 +330,7 @@ sap.ui.define([
 
                     return;
                 }
-                oViewModel.setProperty("/editable", false);
+                oAppViewModel.setProperty("/isEditable", false);
                 
                 delete oComponent._oCreateContext;
 
@@ -304,9 +372,9 @@ sap.ui.define([
              * @private
              */
             _toggleEdit: function () {
-                var oModel = this.getModel("filesDetailView");
-                var bEditable = !oModel.getProperty("/editable");
-                oModel.setProperty("/editable", bEditable);
+                var oModel = this.getModel("appView");
+                var bEditable = !oModel.getProperty("/isEditable");
+                oModel.setProperty("/isEditable", bEditable);
             },
 
         });

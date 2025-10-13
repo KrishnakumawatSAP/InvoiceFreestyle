@@ -1,10 +1,12 @@
 <mvc:View
     xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
     xmlns="sap.uxap"
     xmlns:layout="sap.ui.layout"
     xmlns:m="sap.m"
     xmlns:sf="sap.ui.layout.form"
     xmlns:suite="sap.suite.ui.commons"
+    xmlns:u="sap.ui.unified"
     height="100%"
     controllerName="zdashboard.controller.FilesDetail"
 >
@@ -21,39 +23,10 @@
                 
                 objectSubtitle="{CompanyCode}"
             >
-            
-            <!-- <ProcessFlow
-			id="processflow1"
-			scrollable="false"
-			foldedCorners="true"
-			nodePress="onNodePress"
-			nodes="{/nodes}"
-			lanes="{/lanes}">
-			<nodes>
-				<ProcessFlowNode
-					laneId="{lane}"
-					nodeId="{id}"
-					title="{title}"
-					titleAbbreviation="{titleAbbreviation}"
-					children="{children}"
-					state="{state}"
-					stateText="{stateText}"
-					texts="{texts}"
-					highlighted="{highlighted}"
-					focused="{focused}" />
-			</nodes>
-			<lanes>
-				<ProcessFlowLaneHeader
-					laneId="{id}"
-					iconSrc="{icon}"
-					text="{label}"
-					position="{position}" />
-			</lanes>
-		</ProcessFlow> -->
-      
+                  
               <actions>
-					<m:Button text="Edit" type="Emphasized" press="onEdit" visible="{=! ${filesDetailView>/editable}}"/>
-                    <m:Button text="Save" type="Emphasized" press="onSave" visible="{filesDetailView>/editable}"/>
+					<m:Button text="Edit" type="Emphasized" press="onEdit" visible="{=! ${appView>/isEditable}}"/>
+                    <m:Button text="Save" type="Emphasized" press="onSave" visible="{appView>/isEditable}"/>
 					<m:OverflowToolbarButton icon="sap-icon://action" type="Transparent" text="Share" tooltip="action"/>
 				</actions>
                	
@@ -65,13 +38,46 @@
         <!-- Header Content -->
         <headerContent>
 
-            <layout:VerticalLayout>
-               <m:ObjectStatus title="Admin Data" />
-               <m:ObjectStatus title="Company Code" id="CompCode" text="{companyCode}"/>
-               <m:ObjectStatus title="Gross Amount" id="FiscalYear" text="{fiscalYear}"/>
-                <m:ObjectStatus title="Create By" id="CreatedBy"  text="{senderMail}" />
-               <m:ObjectStatus title="Invoice Number" id="InvoiceNumber" text="{documentId}"/>
-                <m:ObjectStatus title="Status"  id="Status"  text="{Status}" />
+            <m:HBox>
+                <m:VBox class="sapUiLargeMargin">
+                    <m:ObjectHeader title="Admin Data" />
+                    <m:ObjectStatus title="Company Code" id="CompCode" text="{companyCode}"/>
+                    <m:ObjectStatus title="Gross Amount" id="FiscalYear" text="{fiscalYear}"/>
+                    <m:ObjectStatus title="Create By" id="CreatedBy"  text="{senderMail}" />
+                    <m:ObjectStatus title="Invoice Number" id="InvoiceNumber" text="{documentId}"/>
+                    <m:ObjectStatus title="Status"  id="Status"  text="{Status}" />
+                </m:VBox>
+                 <m:VBox>
+            <suite:ProcessFlow
+			id="processflow1"
+			scrollable="false"
+			foldedCorners="true"
+			nodePress="onNodePress"
+			nodes="{ProcessFlow>/nodes}"
+			lanes="{ProcessFlow>/lanes}">
+			<suite:nodes>
+				<suite:ProcessFlowNode
+					laneId="{ProcessFlow>lane}"
+					nodeId="{ProcessFlow>id}"
+					title="{ProcessFlow>title}"
+					titleAbbreviation="{ProcessFlow>titleAbbreviation}"
+					children="{ProcessFlow>children}"
+					state="{ProcessFlow>state}"
+					stateText="{ProcessFlow>stateText}"
+					texts="{ProcessFlow>texts}"
+					highlighted="{ProcessFlow>highlighted}"
+					focused="{ProcessFlow>focused}" />
+			</suite:nodes>
+			<suite:lanes>
+				<suite:ProcessFlowLaneHeader
+					laneId="{ProcessFlow>id}"
+					iconSrc="{ProcessFlow>icon}"
+					text="{ProcessFlow>label}"
+					position="{ProcessFlow>position}" />
+			</suite:lanes>
+		</suite:ProcessFlow>
+	       
+             
           
 				
 				
@@ -89,8 +95,8 @@
 
                 <m:Label text="Status" labelFor="Status" />
                 <m:Text id="Status" text="{Status}" /> -->
-                
-            </layout:VerticalLayout>
+                 </m:VBox>
+            </m:HBox>
         </headerContent>
 
         <!-- Sections -->
@@ -119,33 +125,33 @@
                             singleContainerFullSize="false"
                              width="60%">
                                 <m:Label text="Company Code" />
-                                <m:Input value="{CompanyCode}" visible="{filesDetailView>/editable}" />
+                                <m:Input value="{CompanyCode}" visible="{appView>/isEditable}" />
                                 <m:Text text="{CompanyCode}" />
 
                                 <m:Label text="Fiscal Year" />
-                                <m:Input value="{fiscalYear}" visible="{filesDetailView>/editable}" />
+                                <m:Input value="{fiscalYear}" visible="{appView>/isEditable}" />
                                 <m:Text text="{fiscalYear}" />
 
                                 <m:Label text="Document Date" />
                                 <m:DatePicker
                                     value="{documentDate}"
-                                    displayFormat="long" visible="{filesDetailView>/editable}"
+                                    displayFormat="long" visible="{appView>/isEditable}"
                                 />
                                 <m:Text text="{path: 'documentDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'd MMM yyyy'}}" />
 
                                 <m:Label text="Posting Date" />
                                 <m:DatePicker
                                     value="{postingDate}"
-                                    displayFormat="long" visible="{filesDetailView>/editable}"
+                                    displayFormat="long" visible="{appView>/isEditable}"
                                 />
                                 <m:Text text="{path: 'postingDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'd MMM yyyy'}}" />
 
                                 <m:Label text="Supplier Invoice Party" />
-                                <m:Input value="{supInvParty}"  visible="{filesDetailView>/editable}"/>
+                                <m:Input value="{supInvParty}"  visible="{appView>/isEditable}"/>
                                 <m:Text text="{supInvParty}" />
 
                                 <m:Label text="Invoicing Party" />
-                                <m:Input value="{supInvParty}" visible="{filesDetailView>/editable}" />
+                                <m:Input value="{supInvParty}" visible="{appView>/isEditable}" />
                                 <m:Text text="{supInvParty}" />
                             </sf:SimpleForm>
                              </m:HBox>
@@ -153,24 +159,24 @@
                          <blocks>
                             <sf:SimpleForm editable="true">
                                 <m:Label text="Currency" />
-                                <m:Input value="{documentCurrency}" visible="{filesDetailView>/editable}" />
+                                <m:Input value="{documentCurrency}" visible="{appView>/isEditable}" />
                                 <m:Text text="{documentCurrency}" />
 
                                 <m:Label text="Gross Amount" />
-                                <m:Input value="{invGrossAmount}" visible="{filesDetailView>/editable}" />
+                                <m:Input value="{invGrossAmount}" visible="{appView>/isEditable}" />
                                 <m:Text text="{invGrossAmount}" />
 
                                 <m:Label text="Accounting Document Type" />
-                                <m:Input value="{AccountingDocumentType}" visible="{filesDetailView>/editable}" />
+                                <m:Input value="{AccountingDocumentType}" visible="{appView>/isEditable}" />
                                 <m:Text text="{AccountingDocumentType}" />
 
                                 <m:Label text="Invoicing Party" />
-                                <m:Input value="{InvoicingParty}" visible="{filesDetailView>/editable}" />
+                                <m:Input value="{InvoicingParty}" visible="{appView>/isEditable}" />
                                 <m:Text text="{InvoicingParty}" />
                                 
 
                                 <m:Label text="Document Header Text" />
-                                <m:Input value="{DocumentHeaderText}" visible="{filesDetailView>/editable}" />
+                                <m:Input value="{DocumentHeaderText}" visible="{appView>/isEditable}" />
                                 <m:Text text="{DocumentHeaderText}" />
 
                               
@@ -195,7 +201,7 @@
                             >
                               <m:Toolbar>
                                         <m:ToolbarSpacer/>
-                                        <m:Button text="Create" press="oncreateItem" type="Emphasized" visible="{filesDetailView>/editable}" />
+                                        <m:Button text="Create" press="oncreateItem" type="Emphasized" visible="{appView>/isEditable}" />
                                     </m:Toolbar>
                                 <m:columns>
                                     <m:Column>
@@ -232,44 +238,44 @@
                                 <m:items>
                                        <m:ColumnListItem>
                                         <!-- Purchase Order -->
-                                        <m:Input value="{PurchaseOrder}" visible="{filesDetailView>/editable}" />
-                                        <m:Text text="{PurchaseOrder}" visible="{= !${filesDetailView>/editable}}" />
+                                        <m:Input value="{PurchaseOrder}" visible="{appView>/isEditable}" />
+                                        <m:Text text="{PurchaseOrder}" visible="{= !${appView>/isEditable}}" />
 
                                         <!-- Unit of Measure -->
-                                        <m:Input value="{UnitOfMeasure}" visible="{filesDetailView>/editable}" />
-                                        <m:Text text="{UnitOfMeasure}" visible="{= !${filesDetailView>/editable}}" />
+                                        <m:Input value="{UnitOfMeasure}" visible="{appView>/isEditable}" />
+                                        <m:Text text="{UnitOfMeasure}" visible="{= !${appView>/isEditable}}" />
 
                                         <!-- Quantity -->
-                                        <m:Input value="{Quantity}" type="Number" visible="{filesDetailView>/editable}" />
-                                        <m:Text text="{Quantity}" visible="{= !${filesDetailView>/editable}}" />
+                                        <m:Input value="{Quantity}" type="Number" visible="{appView>/isEditable}" />
+                                        <m:Text text="{Quantity}" visible="{= !${appView>/isEditable}}" />
 
                                         <!-- Invoice Item -->
-                                        <m:Input value="{InvoiceItem}" visible="{filesDetailView>/editable}" />
-                                        <m:Text text="{InvoiceItem}" visible="{= !${filesDetailView>/editable}}" />
+                                        <m:Input value="{InvoiceItem}" visible="{appView>/isEditable}" />
+                                        <m:Text text="{InvoiceItem}" visible="{= !${appView>/isEditable}}" />
 
                                         <!-- Invoice Item Amount -->
-                                        <m:Input value="{InvoiceItemAmount}" type="Number" visible="{filesDetailView>/editable}" />
-                                        <m:Text text="{InvoiceItemAmount}" visible="{= !${filesDetailView>/editable}}" />
+                                        <m:Input value="{InvoiceItemAmount}" type="Number" visible="{appView>/isEditable}" />
+                                        <m:Text text="{InvoiceItemAmount}" visible="{= !${appView>/isEditable}}" />
 
                                         <!-- Plant -->
-                                        <m:Input value="{Plant}" visible="{filesDetailView>/editable}" />
-                                        <m:Text text="{Plant}" visible="{= !${filesDetailView>/editable}}" />
+                                        <m:Input value="{Plant}" visible="{appView>/isEditable}" />
+                                        <m:Text text="{Plant}" visible="{= !${appView>/isEditable}}" />
 
                                         <!-- Product Type -->
-                                        <m:Input value="{ProductType}" visible="{filesDetailView>/editable}" />
-                                        <m:Text text="{ProductType}" visible="{= !${filesDetailView>/editable}}" />
+                                        <m:Input value="{ProductType}" visible="{appView>/isEditable}" />
+                                        <m:Text text="{ProductType}" visible="{= !${appView>/isEditable}}" />
 
                                         <!-- Tax Jurisdiction -->
-                                        <m:Input value="{TaxJurisdiction}" visible="{filesDetailView>/editable}" />
-                                        <m:Text text="{TaxJurisdiction}" visible="{= !${filesDetailView>/editable}}" />
+                                        <m:Input value="{TaxJurisdiction}" visible="{appView>/isEditable}" />
+                                        <m:Text text="{TaxJurisdiction}" visible="{= !${appView>/isEditable}}" />
 
                                         <!-- Amount -->
-                                        <m:Input value="{Amount}" type="Number" visible="{filesDetailView>/editable}" />
-                                        <m:Text text="{Amount}" visible="{= !${filesDetailView>/editable}}" />
+                                        <m:Input value="{Amount}" type="Number" visible="{appView>/isEditable}" />
+                                        <m:Text text="{Amount}" visible="{= !${appView>/isEditable}}" />
 
                                         <!-- Tax Code -->
-                                        <m:Input value="{TaxCode}" visible="{filesDetailView>/editable}" />
-                                        <m:Text text="{TaxCode}" visible="{= !${filesDetailView>/editable}}" />
+                                        <m:Input value="{TaxCode}" visible="{appView>/isEditable}" />
+                                        <m:Text text="{TaxCode}" visible="{= !${appView>/isEditable}}" />
                                     </m:ColumnListItem>
                                 </m:items>
                             </m:Table>
@@ -289,7 +295,7 @@
                             <m:List items="{to_InvoiceLogs}">
                                <m:Toolbar>
                                         <m:ToolbarSpacer/>
-                                        <m:Button text="Create" press="oncreateLogs" type="Emphasized" visible="{=!! ${filesDetailView>/editable}}" />
+                                        <m:Button text="Create" press="oncreateLogs" type="Emphasized" visible="{=!! ${appView>/isEditable}}" />
                                     </m:Toolbar>
                                 <m:items>
                                     <m:StandardListItem title="{Message}" />
@@ -300,22 +306,48 @@
                 </subSections>
             </ObjectPageSection>
 
-            <ObjectPageSection
-                title="Attachment"
-                titleUppercase="false"
-            >
-                <subSections>
-                    <ObjectPageSubSection>
-                        <blocks>
-                            <m:List items="{to_InvoiceLogs}">
-                                <m:items>
-                                    <m:StandardListItem title="{Message}" />
-                                </m:items>
-                            </m:List>
-                        </blocks>
-                    </ObjectPageSubSection>
-                </subSections>
-            </ObjectPageSection>
+              <ObjectPageSection title="Attachment" titleUppercase="false">
+    <subSections>
+        <ObjectPageSubSection>
+            <blocks>
+                <m:VBox class="sapUiSmallMargin">
+                    <!-- Toolbar with Upload Button -->
+                    <m:Toolbar>
+                        <m:Title text="Attachments" level="H3" />
+                        <m:ToolbarSpacer/>
+                         <u:FileUploader
+                        id="fileUploader"
+                        name="uploadFile"
+                        change="onFileSelected"
+                       />
+                        <m:Button icon="sap-icon://upload" text="Upload File" press="onUploadPress"/>
+                    </m:Toolbar>
+
+                    <!-- Hidden FileUploader -->
+                   
+
+                    <!-- Uploaded File List -->
+                    <m:Table id="uploadedFilesTable" inset="false" growing="true" items="{/UploadedFiles}">
+                        <m:columns>
+                            <m:Column><m:Text text="File Name"/></m:Column>
+                            <m:Column><m:Text text="Uploaded On"/></m:Column>
+                            <m:Column><m:Text text="Status"/></m:Column>
+                        </m:columns>
+                        <m:items>
+                            <m:ColumnListItem>
+                                <m:cells>
+                                    <m:Text text="{fileName}"/>
+                                    <m:Text text="{uploadDate}"/>
+                                    <m:Text text="{status}"/>
+                                </m:cells>
+                            </m:ColumnListItem>
+                        </m:items>
+                    </m:Table>
+                </m:VBox>
+            </blocks>
+        </ObjectPageSubSection>
+    </subSections>
+</ObjectPageSection>
         </sections>
     </ObjectPageLayout>
 </mvc:View>
