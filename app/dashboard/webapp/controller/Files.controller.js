@@ -34,13 +34,15 @@ sap.ui.define([
 			 */
 			onInit: function () {
 				this.setModel(new JSONModel({
-					layout: LayoutType.TwoColumnsBeginExpanded
+					layout: LayoutType.TwoColumnsBeginExpanded,
+					bDeletionEnabled: false,
+					bCopyEnabled: false
 				}), "filesView");
 				this.oRouter = this.getOwnerComponent().getRouter();
 				this.oRouter.getRoute("files").attachPatternMatched(this._onProductMatched, this);
-				var oInnerTable = this.byId("InvoiceTable");
-				if (oInnerTable) {
-					oInnerTable.attachEventOnce("updateFinished", this.onTableUpdateFinished, this);
+				this._oInnerTable = this.byId("InvoiceTable");
+				if (this._oInnerTable) {
+					this._oInnerTable.attachEventOnce("updateFinished", this.onTableUpdateFinished, this);
 				}
 			},
 			onTableUpdateFinished: function (oEvent) {
@@ -49,7 +51,8 @@ sap.ui.define([
 				if (aItems.length > 0) {
 					var oFirstItem = aItems[0];
 					oTable.setSelectedItem(oFirstItem);
-
+					this.getView().getModel("filesView").setProperty("/bDeletionEnabled", true);
+					this.getView().getModel("filesView").setProperty("/bCopyEnabled", true);
 					//this is for the first row
 					this._bindDetail(oFirstItem.getBindingContext());
 				}
@@ -66,11 +69,13 @@ sap.ui.define([
 				var oContext = oEvent.getParameter("listItem").getBindingContext()
 
 				this._bindDetail(oContext);
+				this.getModel("appView").setProperty("/bProcessFlowVisible", true);
 			},
 		_onProductMatched: function(oEvent){
+			sap.ui.core.BusyIndicator.hide();
 			var sObject = oEvent.getParameter("arguments").objectId || "0",
 			oTable = this.byId("InvoiceTable");
-			oTable.getItems()[oTable.getBinding("items").aIndices.indexOf(+sObject)].setSelected(true);
+			//oTable.getItems()[oTable.getBinding("items").aIndices.indexOf(+sObject)].setSelected(true);
 		},
 		onTabSelect: function (oEvent) {
             var sKey = oEvent.getParameter("key"); // tab key (all, pdf, email, posted, error)
@@ -105,6 +110,62 @@ sap.ui.define([
                 oBinding.filter(aFilters, "Application");
             }
         },
+		/**
+		 * 
+		 * @param {object} oEvent 
+		 */
+
+		onPressDelete: function(oEvent){
+			var oTable = this.byId("InvoiceTable");
+		},
+		/**
+		 * 
+		 */
+
+		onSelectionChange: function(oEvt){
+			var isSelect = oEvt.getParameter("selected");
+			this._oInnerTable = this.byId("InvoiceTable");
+			isSelect = this._oInnerTable.getSelectedItems().length > 0;
+			var isSelectCopy = this._oInnerTable.getSelectedItems().length === 1;
+			var oModel = this.getView().getModel("filesView").setProperty("/bDeletionEnabled", isSelect)
+			var oModel = this.getView().getModel("filesView").setProperty("/bCopyEnabled", isSelectCopy)
+		},
+
+		/**
+		 * 
+		 */
+		
+		onPressCopy: function(oEvent){
+			var oItem = this._oInnerTable.getSelectedItem();
+			var oData  = oItem.getBindingContext().getObject();
+			var oModel = this.getView().getModel(), oAppViewModel = this.getModel("appView");
+			const oContext = oModel.createEntry("/Invoice", {
+			properties: {
+				CompanyCode: oData.CompanyCode,
+				documentDate: new Date(),
+				postingDate: new Date(),
+				invGrossAmount: oData.invGrossAmount,
+				documentCurrency: oData.documentCurrency,
+				supInvParty: oData.supInvParty,
+				InvoicingParty: oData.InvoicingParty,
+				// reset system-generated fields
+				InvoiceNumber: "", 
+				//Status: "DRAFT"
+				}
+			});
+
+			// 🔹 Update view state
+			oAppViewModel.setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
+			oAppViewModel.setProperty("/isEditable", true);
+
+			// 🔹 Navigate to detail page
+			this.getRouter().navTo("fileDetail", {
+				objectId: "copy"
+			});
+
+			// 🔹 Store context for binding in detail page
+			this.getOwnerComponent()._oCreateContext = oContext;
+		},
 
         NavigateToInvoiceDetails: function (oEvent) {
             var oCtx = oEvent.getSource().getBindingContext();

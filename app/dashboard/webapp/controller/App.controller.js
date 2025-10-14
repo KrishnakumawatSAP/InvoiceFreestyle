@@ -43,7 +43,8 @@ sap.ui.define([
 					sideBarExpanded: true,
 					breadcrumbLinks: [{}],
 					layout: "TwoColumnsBeginExpanded",
-					isEditable: false
+					isEditable: false,
+					bProcessFlowVisible: true
 				});
 				this.setModel(oViewModel, "appView");
 

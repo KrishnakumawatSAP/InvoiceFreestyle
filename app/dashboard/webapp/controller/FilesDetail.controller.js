@@ -39,7 +39,8 @@ sap.ui.define([
                     delay: 0,
                     editable: false,
                     DELETED_LEVEL: this.DELETED_LEVEL,
-                    data: []
+                    data: [],
+                    bProcessFlowVisible: true
                 });
 
                 this.getRouter().getRoute("fileDetail").attachPatternMatched(this._onObjectMatched, this);
@@ -300,6 +301,7 @@ sap.ui.define([
              * @private
              */
            _onObjectMatched: function (oEvent) {
+                sap.ui.core.BusyIndicator.hide()
                 var sObjectId = oEvent.getParameter("arguments").objectId;
                 var oViewModel = this.getModel("filesDetailView");
                 var oAppViewModel = this.getModel("appView");
@@ -309,15 +311,16 @@ sap.ui.define([
         
                 this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
 
-                if (sObjectId === "new") {
+                if (sObjectId === "new" || sObjectId === "copy") {
+                    this.getModel("appView").setProperty("/bProcessFlowVisible", false);
                     if (!oCreateContext) {
                         this.getRouter().navTo("files");
                         return;
                     }
 
-                    if (oCurrentContext && oCurrentContext.getPath() === oCreateContext.getPath()) {
-                        return; 
-                    }
+                    // if (oCurrentContext && oCurrentContext.getPath() === oCreateContext.getPath()) {
+                    //     return; 
+                    // }
 
                     this.getView().setBindingContext(oCreateContext);
                     oAppViewModel.setProperty("/isEditable", true);
@@ -329,9 +332,10 @@ sap.ui.define([
     
 
                     return;
+                } else {
+                    this.getModel("appView").setProperty("/bProcessFlowVisible", true);
                 }
                 oAppViewModel.setProperty("/isEditable", false);
-                
                 delete oComponent._oCreateContext;
 
                 

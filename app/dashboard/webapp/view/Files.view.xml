@@ -77,14 +77,15 @@
                                 growing="true"
                                 growingScrollToLoad="true"
                                 itemPress="onListItemPress"
+                                selectionChange="onSelectionChange"
                              
                             >
                                 <headerToolbar>
                                    <Toolbar>
                                         <ToolbarSpacer/>
                                         <Button text="Create" press="onOpenCreateDialog" type="Emphasized" />
-                                        <Button text="Delete" press="onPressDelete" enabled="false"/>
-                                        <Button text="Copy" press="onPressCopy" enabled="false" />
+                                        <Button text="Delete" press="onPressDelete" enabled="{filesView>/bDeletionEnabled}"/>
+                                        <Button text="Copy" press="onPressCopy" enabled="{filesView>/bCopyEnabled}" />
                                         <Button text="Extract PDF" press="onPressExtractPDF" />
                                     </Toolbar>
                                 </headerToolbar>

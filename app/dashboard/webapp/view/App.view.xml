@@ -41,7 +41,7 @@
                 selectedItem="{appView>/selectedItem}"
                 
             >
-                <tnt:NavigationList id="_IDGenNavigationList">
+                <tnt:NavigationList id="_IDGenNavigationList" selectedKey="{appView>/selectedItem}">
                     <tnt:NavigationListItem
                         id="_IDGenNavigationListItem"
                         text="Home"

@@ -54,7 +54,8 @@
 			foldedCorners="true"
 			nodePress="onNodePress"
 			nodes="{ProcessFlow>/nodes}"
-			lanes="{ProcessFlow>/lanes}">
+			lanes="{ProcessFlow>/lanes}"
+            visible="{appView>/bProcessFlowVisible}">
 			<suite:nodes>
 				<suite:ProcessFlowNode
 					laneId="{ProcessFlow>lane}"
