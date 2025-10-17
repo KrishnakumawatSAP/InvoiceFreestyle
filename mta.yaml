@@ -126,7 +126,7 @@ modules:
       build-result: app/
       requires:
         - artifacts:
-            - zdashboard.zip
+            - zsdavimadministration.zip
           name: zdashboard
           target-path: app/
   - name: zdashboard
@@ -198,7 +198,7 @@ resources:
     parameters:
       service: hana
       service-plan: hdi-shared
-      service-name: dashboards-db
+
   - name: dashboards-html5-repo-host
     type: org.cloudfoundry.managed-service
     parameters:

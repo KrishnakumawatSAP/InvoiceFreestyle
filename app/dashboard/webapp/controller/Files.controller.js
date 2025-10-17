@@ -141,7 +141,7 @@ sap.ui.define([
 			var oModel = this.getView().getModel(), oAppViewModel = this.getModel("appView");
 			const oContext = oModel.createEntry("/Invoice", {
 			properties: {
-				CompanyCode: oData.CompanyCode,
+				companyCode: oData.companyCode,
 				documentDate: new Date(),
 				postingDate: new Date(),
 				invGrossAmount: oData.invGrossAmount,
@@ -210,8 +210,8 @@ sap.ui.define([
 				var oAppViewModel = this.getModel("appView");
 				var oContext = oModel.createEntry("/Invoice", {
 					properties: {
-						CompanyCode: "",
-						companyCode: new Date().getFullYear(),
+						companyCode: "",
+						fiscalYear: new Date().getFullYear(),
 						documentDate: new Date(),
 						postingDate: new Date(),
 						invGrossAmount: 0,

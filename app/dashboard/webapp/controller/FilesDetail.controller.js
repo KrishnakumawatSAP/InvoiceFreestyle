@@ -352,7 +352,70 @@ sap.ui.define([
                     }
                 });
             },
+            oncreateItem: function(){
+                var oAppViewModel = this.getModel("appView");   
+                oAppViewModel.setProperty("/isEditable", true);
+                var oTable = this.getView().byId("ItemTable")
+                var oModel = this.getView().getModel()
+                var oInvoiceCtx = this.getView().getBindingContext();
+                this._oNewItemCtx = oModel.createEntry(oInvoiceCtx.getPath() + "/to_InvoiceItem", {  
+                    purchaseOrder: "",
+                    poQuantityUnit: "",
+                    quantityPOUnit: 0,          
+                    sup_InvoiceItem: "",
+                    supInvItemAmount: 0,       
+                    Plant: "",
+                    ProductType: "",
+                    TaxJurisdiction: "",
+                    taxCode: ""
+                });
+                
+                oTable.getBinding("items").refresh();
+                //this.getView().getModel().submitChanges();
+            },
+            onDiscardDraft: function(){
 
+               var oView = this.getView();
+                var oModel = oView.getModel(); // OData model
+                var oAppViewModel = oView.getModel("appView");
+                var oTable = oView.byId("ItemTable");
+
+                // 🔹 1️⃣ Cancel pending changes
+                if (oModel.hasPendingChanges()) {
+                    oModel.resetChanges(); // discard all unsubmitted changes
+                }
+
+                // 🔹 2️⃣ Handle "new create" scenario (transient entry)
+                // Find any transient contexts (created but not submitted)
+                var aItems = oTable.getItems();
+                aItems.forEach(function (oItem) {
+                    var oCtx = oItem.getBindingContext();
+                    if (oCtx && oCtx.bCreated) {  // transient created entry
+                        oModel.deleteCreatedEntry(oCtx);
+                    }
+                });
+
+                // 🔹 3️⃣ Rebind or refresh the table data to original state
+                oModel.refresh(true);
+
+                // 🔹 4️⃣ Restore display mode
+                oAppViewModel.setProperty("/isEditable", false);
+                
+                // 4️⃣ Restore the two-column layout
+                if (oAppViewModel.getProperty("/layout") !== "TwoColumnsMidExpanded") {
+                    oAppViewModel.setProperty("/layout", "TwoColumnsMidExpanded");
+                }
+
+                // 🔹 5️⃣ Select the first available item (for example)
+                var aVisibleItems = oTable.getItems();
+                if (aVisibleItems.length > 0) {
+                    oTable.setSelectedItem(aVisibleItems[0]);
+                    oTable.fireItemPress({ listItem: aVisibleItems[0] }); // trigger your display logic again if needed
+                }
+
+                // 🔹 6️⃣ Notify user
+                sap.m.MessageToast.show("Changes discarded");
+            },
             /**
              * Validações realizadas ao trocar o bind da view
              * @private

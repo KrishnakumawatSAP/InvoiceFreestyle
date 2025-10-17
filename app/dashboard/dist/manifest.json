@@ -142,7 +142,7 @@
                     ]
                 },
                 {
-                    "pattern": "parameters/contacts",
+                    "pattern": "parameters/cotacts",
                     "name": "contacts",
                     "target": [
                         "contacts"

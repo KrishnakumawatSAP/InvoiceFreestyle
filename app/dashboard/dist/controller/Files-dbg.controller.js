@@ -33,17 +33,49 @@ sap.ui.define([
 			 * @public
 			 */
 			onInit: function () {
-				//    this._applyTabFilter("all");
 				this.setModel(new JSONModel({
-					layout: LayoutType.TwoColumnsBeginExpanded
+					layout: LayoutType.TwoColumnsBeginExpanded,
+					bDeletionEnabled: false,
+					bCopyEnabled: false
 				}), "filesView");
 				this.oRouter = this.getOwnerComponent().getRouter();
 				this.oRouter.getRoute("files").attachPatternMatched(this._onProductMatched, this);
+				this._oInnerTable = this.byId("InvoiceTable");
+				if (this._oInnerTable) {
+					this._oInnerTable.attachEventOnce("updateFinished", this.onTableUpdateFinished, this);
+				}
+			},
+			onTableUpdateFinished: function (oEvent) {
+				var oTable = oEvent.getSource();
+				var aItems = oTable.getItems();
+				if (aItems.length > 0) {
+					var oFirstItem = aItems[0];
+					oTable.setSelectedItem(oFirstItem);
+					this.getView().getModel("filesView").setProperty("/bDeletionEnabled", true);
+					this.getView().getModel("filesView").setProperty("/bCopyEnabled", true);
+					//this is for the first row
+					this._bindDetail(oFirstItem.getBindingContext());
+				}
+			},
+			 _bindDetail: function (oContext) {
+				var oDetailView = this.byId("FilesDetailView"); 
+				if (oDetailView) {
+					oDetailView.setBindingContext(oContext);
+				}
+				this.getView().getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			},
+			onListItemPress: function (oEvent) {
+		
+				var oContext = oEvent.getParameter("listItem").getBindingContext()
+
+				this._bindDetail(oContext);
+				this.getModel("appView").setProperty("/bProcessFlowVisible", true);
 			},
 		_onProductMatched: function(oEvent){
+			sap.ui.core.BusyIndicator.hide();
 			var sObject = oEvent.getParameter("arguments").objectId || "0",
 			oTable = this.byId("InvoiceTable");
-			oTable.getItems()[oTable.getBinding("items").aIndices.indexOf(+sObject)].setSelected(true);
+			//oTable.getItems()[oTable.getBinding("items").aIndices.indexOf(+sObject)].setSelected(true);
 		},
 		onTabSelect: function (oEvent) {
             var sKey = oEvent.getParameter("key"); // tab key (all, pdf, email, posted, error)
@@ -78,6 +110,62 @@ sap.ui.define([
                 oBinding.filter(aFilters, "Application");
             }
         },
+		/**
+		 * 
+		 * @param {object} oEvent 
+		 */
+
+		onPressDelete: function(oEvent){
+			var oTable = this.byId("InvoiceTable");
+		},
+		/**
+		 * 
+		 */
+
+		onSelectionChange: function(oEvt){
+			var isSelect = oEvt.getParameter("selected");
+			this._oInnerTable = this.byId("InvoiceTable");
+			isSelect = this._oInnerTable.getSelectedItems().length > 0;
+			var isSelectCopy = this._oInnerTable.getSelectedItems().length === 1;
+			var oModel = this.getView().getModel("filesView").setProperty("/bDeletionEnabled", isSelect)
+			var oModel = this.getView().getModel("filesView").setProperty("/bCopyEnabled", isSelectCopy)
+		},
+
+		/**
+		 * 
+		 */
+		
+		onPressCopy: function(oEvent){
+			var oItem = this._oInnerTable.getSelectedItem();
+			var oData  = oItem.getBindingContext().getObject();
+			var oModel = this.getView().getModel(), oAppViewModel = this.getModel("appView");
+			const oContext = oModel.createEntry("/Invoice", {
+			properties: {
+				CompanyCode: oData.CompanyCode,
+				documentDate: new Date(),
+				postingDate: new Date(),
+				invGrossAmount: oData.invGrossAmount,
+				documentCurrency: oData.documentCurrency,
+				supInvParty: oData.supInvParty,
+				InvoicingParty: oData.InvoicingParty,
+				// reset system-generated fields
+				InvoiceNumber: "", 
+				//Status: "DRAFT"
+				}
+			});
+
+			// 🔹 Update view state
+			oAppViewModel.setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
+			oAppViewModel.setProperty("/isEditable", true);
+
+			// 🔹 Navigate to detail page
+			this.getRouter().navTo("fileDetail", {
+				objectId: "copy"
+			});
+
+			// 🔹 Store context for binding in detail page
+			this.getOwnerComponent()._oCreateContext = oContext;
+		},
 
         NavigateToInvoiceDetails: function (oEvent) {
             var oCtx = oEvent.getSource().getBindingContext();
@@ -103,21 +191,43 @@ sap.ui.define([
 			 * @public
 			 */
 			onOpenCreateDialog: function (oEvent) {
-				var oContext = this.getModel().createEntry("/Invoice", {
-					properties: {},
-					success: function (oData) {
-						this.onCloseCreateDialog();
-						MessageToast.show("Arquivo criado com sucesso");
-					}.bind(this),
-					error: function (oError) {
-						MessageBox.error("Ocorreu um erro ao tentar criar um arquivo");
+				// var oContext = this.getModel().createEntry("/Invoice", {
+				// 	properties: {},
+				// 	success: function (oData) {
+				// 		this.onCloseCreateDialog();
+				// 		MessageToast.show("Arquivo criado com sucesso");
+				// 	}.bind(this),
+				// 	error: function (oError) {
+				// 		MessageBox.error("Ocorreu um erro ao tentar criar um arquivo");
+				// 	}
+				// });
+
+				// this.openFragment("zdashboard.view.FilesCreate", {
+				// 	id: "idFilesCreateDialog",
+				// 	bindingPath: oContext.getPath()
+				// });
+				    var oModel = this.getView().getModel();
+				var oAppViewModel = this.getModel("appView");
+				var oContext = oModel.createEntry("/Invoice", {
+					properties: {
+						CompanyCode: "",
+						companyCode: new Date().getFullYear(),
+						documentDate: new Date(),
+						postingDate: new Date(),
+						invGrossAmount: 0,
+						documentCurrency: "",
+						supInvParty: "",
+						InvoicingParty: ""
 					}
 				});
+				this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
+				oAppViewModel.setProperty("/isEditable", true);
+				this.getRouter().navTo("fileDetail", {
+					objectId: "new"
+				}, false);
 
-				this.openFragment("zdashboard.view.FilesCreate", {
-					id: "idFilesCreateDialog",
-					bindingPath: oContext.getPath()
-				});
+				// store context for new object
+				this.getOwnerComponent()._oCreateContext = oContext;
 			},
 
 			/**
@@ -206,42 +316,7 @@ sap.ui.define([
 			 * @param {sap.ui.base.Event} oEvent 
 			 * @public
 			 */
-			showDetail: function (oEvent) {
-
-
-				//Doesn't work as the fileDetail view is not ready yet
-				var oCtx = oEvent.getParameter("listItem").getBindingContext();
-    			var sPath = oCtx.getPath(); // "/Invoice(guid'0891c370-62dc-4cf0-a220-1d88686baa94')"
-
-				
-				var sGuid = sPath.match(/guid'([^']+)'/)[1];
-
-
-				function navToDetail() {
-
-					this.getModel().resetChanges();
-					this.getRouter().navTo("fileDetail", {
-						objectId: sGuid   // GUID or documentId
-					});
-				}
-				
-
-				//  this.getOwnerComponent().getRouter().navTo("files", {
-				// 	objectId: sGuid
-				// });
-
-				if (this.getModel().hasPendingChanges()) {
-					MessageBox.confirm("Os dados não salvos serão perdidos.", {
-						onClose: function (sAction) {
-							if (sAction == MessageBox.Action.OK) {
-								navToDetail.call(this);
-							}
-						}.bind(this)
-					})
-				} else {
-					navToDetail.call(this);
-				}
-			},
+			
 
 			/**
 			 * Evento chamado ao realizar uma busca

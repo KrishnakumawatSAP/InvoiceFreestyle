@@ -17,19 +17,7 @@
             id="_IDGenBlockLayout1"
             background="Light"
         >
-            <layout:BlockLayoutRow id="_IDGenBlockLayoutRow">
-                <layout:BlockLayoutCell
-                    id="_IDGenBlockLayoutCell"
-                    title="Settings"
-                    titleLevel="H1"
-                    width="100%"
-                >
-                    <Text
-                        id="_IDGenText6"
-                        text="General settings for files sent to Msitek"
-                    />
-                </layout:BlockLayoutCell>
-            </layout:BlockLayoutRow>
+            
 
             <layout:BlockLayoutRow id="_IDGenBlockLayoutRow1">
                 <layout:BlockLayoutCell
@@ -117,23 +105,7 @@
             class="elementAtBottom"
             background="Light"
         >
-            <layout:BlockLayoutRow id="_IDGenBlockLayoutRow3">
-                <layout:BlockLayoutCell
-                    id="_IDGenBlockLayoutCell6"
-                    titleAlignment="Center"
-                    title="Questions?"
-                >
-                    <HBox
-                        id="_IDGenHBox1"
-                        justifyContent="Center"
-                    >
-                        <FormattedText
-                            id="_IDGenFormattedText"
-                            htmlText="{i18n>duvidas}"
-                        />
-                    </HBox>
-                </layout:BlockLayoutCell>
-            </layout:BlockLayoutRow>
+           
             <layout:BlockLayoutRow
 			rowColorSet="ColorSet2">
 			<layout:BlockLayoutCell>
@@ -286,28 +258,7 @@
 					</mc:minThreshold>
 				</mc:AreaMicroChart>
 			</layout:BlockLayoutCell>
-			<!-- <layout:BlockLayoutCell>
-				<Title
-					text="{i18n>maintenanceCompletion}"
-					level="H4"
-					titleStyle="H2"
-					width="100%"/>
-				<Title
-					text="{i18n>canceledOrdersDate}"
-					level="H5"
-					width="100%"
-					class="sapUiSmallMarginBottom"/>
-				<FlexBox
-					height="8rem"
-					renderType="Bare"
-					width="12rem">
-					<items>
-						<mc:RadialMicroChart
-							percentage="39"
-							valueColor="Critical"/>
-					</items>
-				</FlexBox>
-			</layout:BlockLayoutCell> -->
+			
 		</layout:BlockLayoutRow>
 		<layout:BlockLayoutRow
 			rowColorSet="ColorSet1">
@@ -430,34 +381,25 @@
 					</items>
 				</FlexBox>
 			</layout:BlockLayoutCell>
-			<!-- <layout:BlockLayoutCell>
-				<Title
-					text="{i18n>costUpgStor}"
-					level="H4"
-					titleStyle="H2"
-					width="100%"/>
-				<Title
-					text="{i18n>profitMarginDate}"
-					level="H5"
-					width="100%"
-					class="sapUiSmallMarginBottom"/>
-				<FlexBox
-					width="20rem"
-					height="8rem"
-					alignItems="Center"
-					renderType="Bare"
-					direction="Column">
-					<mc:DeltaMicroChart
-						value1="60"
-						value2="87"
-						title1="{i18n>profitMarginStartLabel}"
-						title2="{i18n>profitMarginEndLabel}"
-						deltaDisplayValue="27"
-						color="Good"
-						width="16rem"/>
-				</FlexBox>
-			</layout:BlockLayoutCell> -->
+			
 		</layout:BlockLayoutRow>
+		 <layout:BlockLayoutRow id="_IDGenBlockLayoutRow3">
+                <layout:BlockLayoutCell
+                    id="_IDGenBlockLayoutCell6"
+                    titleAlignment="Center"
+                    title="Questions?"
+                >
+                    <HBox
+                        id="_IDGenHBox1"
+                        justifyContent="Center"
+                    >
+                        <FormattedText
+                            id="_IDGenFormattedText"
+                            htmlText="{i18n>duvidas}"
+                        />
+                    </HBox>
+                </layout:BlockLayoutCell>
+            </layout:BlockLayoutRow>
         </layout:BlockLayout>
     </Page>
 </mvc:View>

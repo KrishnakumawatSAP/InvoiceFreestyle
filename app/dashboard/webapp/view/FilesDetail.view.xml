@@ -21,12 +21,13 @@
                 id="ObjectPageHeader"
                 objectTitle="{DocumentHeaderText}"
                 
-                objectSubtitle="{CompanyCode}"
+                objectSubtitle="{companyCode}"
             >
                   
               <actions>
 					<m:Button text="Edit" type="Emphasized" press="onEdit" visible="{=! ${appView>/isEditable}}"/>
                     <m:Button text="Save" type="Emphasized" press="onSave" visible="{appView>/isEditable}"/>
+                    <m:Button text="Void"  press="onDiscardDraft" visible="{appView>/isEditable}"/>
 					<m:OverflowToolbarButton icon="sap-icon://action" type="Transparent" text="Share" tooltip="action"/>
 				</actions>
                	
@@ -126,8 +127,8 @@
                             singleContainerFullSize="false"
                              width="60%">
                                 <m:Label text="Company Code" />
-                                <m:Input value="{CompanyCode}" visible="{appView>/isEditable}" />
-                                <m:Text text="{CompanyCode}" />
+                                <m:Input value="{companyCode}" visible="{appView>/isEditable}" />
+                                <m:Text text="{companyCode}" />
 
                                 <m:Label text="Fiscal Year" />
                                 <m:Input value="{fiscalYear}" visible="{appView>/isEditable}" />
@@ -196,90 +197,126 @@
                     <ObjectPageSubSection>
                         <blocks>
                             <m:Table
-                                id="ItemTable"
-                                items="{to_InvoiceItem}"
-                                inset="false"
-                            >
-                              <m:Toolbar>
-                                        <m:ToolbarSpacer/>
-                                        <m:Button text="Create" press="oncreateItem" type="Emphasized" visible="{appView>/isEditable}" />
-                                    </m:Toolbar>
-                                <m:columns>
-                                    <m:Column>
-                                        <m:Text text="Purchase Order" />
-                                    </m:Column>
-                                     <m:Column>
-                                        <m:Text text="Unit of Measure" />
-                                    </m:Column>
-                                    <m:Column>
-                                        <m:Text text="Quantity" />
-                                    </m:Column>
-                                      <m:Column>
-                                        <m:Text text="Invoice Item" />
-                                    </m:Column>
-                                      <m:Column>
-                                        <m:Text text="Invoice Item Amount" />
-                                    </m:Column>
-                                       <m:Column>
-                                        <m:Text text="Plant" />
-                                    </m:Column>
-                                       <m:Column>
-                                        <m:Text text="Product Type" />
-                                    </m:Column> 
-                                    <m:Column>
-                                        <m:Text text="Tax Jurisdicary" />
-                                    </m:Column> 
-                                    <m:Column>
-                                        <m:Text text="Amount" />
-                                    </m:Column>
-                                    <m:Column>
-                                        <m:Text text="Tax Code" />
-                                    </m:Column>
-                                </m:columns>
-                                <m:items>
-                                       <m:ColumnListItem>
-                                        <!-- Purchase Order -->
-                                        <m:Input value="{PurchaseOrder}" visible="{appView>/isEditable}" />
-                                        <m:Text text="{PurchaseOrder}" visible="{= !${appView>/isEditable}}" />
+                            id="ItemTable"
+                            items="{to_InvoiceItem}"
+                            inset="false"
+                            mode="SingleSelectMaster"
+                            growing="true"
+                            growingScrollToLoad="true"
+                            sticky="ColumnHeaders"
+                            autoPopinMode="true"
+                            demandPopin="true"
+                            width="100%"
+                        >
+                            <m:headerToolbar>
+                                <m:Toolbar>
+                                    <m:Title text="Invoice Items" level="H2" />
+                                    <m:ToolbarSpacer/>
+                                    <m:Button text="Create" press="oncreateItem" type="Emphasized" visible="{appView>/isEditable}" />
+                                </m:Toolbar>
+                            </m:headerToolbar>
 
-                                        <!-- Unit of Measure -->
-                                        <m:Input value="{UnitOfMeasure}" visible="{appView>/isEditable}" />
-                                        <m:Text text="{UnitOfMeasure}" visible="{= !${appView>/isEditable}}" />
+                            <m:columns>
+                                <m:Column hAlign="Begin" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
+                                    <m:Text text="Purchase Order" wrapping="false" />
+                                </m:Column>
 
-                                        <!-- Quantity -->
-                                        <m:Input value="{Quantity}" type="Number" visible="{appView>/isEditable}" />
-                                        <m:Text text="{Quantity}" visible="{= !${appView>/isEditable}}" />
+                                <m:Column hAlign="Center" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
+                                    <m:Text text="Unit of Measure" wrapping="false" />
+                                </m:Column>
 
-                                        <!-- Invoice Item -->
-                                        <m:Input value="{InvoiceItem}" visible="{appView>/isEditable}" />
-                                        <m:Text text="{InvoiceItem}" visible="{= !${appView>/isEditable}}" />
+                                <m:Column hAlign="End" popinDisplay="Inline" demandPopin="true" minScreenWidth="Tablet">
+                                    <m:Text text="Quantity" wrapping="false" />
+                                </m:Column>
 
-                                        <!-- Invoice Item Amount -->
-                                        <m:Input value="{InvoiceItemAmount}" type="Number" visible="{appView>/isEditable}" />
-                                        <m:Text text="{InvoiceItemAmount}" visible="{= !${appView>/isEditable}}" />
+                                <m:Column hAlign="Begin" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
+                                    <m:Text text="Invoice Item" wrapping="false" />
+                                </m:Column>
 
-                                        <!-- Plant -->
-                                        <m:Input value="{Plant}" visible="{appView>/isEditable}" />
-                                        <m:Text text="{Plant}" visible="{= !${appView>/isEditable}}" />
+                                <m:Column hAlign="End" popinDisplay="Inline" demandPopin="true" minScreenWidth="Tablet">
+                                    <m:Text text="Invoice Item Amount" wrapping="false" />
+                                </m:Column>
 
-                                        <!-- Product Type -->
-                                        <m:Input value="{ProductType}" visible="{appView>/isEditable}" />
-                                        <m:Text text="{ProductType}" visible="{= !${appView>/isEditable}}" />
+                                <m:Column hAlign="Begin" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
+                                    <m:Text text="Plant" wrapping="false" />
+                                </m:Column>
 
-                                        <!-- Tax Jurisdiction -->
-                                        <m:Input value="{TaxJurisdiction}" visible="{appView>/isEditable}" />
-                                        <m:Text text="{TaxJurisdiction}" visible="{= !${appView>/isEditable}}" />
+                                <m:Column hAlign="Center" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
+                                    <m:Text text="Product Type" wrapping="false" />
+                                </m:Column>
 
-                                        <!-- Amount -->
-                                        <m:Input value="{Amount}" type="Number" visible="{appView>/isEditable}" />
-                                        <m:Text text="{Amount}" visible="{= !${appView>/isEditable}}" />
+                                <m:Column hAlign="Begin" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
+                                    <m:Text text="Tax Jurisdiction" wrapping="false" />
+                                </m:Column>
 
-                                        <!-- Tax Code -->
-                                        <m:Input value="{TaxCode}" visible="{appView>/isEditable}" />
-                                        <m:Text text="{TaxCode}" visible="{= !${appView>/isEditable}}" />
-                                    </m:ColumnListItem>
-                                </m:items>
-                            </m:Table>
+                              
+
+                                <m:Column hAlign="Center" popinDisplay="Inline" demandPopin="true" minScreenWidth="Tablet">
+                                    <m:Text text="Tax Code" wrapping="false" />
+                                </m:Column>
+                            </m:columns>
+
+                            <m:items>
+                              <m:ColumnListItem type="Active">
+                                <!-- Purchase Order -->
+                                <m:VBox>
+                                    <m:Input value="{purchaseOrder}" visible="{appView>/isEditable}" />
+                                    <m:Text text="{purchaseOrder}" visible="{= !${appView>/isEditable}}" />
+                                </m:VBox>
+
+                                <!-- Unit of Measure -->
+                                <m:VBox>
+                                    <m:Input value="{poQuantityUnit}" visible="{appView>/isEditable}" />
+                                    <m:Text text="{poQuantityUnit}" visible="{= !${appView>/isEditable}}" />
+                                </m:VBox>
+
+                                <!-- Quantity -->
+                                <m:VBox>
+                                    <m:Input value="{quantityPOUnit}"  visible="{appView>/isEditable}" />
+                                    <m:Text text="{quantityPOUnit}" visible="{= !${appView>/isEditable}}" />
+                                </m:VBox>
+
+                                <!-- Invoice Item -->
+                                <m:VBox>
+                                    <m:Input value="{sup_InvoiceItem}" visible="{appView>/isEditable}" />
+                                    <m:Text text="{sup_InvoiceItem}" visible="{= !${appView>/isEditable}}" />
+                                </m:VBox>
+
+                                <!-- Invoice Item Amount -->
+                                <m:VBox>
+                                    <m:Input value="{supInvItemAmount}"  visible="{appView>/isEditable}" />
+                                    <m:Text text="{supInvItemAmount}" visible="{= !${appView>/isEditable}}" />
+                                </m:VBox>
+
+                                <!-- Plant -->
+                                <m:VBox>
+                                    <m:Input value="{Plant}" visible="{appView>/isEditable}" />
+                                    <m:Text text="{Plant}" visible="{= !${appView>/isEditable}}" />
+                                </m:VBox>
+
+                                <!-- Product Type -->
+                                <m:VBox>
+                                    <m:Input value="{ProductType}" visible="{appView>/isEditable}" />
+                                    <m:Text text="{ProductType}" visible="{= !${appView>/isEditable}}" />
+                                </m:VBox>
+
+                                <!-- Tax Jurisdiction -->
+                                <m:VBox>
+                                    <m:Input value="{TaxJurisdiction}" visible="{appView>/isEditable}" />
+                                    <m:Text text="{TaxJurisdiction}" visible="{= !${appView>/isEditable}}" />
+                                </m:VBox>
+
+
+                                <!-- Tax Code -->
+                                <m:VBox>
+                                    <m:Input value="{taxCode}" visible="{appView>/isEditable}" />
+                                    <m:Text text="{taxCode}" visible="{= !${appView>/isEditable}}" />
+                                </m:VBox>
+                            </m:ColumnListItem>
+
+                            </m:items>
+                        </m:Table>
+
                         </blocks>
                     </ObjectPageSubSection>
                 </subSections>
@@ -328,7 +365,7 @@
                    
 
                     <!-- Uploaded File List -->
-                    <m:Table id="uploadedFilesTable" inset="false" growing="true" items="{/UploadedFiles}">
+                    <m:Table id="uploadedFilesTable" inset="false" growing="true" >
                         <m:columns>
                             <m:Column><m:Text text="File Name"/></m:Column>
                             <m:Column><m:Text text="Uploaded On"/></m:Column>

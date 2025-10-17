@@ -103,7 +103,7 @@
               "operationMode": "Server",
               "autoExpandSelect": true,
               "earlyRequests": true,
-              "refreshAfterChange": false,
+              "refreshAfterChange": true,
               "defaultBindingMode": "TwoWay",
               "defaultCountMode": "Inline",
               "useBatch": true

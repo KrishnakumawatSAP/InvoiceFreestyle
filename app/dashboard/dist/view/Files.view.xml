@@ -14,7 +14,7 @@
 >
     <f:FlexibleColumnLayout
         id="_IDGenFlexibleColumnLayout1"
-        layout="{filesView>/layout}"
+        layout="{appView>/layout}"
     >
         <f:beginColumnPages>
             <FlexBox>
@@ -76,14 +76,16 @@
                                 sticky="ColumnHeaders"
                                 growing="true"
                                 growingScrollToLoad="true"
-                                itemPress="showDetail"
+                                itemPress="onListItemPress"
+                                selectionChange="onSelectionChange"
+                             
                             >
                                 <headerToolbar>
                                    <Toolbar>
                                         <ToolbarSpacer/>
                                         <Button text="Create" press="onOpenCreateDialog" type="Emphasized" />
-                                        <Button text="Delete" press="onPressDelete" enabled="false"/>
-                                        <Button text="Copy" press="onPressCopy" enabled="false" />
+                                        <Button text="Delete" press="onPressDelete" enabled="{filesView>/bDeletionEnabled}"/>
+                                        <Button text="Copy" press="onPressCopy" enabled="{filesView>/bCopyEnabled}" />
                                         <Button text="Extract PDF" press="onPressExtractPDF" />
                                     </Toolbar>
                                 </headerToolbar>
@@ -121,7 +123,8 @@
                                 </columns>
 
                                 <items>
-                                    <ColumnListItem type="Navigation">
+                                    <ColumnListItem type="Active"
+                                    >
                                         <cells>
                                             <ObjectIdentifier
                                                 title="{documentId}"
