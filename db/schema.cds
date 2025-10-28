@@ -133,3 +133,35 @@ entity Segments {
       ChangeDate  : DateTime;
       ChangeTime  : Time;
 }
+
+entity BusinessPartnerDetails {
+  key BusinessPartner         : String;
+      Customer                : String;
+      BusinessPartnerFullName : String;
+      BusinessPartnerCategory : String;
+      BusinessPartnerGrouping : String;
+      OrganizationBPName1     : String;
+
+      AddressTimeZone         : String;
+      CityName                : String;
+      Country                 : String;
+      FullName                : String;
+      HouseNumber             : String;
+      PostalCode              : String;
+      Region                  : String;
+      StreetName              : String;
+
+      EmailAddress            : String;
+      PhoneNumber             : String;
+}
+
+entity MediaFile : cuid {
+  @Core.ContentDisposition.Filename: fileName
+  @Core.MediaType                  : mediaType
+  content   : LargeBinary;
+  fileName  : String;
+
+  @Core.IsMediaType: true
+  mediaType : String;
+  url       : String;
+}
