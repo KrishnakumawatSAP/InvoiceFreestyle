@@ -44,7 +44,22 @@ sap.ui.define([
 				if (this._oInnerTable) {
 					this._oInnerTable.attachEventOnce("updateFinished", this.onTableUpdateFinished, this);
 				}
+				this.getOwnerComponent().getEventBus().subscribe("Invoice", "Saved", this._onInvoiceSaved, this);
 			},
+
+
+			_onInvoiceSaved: function () {
+				var oSmartTable = this.byId("InvoiceSmartTable");
+				if (oSmartTable) {
+					oSmartTable.rebindTable();
+
+					var oTable = oSmartTable.getTable();
+					if (oTable) {
+						oTable.removeSelections(true);
+					}
+				}
+			},
+
 			onTableUpdateFinished: function (oEvent) {
 				var oTable = oEvent.getSource();
 				var aItems = oTable.getItems();
@@ -57,127 +72,132 @@ sap.ui.define([
 					this._bindDetail(oFirstItem.getBindingContext());
 				}
 			},
-			 _bindDetail: function (oContext) {
-				var oDetailView = this.byId("FilesDetailView"); 
+			_bindDetail: function (oContext) {
+				var oDetailView = this.byId("FilesDetailView");
 				if (oDetailView) {
 					oDetailView.setBindingContext(oContext);
 				}
 				this.getView().getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			},
 			onListItemPress: function (oEvent) {
-		
+
 				var oContext = oEvent.getParameter("listItem").getBindingContext()
 
 				this._bindDetail(oContext);
 				this.getModel("appView").setProperty("/bProcessFlowVisible", true);
 			},
-		_onProductMatched: function(oEvent){
-			sap.ui.core.BusyIndicator.hide();
-			var sObject = oEvent.getParameter("arguments").objectId || "0",
-			oTable = this.byId("InvoiceTable");
-			//oTable.getItems()[oTable.getBinding("items").aIndices.indexOf(+sObject)].setSelected(true);
-		},
-		onTabSelect: function (oEvent) {
-            var sKey = oEvent.getParameter("key"); // tab key (all, pdf, email, posted, error)
-            var oSmartTable = this.byId("InvoiceSmartTable");
-
-
-            var oBinding = oSmartTable.getTable().getBinding("items");
-
-            var aFilters = [];
-			//for icon tab bar switch table refrsh
-            switch (sKey) {
-                case "pdf":
-                    aFilters.push(new Filter("mode", FilterOperator.EQ, "pdf"));
-                    break;
-                case "email":
-                    aFilters.push(new Filter("mode", FilterOperator.EQ, "email"));
-                    break;
-                case "posted":
-                    aFilters.push(new Filter("statusFlag", FilterOperator.EQ, "S"));
-                    break;
-                case "error":
-                    aFilters.push(new Filter("statusFlag", FilterOperator.EQ, "E")); // assuming 'E' = Error
-                    break;
-                case "all":
-                default:
-                    // no extra filter
-                    break;
-            }
-
-            // apply filters
-            if (oBinding) {
-                oBinding.filter(aFilters, "Application");
-            }
-        },
-		/**
-		 * 
-		 * @param {object} oEvent 
-		 */
-
-		onPressDelete: function(oEvent){
-			var oTable = this.byId("InvoiceTable");
-		},
-		/**
-		 * 
-		 */
-
-		onSelectionChange: function(oEvt){
-			var isSelect = oEvt.getParameter("selected");
-			this._oInnerTable = this.byId("InvoiceTable");
-			isSelect = this._oInnerTable.getSelectedItems().length > 0;
-			var isSelectCopy = this._oInnerTable.getSelectedItems().length === 1;
-			var oModel = this.getView().getModel("filesView").setProperty("/bDeletionEnabled", isSelect)
-			var oModel = this.getView().getModel("filesView").setProperty("/bCopyEnabled", isSelectCopy)
-		},
-
-		/**
-		 * 
-		 */
-		
-		onPressCopy: function(oEvent){
-			var oItem = this._oInnerTable.getSelectedItem();
-			var oData  = oItem.getBindingContext().getObject();
-			var oModel = this.getView().getModel(), oAppViewModel = this.getModel("appView");
-			const oContext = oModel.createEntry("/Invoice", {
-			properties: {
-				companyCode: oData.companyCode,
-				documentDate: new Date(),
-				postingDate: new Date(),
-				invGrossAmount: oData.invGrossAmount,
-				documentCurrency: oData.documentCurrency,
-				supInvParty: oData.supInvParty,
-				InvoicingParty: oData.InvoicingParty,
-				// reset system-generated fields
-				InvoiceNumber: "", 
-				//Status: "DRAFT"
+			_onProductMatched: function (oEvent) {
+				sap.ui.core.BusyIndicator.hide();
+				var sObject = oEvent.getParameter("arguments").objectId || "0",
+					oTable = this.byId("InvoiceTable");
+				if (oEvent) {
+					var oAppViewModel = this.getModel("appView");
+					oAppViewModel.setProperty("/selectedItem", "files")
+					sap.ui.getCore().byId("container-zdashboard---app--_IDGenNavigationList").setSelectedKey(oAppViewModel.getProperty("/selectedItem"))
 				}
-			});
+				//oTable.getItems()[oTable.getBinding("items").aIndices.indexOf(+sObject)].setSelected(true);
+			},
+			onTabSelect: function (oEvent) {
+				var sKey = oEvent.getParameter("key"); // tab key (all, pdf, email, posted, error)
+				var oSmartTable = this.byId("InvoiceSmartTable");
 
-			// 🔹 Update view state
-			oAppViewModel.setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
-			oAppViewModel.setProperty("/isEditable", true);
 
-			// 🔹 Navigate to detail page
-			this.getRouter().navTo("fileDetail", {
-				objectId: "copy"
-			});
+				var oBinding = oSmartTable.getTable().getBinding("items");
 
-			// 🔹 Store context for binding in detail page
-			this.getOwnerComponent()._oCreateContext = oContext;
-		},
+				var aFilters = [];
+				//for icon tab bar switch table refrsh
+				switch (sKey) {
+					case "pdf":
+						aFilters.push(new Filter("mode", FilterOperator.EQ, "pdf"));
+						break;
+					case "email":
+						aFilters.push(new Filter("mode", FilterOperator.EQ, "email"));
+						break;
+					case "posted":
+						aFilters.push(new Filter("statusFlag", FilterOperator.EQ, "S"));
+						break;
+					case "error":
+						aFilters.push(new Filter("statusFlag", FilterOperator.EQ, "E")); // assuming 'E' = Error
+						break;
+					case "all":
+					default:
+						// no extra filter
+						break;
+				}
 
-        NavigateToInvoiceDetails: function (oEvent) {
-            var oCtx = oEvent.getSource().getBindingContext();
-            var sDocId = oCtx.getProperty("documentId");
+				// apply filters
+				if (oBinding) {
+					oBinding.filter(aFilters, "Application");
+				}
+			},
+			/**
+			 * 
+			 * @param {object} oEvent 
+			 */
 
-            // Example: navigate to detail route
-            this.getOwnerComponent().getRouter().navTo("InvoiceDetail", {
-                docId: sDocId
-            });
-        },
+			onPressDelete: function (oEvent) {
+				var oTable = this.byId("InvoiceTable");
+			},
+			/**
+			 * 
+			 */
 
-			
+			onSelectionChange: function (oEvt) {
+				var isSelect = oEvt.getParameter("selected");
+				this._oInnerTable = this.byId("InvoiceTable");
+				isSelect = this._oInnerTable.getSelectedItems().length > 0;
+				var isSelectCopy = this._oInnerTable.getSelectedItems().length === 1;
+				var oModel = this.getView().getModel("filesView").setProperty("/bDeletionEnabled", isSelect)
+				var oModel = this.getView().getModel("filesView").setProperty("/bCopyEnabled", isSelectCopy)
+			},
+
+			/**
+			 * 
+			 */
+
+			onPressCopy: function (oEvent) {
+				var oItem = this._oInnerTable.getSelectedItem();
+				var oData = oItem.getBindingContext().getObject();
+				var oModel = this.getView().getModel(), oAppViewModel = this.getModel("appView");
+				const oContext = oModel.createEntry("/Invoice", {
+					properties: {
+						companyCode: oData.companyCode,
+						documentDate: new Date(),
+						postingDate: new Date(),
+						invGrossAmount: oData.invGrossAmount,
+						documentCurrency: oData.documentCurrency,
+						supInvParty: oData.supInvParty,
+						InvoicingParty: oData.InvoicingParty,
+						// reset system-generated fields
+						InvoiceNumber: "",
+						//Status: "DRAFT"
+					}
+				});
+
+				// 🔹 Update view state
+				oAppViewModel.setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
+				oAppViewModel.setProperty("/isEditable", true);
+
+				// 🔹 Navigate to detail page
+				this.getRouter().navTo("fileDetail", {
+					objectId: "copy"
+				});
+
+				// 🔹 Store context for binding in detail page
+				this.getOwnerComponent()._oCreateContext = oContext;
+			},
+
+			NavigateToInvoiceDetails: function (oEvent) {
+				var oCtx = oEvent.getSource().getBindingContext();
+				var sDocId = oCtx.getProperty("documentId");
+
+				// Example: navigate to detail route
+				this.getOwnerComponent().getRouter().navTo("InvoiceDetail", {
+					docId: sDocId
+				});
+			},
+
+
 
 			/* =========================================================== */
 			/* event handlers                                              */
@@ -206,12 +226,12 @@ sap.ui.define([
 				// 	id: "idFilesCreateDialog",
 				// 	bindingPath: oContext.getPath()
 				// });
-				    var oModel = this.getView().getModel();
+				var oModel = this.getView().getModel();
 				var oAppViewModel = this.getModel("appView");
 				var oContext = oModel.createEntry("/Invoice", {
 					properties: {
 						companyCode: "",
-						fiscalYear: new Date().getFullYear(),
+						fiscalYear: "",
 						documentDate: new Date(),
 						postingDate: new Date(),
 						invGrossAmount: 0,
@@ -220,7 +240,11 @@ sap.ui.define([
 						InvoicingParty: ""
 					}
 				});
-				this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
+
+		
+				oAppViewModel.setProperty("/layout", "TwoColumnsMidExpanded");
+				oAppViewModel.setProperty("/isFullPage", false);
+				//this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
 				oAppViewModel.setProperty("/isEditable", true);
 				this.getRouter().navTo("fileDetail", {
 					objectId: "new"
@@ -228,6 +252,8 @@ sap.ui.define([
 
 				// store context for new object
 				this.getOwnerComponent()._oCreateContext = oContext;
+				console.log(oAppViewModel.getProperty("/layout"));  // This should print "TwoColumnsMidExpanded"
+
 			},
 
 			/**
@@ -316,7 +342,7 @@ sap.ui.define([
 			 * @param {sap.ui.base.Event} oEvent 
 			 * @public
 			 */
-			
+
 
 			/**
 			 * Evento chamado ao realizar uma busca

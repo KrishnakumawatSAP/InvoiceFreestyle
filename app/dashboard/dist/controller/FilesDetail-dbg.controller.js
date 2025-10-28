@@ -54,7 +54,7 @@ sap.ui.define([
                     oViewModel.setProperty("/delay", iOriginalBusyDelay);
                 });
 
-                 var oData = {
+                var oData = {
                     lanes: [
                         {
                             id: "0",
@@ -116,9 +116,13 @@ sap.ui.define([
 
                 var oModel = new sap.ui.model.json.JSONModel(oData);
                 oView.setModel(oModel, "ProcessFlow");
+                var oAttachmentModel = new sap.ui.model.json.JSONModel({
+                    files: [] // initial empty list
+                });
+                this.getView().setModel(oAttachmentModel, "attachments");
 
                 // Optional: a second process flow model (pf2)
-               
+
             },
 
             /* =========================================================== */
@@ -153,6 +157,77 @@ sap.ui.define([
                 this._toggleEdit();
             },
 
+            onOpenFullPage: function () {
+                // this.getModel("appView").setProperty("/isFullPage", false);
+                var oAppView = this.getView().getModel("appView");
+                oAppView.setProperty("/layout", "MidColumnFullScreen");
+                oAppView.setProperty("/isFullPage", false);
+            },
+
+            onCloseFullPage: function () {
+                //this.getModel("appView").setProperty("/isFullPage", true);
+                var oAppView = this.getView().getModel("appView");
+                oAppView.setProperty("/layout", "TwoColumnsMidExpanded");
+                oAppView.setProperty("/isFullPage", true);
+            },
+            onCloseDetailPage: function () {
+                var oAppView = this.getView().getModel("appView");
+                oAppView.setProperty("/layout", "OneColumn");
+                oAppView.setProperty("/isFullPage", true);
+            },
+
+
+            onFileSelected: function (oEvent) {
+                var oFileUploader = oEvent.getSource();
+                var aFiles = oFileUploader.getFocusDomRef().files;
+
+                if (!aFiles || aFiles.length === 0) {
+                    return;
+                }
+
+                var oFile = aFiles[0]; 
+                var sFileName = oFile.name;
+                var sUploadDate = new Date().toLocaleString();
+                var oAttachmentModel = this.getView().getModel("attachments");
+                var aCurrentFiles = oAttachmentModel.getProperty("/files");
+                var bExists = aCurrentFiles.some(item => item.fileName === sFileName);
+                if (!bExists) {
+                    aCurrentFiles.push({
+                        fileName: sFileName,
+                        uploadDate: sUploadDate,
+                        status: "Pending"
+                    });
+                } else {
+                    sap.m.MessageToast.show("This file is already listed.");
+                }
+
+                oAttachmentModel.setProperty("/files", aCurrentFiles);
+            },
+
+
+
+            onUploadPress: function () {
+                var oModel = this.getView().getModel(); // OData V2
+                // logic to read upload content is missing
+                var oContext = oModel.createEntry("/Invoice", {
+                    properties: {
+                        companyCode: "",
+                        fiscalYear: new Date().getFullYear(),
+                        documentDate: new Date(),
+                        postingDate: new Date(),
+                        invGrossAmount: 0,
+                        documentCurrency: "",
+                        supInvParty: "",
+                        InvoicingParty: ""
+                    }
+                });
+
+                // Optionally navigate to the new record if using object page pattern
+                //changed view to appView 
+                this.getView().getModel("appView").setProperty("/newContext", oContext);
+
+                sap.m.MessageToast.show("New blank invoice added after upload.");
+            },
             /**
              * Evento chamado ao clicar em Adicionar Usuário
              * @public
@@ -244,13 +319,51 @@ sap.ui.define([
                     this.getRouter().navTo("files");
                 }
             },
+            onSave: function () {
+                var oView = this.getView();
+                var oModel = oView.getModel();
+                var oAppViewModel = oView.getModel("appView");
+                var oTable = oView.byId("ItemTable");
+                var oSmartTable = this.getView().byId("InvoiceSmartTable");
+                var that = this;
+
+                oModel.submitChanges({
+                    success: function () {
+                        //   if (!oModel.hasPendingChanges()) {
+                        sap.m.MessageToast.show("Invoice saved successfully");
+                        oAppViewModel.setProperty("/isEditable", false);
+                        oTable.getItems().forEach(function (oItem) {
+                            var oCtx = oItem.getBindingContext();
+                            if (oCtx && oCtx.bCreated) {
+                                oModel.deleteCreatedEntry(oCtx);
+                            }
+                        });
+                        that.getRouter().navTo("files");
+
+                        oModel.refresh(true);
+                        oAppViewModel.refresh(true);
+                       // that.getOwnerComponent().getEventBus().publish("Invoice", "Saved");
+                        if (oAppViewModel.getProperty("/layout") !== "TwoColumnsMidExpanded") {
+                            oAppViewModel.setProperty("/layout", "TwoColumnsMidExpanded");
+                        }
+                        that._bHandlingNew = false;
+                        delete that.getOwnerComponent()._oCreateContext;
+                        // }
+                    },
+                    error: function () {
+                        sap.m.MessageBox.error("Error while saving invoice. Please try again.");
+                    }
+                });
+            },
+
+
 
             /**
              * Evento chamado ao clicar em Salvar
              * @public
              * @param {sap.ui.base.Event} oEvent 
              */
-            onSave: function (oEvent) {
+            onSave1: function (oEvent) {
                 // if (!this.isValid("fileUser")) {
                 //     MessageBox.error("Verifique os erros e tente novamente");
                 //     return
@@ -268,28 +381,28 @@ sap.ui.define([
                 //     }.bind(this)
                 // });
 
-                    var oModel = this.getView().getModel();
-                    var oViewModel = this.getModel("appView");
-                    var that = this;
+                var oModel = this.getView().getModel();
+                var oViewModel = this.getModel("appView");
+                var that = this;
 
-                    // commit pending changes
-                    oModel.submitChanges({
-                        success: function (oData) {
-                            if (!oModel.hasPendingChanges()) {
-                                sap.m.MessageToast.show("Invoice updated successfully");
+                // commit pending changes
+                oModel.submitChanges({
+                    success: function (oData) {
+                        if (!oModel.hasPendingChanges()) {
+                            sap.m.MessageToast.show("Invoice updated successfully");
 
-                                // back to display mode
-                                oViewModel.setProperty("/isEditable", false);
+                            // back to display mode
+                            oViewModel.setProperty("/isEditable", false);
 
-                                // reset flag (in case it was new before)
-                                that._bHandlingNew = false;
-                                delete that.getOwnerComponent()._oCreateContext;
-                            }
-                        },
-                        error: function (oError) {
-                            sap.m.MessageBox.error("Error while updating invoice. Please try again.");
+                            // reset flag (in case it was new before)
+                            that._bHandlingNew = false;
+                            delete that.getOwnerComponent()._oCreateContext;
                         }
-                    });
+                    },
+                    error: function (oError) {
+                        sap.m.MessageBox.error("Error while updating invoice. Please try again.");
+                    }
+                });
             },
 
             /* =========================================================== */
@@ -300,7 +413,7 @@ sap.ui.define([
              * @param {sap.ui.base.Event} oEvent pattern match event in route 'object'
              * @private
              */
-           _onObjectMatched: function (oEvent) {
+            _onObjectMatched: function (oEvent) {
                 sap.ui.core.BusyIndicator.hide()
                 var sObjectId = oEvent.getParameter("arguments").objectId;
                 var oViewModel = this.getModel("filesDetailView");
@@ -308,7 +421,7 @@ sap.ui.define([
                 var oComponent = this.getOwnerComponent();
                 var oCreateContext = oComponent._oCreateContext; // set earlier by list controller
 
-        
+
                 this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
 
                 if (sObjectId === "new" || sObjectId === "copy") {
@@ -329,7 +442,7 @@ sap.ui.define([
                         oHeader.setObjectTitle("New Invoice");
                     }
 
-    
+
 
                     return;
                 } else {
@@ -338,9 +451,9 @@ sap.ui.define([
                 oAppViewModel.setProperty("/isEditable", false);
                 delete oComponent._oCreateContext;
 
-                
+
                 var sObjectPath = this.getModel().createKey("/Invoice", {
-                    DocumentId: sObjectId 
+                    DocumentId: sObjectId
                 });
 
                 this.getView().bindElement({
@@ -352,7 +465,76 @@ sap.ui.define([
                     }
                 });
             },
+            oncreateItem: function () {
+                var oAppViewModel = this.getModel("appView");
+                oAppViewModel.setProperty("/isEditable", true);
+                var oTable = this.getView().byId("ItemTable")
+                var oModel = this.getView().getModel()
+                var oInvoiceCtx = this.getView().getBindingContext();
+                const oContext = oModel.createEntry(oInvoiceCtx.getPath() + "/to_InvoiceItem", {
+                    properties: {
+                        purchaseOrder: "",
+                        poQuantityUnit: "",
+                        quantityPOUnit: 0,
+                        sup_InvoiceItem: "",
+                        supInvItemAmount: 0,
+                        Plant: "",
+                        ProductType: "",
+                        TaxJurisdiction: "",
+                        taxCode: ""
+                    }
+                });
 
+                const oTemplate = oTable.getBindingInfo("items").template.clone();
+                oTemplate.setBindingContext(oContext);
+                oTable.addItem(oTemplate);
+                this._oNewItemCtx = oContext;
+
+                sap.m.MessageToast.show("New row added");
+            },
+            onDiscardDraft: function () {
+
+                var oView = this.getView();
+                var oModel = oView.getModel();
+                var oAppViewModel = oView.getModel("appView");
+                var oTable = oView.byId("ItemTable");
+
+                // 🔹 1️⃣ Cancel pending changes
+                if (oModel.hasPendingChanges()) {
+                    oModel.resetChanges(); // discard all unsubmitted changes
+                }
+
+                // 🔹 2️⃣ Handle "new create" scenario (transient entry)
+                // Find any transient contexts (created but not submitted)
+                var aItems = oTable.getItems();
+                aItems.forEach(function (oItem) {
+                    var oCtx = oItem.getBindingContext();
+                    if (oCtx && oCtx.bCreated) {  // transient created entry
+                        oModel.deleteCreatedEntry(oCtx);
+                    }
+                });
+
+                // 🔹 3️⃣ Rebind or refresh the table data to original state
+                oModel.refresh(true);
+
+                // 🔹 4️⃣ Restore display mode
+                oAppViewModel.setProperty("/isEditable", false);
+
+                // 4️⃣ Restore the two-column layout
+                if (oAppViewModel.getProperty("/layout") !== "TwoColumnsMidExpanded") {
+                    oAppViewModel.setProperty("/layout", "TwoColumnsMidExpanded");
+                }
+
+                // 🔹 5️⃣ Select the first available item (for example)
+                var aVisibleItems = oTable.getItems();
+                if (aVisibleItems.length > 0) {
+                    oTable.setSelectedItem(aVisibleItems[0]);
+                    oTable.fireItemPress({ listItem: aVisibleItems[0] }); // trigger your display logic again if needed
+                }
+
+                // 🔹 6️⃣ Notify user
+                sap.m.MessageToast.show("Changes discarded");
+            },
             /**
              * Validações realizadas ao trocar o bind da view
              * @private

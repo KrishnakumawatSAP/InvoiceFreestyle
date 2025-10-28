@@ -13,127 +13,12 @@
         id="_IDGenPage1"
         showHeader="false"
     >
-        <layout:BlockLayout
-            id="_IDGenBlockLayout1"
-            background="Light"
-        >
-            <layout:BlockLayoutRow id="_IDGenBlockLayoutRow">
-                <layout:BlockLayoutCell
-                    id="_IDGenBlockLayoutCell"
-                    title="Settings"
-                    titleLevel="H1"
-                    width="100%"
-                >
-                    <Text
-                        id="_IDGenText6"
-                        text="General settings for files sent to Msitek"
-                    />
-                </layout:BlockLayoutCell>
-            </layout:BlockLayoutRow>
-
-            <layout:BlockLayoutRow id="_IDGenBlockLayoutRow1">
-                <layout:BlockLayoutCell
-                    id="_IDGenBlockLayoutCell1"
-                    width="-1"
-                >
-                    <core:Icon
-                        id="_IDGenIcon"
-                        color="Default"
-                        src="sap-icon://course-program"
-                    />
-                </layout:BlockLayoutCell>
-                <layout:BlockLayoutCell
-                    id="_IDGenBlockLayoutCell2"
-                    titleLevel="H1"
-                    width="100%"
-                >
-                    <layout:titleLink>
-                        <Link
-                            id="_IDGenLink2"
-                            text="Invoices"
-                            press=".onLinkPress"
-                            customData:key="files"
-                        />
-                    </layout:titleLink>
-                    <layout:content>
-                        <Text
-                            id="_IDGenText7"
-                            text="File configurations for transmission to Msitek"
-                        />
-                    </layout:content>
-                </layout:BlockLayoutCell>
-            </layout:BlockLayoutRow>
-
-            <layout:BlockLayoutRow id="_IDGenBlockLayoutRow2">
-                <layout:BlockLayoutCell
-                    id="_IDGenBlockLayoutCell3"
-                    width="-1"
-                >
-                    <core:Icon
-                        id="_IDGenIcon1"
-                        color="Default"
-                        src="sap-icon://role"
-                    />
-                </layout:BlockLayoutCell>
-
-                <layout:BlockLayoutCell id="_IDGenBlockLayoutCell4">
-                    <layout:titleLink>
-                        <Link
-                            id="_IDGenLink3"
-                            text="Contacts"
-                            press=".onLinkPress"
-                            customData:key="contacts"
-                        />
-                    </layout:titleLink>
-                    <layout:VerticalLayout id="_IDGenVerticalLayout">
-                        <Text
-                            id="_IDGenText8"
-                            text="Contact Registration"
-                        />
-                    </layout:VerticalLayout>
-                </layout:BlockLayoutCell>
-
-                <layout:BlockLayoutCell id="_IDGenBlockLayoutCell5">
-                    <layout:titleLink>
-                        <Link
-                            id="_IDGenLink4"
-                            text="Segments"
-                            press=".onLinkPress"
-                            customData:key="segments"
-                        />
-                    </layout:titleLink>
-                    <layout:content>
-                        <Text
-                            id="_IDGenText9"
-                            text="Segment Registration"
-                        />
-                    </layout:content>
-                </layout:BlockLayoutCell>
-            </layout:BlockLayoutRow>
-        </layout:BlockLayout>
-
-        <layout:BlockLayout
+                <layout:BlockLayout
             id="_IDGenBlockLayout2"
-            class="elementAtBottom"
+            class="elementAtTop"
             background="Light"
         >
-            <layout:BlockLayoutRow id="_IDGenBlockLayoutRow3">
-                <layout:BlockLayoutCell
-                    id="_IDGenBlockLayoutCell6"
-                    titleAlignment="Center"
-                    title="Questions?"
-                >
-                    <HBox
-                        id="_IDGenHBox1"
-                        justifyContent="Center"
-                    >
-                        <FormattedText
-                            id="_IDGenFormattedText"
-                            htmlText="{i18n>duvidas}"
-                        />
-                    </HBox>
-                </layout:BlockLayoutCell>
-            </layout:BlockLayoutRow>
+           
             <layout:BlockLayoutRow
 			rowColorSet="ColorSet2">
 			<layout:BlockLayoutCell>
@@ -286,28 +171,7 @@
 					</mc:minThreshold>
 				</mc:AreaMicroChart>
 			</layout:BlockLayoutCell>
-			<!-- <layout:BlockLayoutCell>
-				<Title
-					text="{i18n>maintenanceCompletion}"
-					level="H4"
-					titleStyle="H2"
-					width="100%"/>
-				<Title
-					text="{i18n>canceledOrdersDate}"
-					level="H5"
-					width="100%"
-					class="sapUiSmallMarginBottom"/>
-				<FlexBox
-					height="8rem"
-					renderType="Bare"
-					width="12rem">
-					<items>
-						<mc:RadialMicroChart
-							percentage="39"
-							valueColor="Critical"/>
-					</items>
-				</FlexBox>
-			</layout:BlockLayoutCell> -->
+			
 		</layout:BlockLayoutRow>
 		<layout:BlockLayoutRow
 			rowColorSet="ColorSet1">
@@ -430,34 +294,25 @@
 					</items>
 				</FlexBox>
 			</layout:BlockLayoutCell>
-			<!-- <layout:BlockLayoutCell>
-				<Title
-					text="{i18n>costUpgStor}"
-					level="H4"
-					titleStyle="H2"
-					width="100%"/>
-				<Title
-					text="{i18n>profitMarginDate}"
-					level="H5"
-					width="100%"
-					class="sapUiSmallMarginBottom"/>
-				<FlexBox
-					width="20rem"
-					height="8rem"
-					alignItems="Center"
-					renderType="Bare"
-					direction="Column">
-					<mc:DeltaMicroChart
-						value1="60"
-						value2="87"
-						title1="{i18n>profitMarginStartLabel}"
-						title2="{i18n>profitMarginEndLabel}"
-						deltaDisplayValue="27"
-						color="Good"
-						width="16rem"/>
-				</FlexBox>
-			</layout:BlockLayoutCell> -->
+			
 		</layout:BlockLayoutRow>
+		 <layout:BlockLayoutRow id="_IDGenBlockLayoutRow3">
+                <layout:BlockLayoutCell
+                    id="_IDGenBlockLayoutCell6"
+                    titleAlignment="Center"
+                    title="Questions?"
+                >
+                    <HBox
+                        id="_IDGenHBox1"
+                        justifyContent="Center"
+                    >
+                        <FormattedText
+                            id="_IDGenFormattedText"
+                            htmlText="{i18n>duvidas}"
+                        />
+                    </HBox>
+                </layout:BlockLayoutCell>
+            </layout:BlockLayoutRow>
         </layout:BlockLayout>
     </Page>
 </mvc:View>

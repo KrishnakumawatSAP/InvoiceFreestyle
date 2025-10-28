@@ -38,13 +38,14 @@ sap.ui.define([
 				oViewModel = new JSONModel({
 					busy: true,
 					delay: 0,
-					selectedItem: "files",
+					selectedItem: "main",
 					paramsExpanded: true,
 					sideBarExpanded: true,
 					breadcrumbLinks: [{}],
 					layout: "TwoColumnsBeginExpanded",
 					isEditable: false,
-					bProcessFlowVisible: true
+					bProcessFlowVisible: true,
+					isFullPage: true
 				});
 				this.setModel(oViewModel, "appView");
 
@@ -92,15 +93,16 @@ sap.ui.define([
 			 * @param {sap.ui.base.Event} oEvent 
 			 */
 			onItemSelect: function (oEvent) {
-
+				this.getView().setBusy(true);
 				// when clicking on "params" just toggle between expanded and collapsed
 				var sKey = oEvent.getParameter("item").getKey();
-				if (sKey === "params") {
+				if (sKey === "files") {
 					this._toggleItemExpand();
 				}
 
 				function navToView() {
 					this.getRouter().navTo(sKey);
+					this.getView().setBusy(false);
 				}
 
 				if (this.getModel().hasPendingChanges()) {
@@ -114,6 +116,7 @@ sap.ui.define([
 					})
 				} else {
 					navToView.call(this);
+					this.getView().setBusy(false);
 				}
 
 			},

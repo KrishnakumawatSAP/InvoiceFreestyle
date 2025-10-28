@@ -7,12 +7,13 @@
     xmlns:sf="sap.ui.layout.form"
     xmlns:suite="sap.suite.ui.commons"
     xmlns:u="sap.ui.unified"
+    xmlns:smartField="sap.ui.comp.smartfield.SmartField"
     height="100%"
     controllerName="zdashboard.controller.FilesDetail"
 >
     <ObjectPageLayout
         id="ObjectPageLayout"
-        showTitleInHeaderContent="true"
+        showTitleInHeaderContent="false"
         enableLazyLoading="true"
     >
         <!-- Header -->
@@ -20,85 +21,117 @@
             <ObjectPageHeader
                 id="ObjectPageHeader"
                 objectTitle="{DocumentHeaderText}"
-                
                 objectSubtitle="{companyCode}"
             >
-                  
-              <actions>
-					<m:Button text="Edit" type="Emphasized" press="onEdit" visible="{=! ${appView>/isEditable}}"/>
-                    <m:Button text="Save" type="Emphasized" press="onSave" visible="{appView>/isEditable}"/>
-                    <m:Button text="Void"  press="onDiscardDraft" visible="{appView>/isEditable}"/>
-					<m:OverflowToolbarButton icon="sap-icon://action" type="Transparent" text="Share" tooltip="action"/>
-				</actions>
-               	
+                <actions>
+                    <m:Button
+                        text="Edit"
+                        type="Emphasized"
+                        press="onEdit"
+                        visible="{=! ${appView>/isEditable}}"
+                    />
+                    <m:Button
+                        text="Save"
+                        type="Emphasized"
+                        press="onSave"
+                        visible="{appView>/isEditable}"
+                    />
+                    <m:Button
+                        text="Void"
+                        press="onDiscardDraft"
+                        visible="{appView>/isEditable}"
+                    />
+                    <m:Button
+                        icon="sap-icon://decline"
+                        press="onCloseDetailPage"
+                    />
+                    <m:Button
+                        icon="sap-icon://full-screen"
+                        press="onOpenFullPage"
+                        visible="{appView>/isFullPage}"
+                    />
+                    <m:Button
+                        icon="sap-icon://exit-full-screen"
+                        press="onCloseFullPage"
+                        visible="{=! ${appView>/isFullPage}}"
+                    />
 
+                    <m:OverflowToolbarButton
+                        icon="sap-icon://action"
+                        type="Transparent"
+                        text="Share"
+                        tooltip="action"
+                    />
+                </actions>
             </ObjectPageHeader>
-            	
         </headerTitle>
 
         <!-- Header Content -->
         <headerContent>
-
-            <m:HBox>
-                <m:VBox class="sapUiLargeMargin">
-                    <m:ObjectHeader title="Admin Data" />
-                    <m:ObjectStatus title="Company Code" id="CompCode" text="{companyCode}"/>
-                    <m:ObjectStatus title="Gross Amount" id="FiscalYear" text="{fiscalYear}"/>
-                    <m:ObjectStatus title="Create By" id="CreatedBy"  text="{senderMail}" />
-                    <m:ObjectStatus title="Invoice Number" id="InvoiceNumber" text="{documentId}"/>
-                    <m:ObjectStatus title="Status"  id="Status"  text="{Status}" />
-                </m:VBox>
-                 <m:VBox>
-            <suite:ProcessFlow
-			id="processflow1"
-			scrollable="false"
-			foldedCorners="true"
-			nodePress="onNodePress"
-			nodes="{ProcessFlow>/nodes}"
-			lanes="{ProcessFlow>/lanes}"
-            visible="{appView>/bProcessFlowVisible}">
-			<suite:nodes>
-				<suite:ProcessFlowNode
-					laneId="{ProcessFlow>lane}"
-					nodeId="{ProcessFlow>id}"
-					title="{ProcessFlow>title}"
-					titleAbbreviation="{ProcessFlow>titleAbbreviation}"
-					children="{ProcessFlow>children}"
-					state="{ProcessFlow>state}"
-					stateText="{ProcessFlow>stateText}"
-					texts="{ProcessFlow>texts}"
-					highlighted="{ProcessFlow>highlighted}"
-					focused="{ProcessFlow>focused}" />
-			</suite:nodes>
-			<suite:lanes>
-				<suite:ProcessFlowLaneHeader
-					laneId="{ProcessFlow>id}"
-					iconSrc="{ProcessFlow>icon}"
-					text="{ProcessFlow>label}"
-					position="{ProcessFlow>position}" />
-			</suite:lanes>
-		</suite:ProcessFlow>
-	       
-             
-          
-				
-				
-                <!-- <m:Label text="Company Code" labelFor="CompCode" />
-                <m:Text id="CompCode" text="{companyCode}" />
-           
-                <m:Label text="Gross Amount" labelFor="FiscalYear" />
-                <m:Text id="FiscalYear"   />
-
-                <m:Label text="Create By" labelFor="CreatedBy" />
-                <m:ObjectAttribute id="CreatedBy" text="{senderMail}" />
-
-                <m:Label text="Invoice Number" labelFor="InvoiceNumber" />
-                <m:Text id="InvoiceNumber" text="{documentId}" />
-
-                <m:Label text="Status" labelFor="Status" />
-                <m:Text id="Status" text="{Status}" /> -->
-                 </m:VBox>
-            </m:HBox>
+            <!-- <m:HBox> -->
+            <m:VBox class="sapUiLargeMargin">
+                <m:ObjectHeader title="Admin Data" />
+                <m:ObjectStatus
+                    title="Company Code"
+                    id="CompCode"
+                    text="{companyCode}"
+                />
+                <m:ObjectStatus
+                    title="Gross Amount"
+                    id="FiscalYear"
+                    text="{fiscalYear}"
+                />
+                <m:ObjectStatus
+                    title="Create By"
+                    id="CreatedBy"
+                    text="{senderMail}"
+                />
+                <m:ObjectStatus
+                    title="Invoice Number"
+                    id="InvoiceNumber"
+                    text="{documentId}"
+                />
+                <m:ObjectStatus
+                    title="Status"
+                    id="Status"
+                    text="{Status}"
+                />
+            </m:VBox>
+            <m:VBox>
+                <suite:ProcessFlow
+                    id="processflow1"
+                    scrollable="false"
+                    foldedCorners="true"
+                    nodePress="onNodePress"
+                    nodes="{ProcessFlow>/nodes}"
+                    lanes="{ProcessFlow>/lanes}"
+                    visible="{appView>/bProcessFlowVisible}"
+                >
+                    <suite:nodes>
+                        <suite:ProcessFlowNode
+                            laneId="{ProcessFlow>lane}"
+                            nodeId="{ProcessFlow>id}"
+                            title="{ProcessFlow>title}"
+                            titleAbbreviation="{ProcessFlow>titleAbbreviation}"
+                            children="{ProcessFlow>children}"
+                            state="{ProcessFlow>state}"
+                            stateText="{ProcessFlow>stateText}"
+                            texts="{ProcessFlow>texts}"
+                            highlighted="{ProcessFlow>highlighted}"
+                            focused="{ProcessFlow>focused}"
+                        />
+                    </suite:nodes>
+                    <suite:lanes>
+                        <suite:ProcessFlowLaneHeader
+                            laneId="{ProcessFlow>id}"
+                            iconSrc="{ProcessFlow>icon}"
+                            text="{ProcessFlow>label}"
+                            position="{ProcessFlow>position}"
+                        />
+                    </suite:lanes>
+                </suite:ProcessFlow>
+            </m:VBox>
+            <!-- </m:HBox> -->
         </headerContent>
 
         <!-- Sections -->
@@ -111,77 +144,181 @@
                 <subSections>
                     <ObjectPageSubSection>
                         <blocks>
-                        <m:HBox justifyContent="SpaceBetween" renderType="Bare">
-                            <sf:SimpleForm editable="true"
-                            layout="ResponsiveGridLayout"
-                            labelSpanXL="2"
-                            labelSpanL="2"
-                            labelSpanM="3"
-                            labelSpanS="12"
-                            emptySpanXL="0"
-                            emptySpanL="0"
-                            emptySpanM="0"
-                            columnsXL="2"
-                            columnsL="2"
-                            columnsM="1"
-                            singleContainerFullSize="false"
-                             width="60%">
-                                <m:Label text="Company Code" />
-                                <m:Input value="{companyCode}" visible="{appView>/isEditable}" />
-                                <m:Text text="{companyCode}" />
+                            <m:HBox
+                                justifyContent="SpaceBetween"
+                                renderType="Bare"
+                            >
+                                <sf:SimpleForm
+                                    editable="true"
+                                    layout="ResponsiveGridLayout"
+                                    labelSpanXL="2"
+                                    labelSpanL="2"
+                                    labelSpanM="3"
+                                    labelSpanS="12"
+                                    emptySpanXL="0"
+                                    emptySpanL="0"
+                                    emptySpanM="0"
+                                    columnsXL="2"
+                                    columnsL="2"
+                                    columnsM="1"
+                                    singleContainerFullSize="false"
+                                    width="60%"
+                                >
+                                    <m:Label
+                                        text="Company Code"
+                                        labelFor="idCompayCode"
+                                    />
+                                    <m:Input
+                                        value="{companyCode}"
+                                        visible="{appView>/isEditable}"
+                                    />
+                                    <m:Text
+                                        id="idCompayCode"
+                                        text="{companyCode}"
+                                        visible="{= !${appView>/isEditable}}"
+                                    />
 
-                                <m:Label text="Fiscal Year" />
-                                <m:Input value="{fiscalYear}" visible="{appView>/isEditable}" />
-                                <m:Text text="{fiscalYear}" />
+                                    <m:Label
+                                        text="Fiscal Year"
+                                        labelFor="idFiscalYear"
+                                    />
+                                    <m:Input
+                                        value="{fiscalYear}"
+                                        visible="{appView>/isEditable}"
+                                    />
+                                    <m:Text
+                                        id="idFiscalYear"
+                                        text="{fiscalYear}"
+                                        visible="{= !${appView>/isEditable}}"
+                                    />
 
-                                <m:Label text="Document Date" />
-                                <m:DatePicker
+                                    <m:Label
+                                        text="Document Date"
+                                        labelFor="idDate1"
+                                    />
+                                    <!--  <m:DatePicker 
                                     value="{documentDate}"
                                     displayFormat="long" visible="{appView>/isEditable}"
-                                />
-                                <m:Text text="{path: 'documentDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'd MMM yyyy'}}" />
+                                />-->
 
-                                <m:Label text="Posting Date" />
-                                <m:DatePicker
-                                    value="{postingDate}"
-                                    displayFormat="long" visible="{appView>/isEditable}"
-                                />
-                                <m:Text text="{path: 'postingDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'd MMM yyyy'}}" />
+                                    <m:DatePicker
+                                        value="{    path: 'documentDate',
+                                        type: 'sap.ui.model.odata.type.Date'
+                                           }"
+                                        visible="{appView>/isEditable}"
+                                        displayFormat="long"
+                                        valueFormat="yyyy-MM-dd"
+                                    />
+                                    <m:Text
+                                        id="idDate1"
+                                        text="{ path: 'documentDate',
+                                        type: 'sap.ui.model.odata.type.Date',
+                                        formatOptions: { pattern: 'dd MMM yyyy' }
+                                          }"
+                                        visible="{= !${appView>/isEditable}}"
+                                    />
 
-                                <m:Label text="Supplier Invoice Party" />
-                                <m:Input value="{supInvParty}"  visible="{appView>/isEditable}"/>
-                                <m:Text text="{supInvParty}" />
+                                    <m:Label
+                                        text="Posting Date"
+                                        labelFor="idDate2"
+                                    />
+                                    <m:DatePicker
+                                    value="{    path: 'postingDate',
+                                        type: 'sap.ui.model.odata.type.Date'
+                                           }"
+                                        visible="{appView>/isEditable}"
+                                        displayFormat="long"
+                                        valueFormat="yyyy-MM-dd"
+                                        
+                                    />
+                                   <m:Text
+                                        id="idDate2"
+                                        text="{ path: 'postingDate',
+                                        type: 'sap.ui.model.odata.type.Date',
+                                        formatOptions: { pattern: 'dd MMM yyyy' }
+                                          }"
+                                        visible="{= !${appView>/isEditable}}"
+                                    />
 
-                                <m:Label text="Invoicing Party" />
-                                <m:Input value="{supInvParty}" visible="{appView>/isEditable}" />
-                                <m:Text text="{supInvParty}" />
-                            </sf:SimpleForm>
-                             </m:HBox>
+
+                                    <m:Label text="Supplier Invoice Party" />
+                                    <m:Input
+                                        value="{supInvParty}"
+                                        visible="{appView>/isEditable}"
+                                    />
+                                    <m:Text
+                                        text="{supInvParty}"
+                                        visible="{= !${appView>/isEditable}}"
+                                    />
+
+                                    <m:Label text="Invoicing Party" />
+                                    <m:Input
+                                        value="{supInvParty}"
+                                        visible="{appView>/isEditable}"
+                                    />
+                                    <m:Text
+                                        text="{supInvParty}"
+                                        visible="{= !${appView>/isEditable}}"
+                                    />
+                                </sf:SimpleForm>
+                            </m:HBox>
                         </blocks>
-                         <blocks>
+                        <blocks>
                             <sf:SimpleForm editable="true">
                                 <m:Label text="Currency" />
-                                <m:Input value="{documentCurrency}" visible="{appView>/isEditable}" />
-                                <m:Text text="{documentCurrency}" />
+                                
+                                <m:Input
+                                    value="{documentCurrency}"
+                                    visible="{appView>/isEditable}"
+                                    valueHelpOnly="true"
+                                    showValueHelp="true"
+                                    
+                                /> 
+                                
+                                <m:Text
+                                    text="{documentCurrency}"
+                                    visible="{= !${appView>/isEditable}}"
+                                />
 
                                 <m:Label text="Gross Amount" />
-                                <m:Input value="{invGrossAmount}" visible="{appView>/isEditable}" />
-                                <m:Text text="{invGrossAmount}" />
+                                <m:Input
+                                    value="{invGrossAmount}"
+                                    visible="{appView>/isEditable}"
+                                />
+                                <m:Text
+                                    text="{invGrossAmount}"
+                                    visible="{= !${appView>/isEditable}}"
+                                />
 
                                 <m:Label text="Accounting Document Type" />
-                                <m:Input value="{AccountingDocumentType}" visible="{appView>/isEditable}" />
-                                <m:Text text="{AccountingDocumentType}" />
+                                <m:Input
+                                    value="{AccountingDocumentType}"
+                                    visible="{appView>/isEditable}"
+                                />
+                                <m:Text
+                                    text="{AccountingDocumentType}"
+                                    visible="{= !${appView>/isEditable}}"
+                                />
 
                                 <m:Label text="Invoicing Party" />
-                                <m:Input value="{InvoicingParty}" visible="{appView>/isEditable}" />
-                                <m:Text text="{InvoicingParty}" />
-                                
+                                <m:Input
+                                    value="{InvoicingParty}"
+                                    visible="{appView>/isEditable}"
+                                />
+                                <m:Text
+                                    text="{InvoicingParty}"
+                                    visible="{= !${appView>/isEditable}}"
+                                />
 
                                 <m:Label text="Document Header Text" />
-                                <m:Input value="{DocumentHeaderText}" visible="{appView>/isEditable}" />
-                                <m:Text text="{DocumentHeaderText}" />
-
-                              
+                                <m:Input
+                                    value="{DocumentHeaderText}"
+                                    visible="{appView>/isEditable}"
+                                />
+                                <m:Text
+                                    text="{DocumentHeaderText}"
+                                    visible="{= !${appView>/isEditable}}"
+                                />
                             </sf:SimpleForm>
                         </blocks>
                     </ObjectPageSubSection>
@@ -197,126 +334,255 @@
                     <ObjectPageSubSection>
                         <blocks>
                             <m:Table
-                            id="ItemTable"
-                            items="{to_InvoiceItem}"
-                            inset="false"
-                            mode="SingleSelectMaster"
-                            growing="true"
-                            growingScrollToLoad="true"
-                            sticky="ColumnHeaders"
-                            autoPopinMode="true"
-                            demandPopin="true"
-                            width="100%"
-                        >
-                            <m:headerToolbar>
-                                <m:Toolbar>
-                                    <m:Title text="Invoice Items" level="H2" />
-                                    <m:ToolbarSpacer/>
-                                    <m:Button text="Create" press="oncreateItem" type="Emphasized" visible="{appView>/isEditable}" />
-                                </m:Toolbar>
-                            </m:headerToolbar>
+                                id="ItemTable"
+                                items="{to_InvoiceItem}"
+                                inset="false"
+                                mode="SingleSelectMaster"
+                                growing="true"
+                                growingScrollToLoad="true"
+                                sticky="ColumnHeaders"
+                                autoPopinMode="true"
+                                demandPopin="true"
+                                width="100%"
+                            >
+                                <m:headerToolbar>
+                                    <m:Toolbar>
+                                        <m:Title
+                                            text="Invoice Items"
+                                            level="H2"
+                                        />
+                                        <m:ToolbarSpacer />
+                                        <m:Button
+                                            text="Create"
+                                            press="oncreateItem"
+                                            type="Emphasized"
+                                            visible="{appView>/isEditable}"
+                                        />
+                                    </m:Toolbar>
+                                </m:headerToolbar>
 
-                            <m:columns>
-                                <m:Column hAlign="Begin" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
-                                    <m:Text text="Purchase Order" wrapping="false" />
-                                </m:Column>
+                                <m:columns>
+                                    <m:Column
+                                        hAlign="Begin"
+                                        popinDisplay="Block"
+                                        demandPopin="true"
+                                        minScreenWidth="Tablet"
+                                    >
+                                        <m:Text
+                                            text="Purchase Order"
+                                            wrapping="false"
+                                        />
+                                    </m:Column>
 
-                                <m:Column hAlign="Center" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
-                                    <m:Text text="Unit of Measure" wrapping="false" />
-                                </m:Column>
+                                    <m:Column
+                                        hAlign="Center"
+                                        popinDisplay="Block"
+                                        demandPopin="true"
+                                        minScreenWidth="Tablet"
+                                    >
+                                        <m:Text
+                                            text="Unit of Measure"
+                                            wrapping="false"
+                                        />
+                                    </m:Column>
 
-                                <m:Column hAlign="End" popinDisplay="Inline" demandPopin="true" minScreenWidth="Tablet">
-                                    <m:Text text="Quantity" wrapping="false" />
-                                </m:Column>
+                                    <m:Column
+                                        hAlign="End"
+                                        popinDisplay="Inline"
+                                        demandPopin="true"
+                                        minScreenWidth="Tablet"
+                                    >
+                                        <m:Text
+                                            text="Quantity"
+                                            wrapping="false"
+                                        />
+                                    </m:Column>
 
-                                <m:Column hAlign="Begin" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
-                                    <m:Text text="Invoice Item" wrapping="false" />
-                                </m:Column>
+                                    <m:Column
+                                        hAlign="Begin"
+                                        popinDisplay="Block"
+                                        demandPopin="true"
+                                        minScreenWidth="Tablet"
+                                    >
+                                        <m:Text
+                                            text="Invoice Item"
+                                            wrapping="false"
+                                        />
+                                    </m:Column>
 
-                                <m:Column hAlign="End" popinDisplay="Inline" demandPopin="true" minScreenWidth="Tablet">
-                                    <m:Text text="Invoice Item Amount" wrapping="false" />
-                                </m:Column>
+                                    <m:Column
+                                        hAlign="End"
+                                        popinDisplay="Inline"
+                                        demandPopin="true"
+                                        minScreenWidth="Tablet"
+                                    >
+                                        <m:Text
+                                            text="Invoice Item Amount"
+                                            wrapping="false"
+                                        />
+                                    </m:Column>
 
-                                <m:Column hAlign="Begin" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
-                                    <m:Text text="Plant" wrapping="false" />
-                                </m:Column>
+                                    <m:Column
+                                        hAlign="Begin"
+                                        popinDisplay="Block"
+                                        demandPopin="true"
+                                        minScreenWidth="Tablet"
+                                    >
+                                        <m:Text
+                                            text="Plant"
+                                            wrapping="false"
+                                        />
+                                    </m:Column>
 
-                                <m:Column hAlign="Center" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
-                                    <m:Text text="Product Type" wrapping="false" />
-                                </m:Column>
+                                    <m:Column
+                                        hAlign="Center"
+                                        popinDisplay="Block"
+                                        demandPopin="true"
+                                        minScreenWidth="Tablet"
+                                    >
+                                        <m:Text
+                                            text="Product Type"
+                                            wrapping="false"
+                                        />
+                                    </m:Column>
 
-                                <m:Column hAlign="Begin" popinDisplay="Block" demandPopin="true" minScreenWidth="Tablet">
-                                    <m:Text text="Tax Jurisdiction" wrapping="false" />
-                                </m:Column>
+                                    <m:Column
+                                        hAlign="Begin"
+                                        popinDisplay="Block"
+                                        demandPopin="true"
+                                        minScreenWidth="Tablet"
+                                    >
+                                        <m:Text
+                                            text="Tax Jurisdiction"
+                                            wrapping="false"
+                                        />
+                                    </m:Column>
 
-                              
+                                    <m:Column
+                                        hAlign="Center"
+                                        popinDisplay="Inline"
+                                        demandPopin="true"
+                                        minScreenWidth="Tablet"
+                                    >
+                                        <m:Text
+                                            text="Tax Code"
+                                            wrapping="false"
+                                        />
+                                    </m:Column>
+                                </m:columns>
 
-                                <m:Column hAlign="Center" popinDisplay="Inline" demandPopin="true" minScreenWidth="Tablet">
-                                    <m:Text text="Tax Code" wrapping="false" />
-                                </m:Column>
-                            </m:columns>
+                                <m:items>
+                                    <m:ColumnListItem type="Active">
+                                        <!-- Purchase Order -->
+                                        <m:VBox>
+                                            <m:Input
+                                                value="{purchaseOrder}"
+                                                visible="{appView>/isEditable}"
+                                            />
+                                            <m:Text
+                                                text="{purchaseOrder}"
+                                                visible="{= !${appView>/isEditable}}"
+                                            />
+                                        </m:VBox>
 
-                            <m:items>
-                              <m:ColumnListItem type="Active">
-                                <!-- Purchase Order -->
-                                <m:VBox>
-                                    <m:Input value="{purchaseOrder}" visible="{appView>/isEditable}" />
-                                    <m:Text text="{purchaseOrder}" visible="{= !${appView>/isEditable}}" />
-                                </m:VBox>
+                                        <!-- Unit of Measure -->
+                                        <m:VBox>
+                                            <m:Input
+                                                value="{poQuantityUnit}"
+                                                visible="{appView>/isEditable}"
+                                            />
+                                            <m:Text
+                                                text="{poQuantityUnit}"
+                                                visible="{= !${appView>/isEditable}}"
+                                            />
+                                        </m:VBox>
 
-                                <!-- Unit of Measure -->
-                                <m:VBox>
-                                    <m:Input value="{poQuantityUnit}" visible="{appView>/isEditable}" />
-                                    <m:Text text="{poQuantityUnit}" visible="{= !${appView>/isEditable}}" />
-                                </m:VBox>
+                                        <!-- Quantity -->
+                                        <m:VBox>
+                                            <m:Input
+                                                value="{quantityPOUnit}"
+                                                visible="{appView>/isEditable}"
+                                            />
+                                            <m:Text
+                                                text="{quantityPOUnit}"
+                                                visible="{= !${appView>/isEditable}}"
+                                            />
+                                        </m:VBox>
 
-                                <!-- Quantity -->
-                                <m:VBox>
-                                    <m:Input value="{quantityPOUnit}"  visible="{appView>/isEditable}" />
-                                    <m:Text text="{quantityPOUnit}" visible="{= !${appView>/isEditable}}" />
-                                </m:VBox>
+                                        <!-- Invoice Item -->
+                                        <m:VBox>
+                                            <m:Input
+                                                value="{sup_InvoiceItem}"
+                                                visible="{appView>/isEditable}"
+                                            />
+                                            <m:Text
+                                                text="{sup_InvoiceItem}"
+                                                visible="{= !${appView>/isEditable}}"
+                                            />
+                                        </m:VBox>
 
-                                <!-- Invoice Item -->
-                                <m:VBox>
-                                    <m:Input value="{sup_InvoiceItem}" visible="{appView>/isEditable}" />
-                                    <m:Text text="{sup_InvoiceItem}" visible="{= !${appView>/isEditable}}" />
-                                </m:VBox>
+                                        <!-- Invoice Item Amount -->
+                                        <m:VBox>
+                                            <m:Input
+                                                value="{supInvItemAmount}"
+                                                visible="{appView>/isEditable}"
+                                            />
+                                            <m:Text
+                                                text="{supInvItemAmount}"
+                                                visible="{= !${appView>/isEditable}}"
+                                            />
+                                        </m:VBox>
 
-                                <!-- Invoice Item Amount -->
-                                <m:VBox>
-                                    <m:Input value="{supInvItemAmount}"  visible="{appView>/isEditable}" />
-                                    <m:Text text="{supInvItemAmount}" visible="{= !${appView>/isEditable}}" />
-                                </m:VBox>
+                                        <!-- Plant -->
+                                        <m:VBox>
+                                            <m:Input
+                                                value="{Plant}"
+                                                visible="{appView>/isEditable}"
+                                            />
+                                            <m:Text
+                                                text="{Plant}"
+                                                visible="{= !${appView>/isEditable}}"
+                                            />
+                                        </m:VBox>
 
-                                <!-- Plant -->
-                                <m:VBox>
-                                    <m:Input value="{Plant}" visible="{appView>/isEditable}" />
-                                    <m:Text text="{Plant}" visible="{= !${appView>/isEditable}}" />
-                                </m:VBox>
+                                        <!-- Product Type -->
+                                        <m:VBox>
+                                            <m:Input
+                                                value="{ProductType}"
+                                                visible="{appView>/isEditable}"
+                                            />
+                                            <m:Text
+                                                text="{ProductType}"
+                                                visible="{= !${appView>/isEditable}}"
+                                            />
+                                        </m:VBox>
 
-                                <!-- Product Type -->
-                                <m:VBox>
-                                    <m:Input value="{ProductType}" visible="{appView>/isEditable}" />
-                                    <m:Text text="{ProductType}" visible="{= !${appView>/isEditable}}" />
-                                </m:VBox>
+                                        <!-- Tax Jurisdiction -->
+                                        <m:VBox>
+                                            <m:Input
+                                                value="{TaxJurisdiction}"
+                                                visible="{appView>/isEditable}"
+                                            />
+                                            <m:Text
+                                                text="{TaxJurisdiction}"
+                                                visible="{= !${appView>/isEditable}}"
+                                            />
+                                        </m:VBox>
 
-                                <!-- Tax Jurisdiction -->
-                                <m:VBox>
-                                    <m:Input value="{TaxJurisdiction}" visible="{appView>/isEditable}" />
-                                    <m:Text text="{TaxJurisdiction}" visible="{= !${appView>/isEditable}}" />
-                                </m:VBox>
-
-
-                                <!-- Tax Code -->
-                                <m:VBox>
-                                    <m:Input value="{taxCode}" visible="{appView>/isEditable}" />
-                                    <m:Text text="{taxCode}" visible="{= !${appView>/isEditable}}" />
-                                </m:VBox>
-                            </m:ColumnListItem>
-
-                            </m:items>
-                        </m:Table>
-
+                                        <!-- Tax Code -->
+                                        <m:VBox>
+                                            <m:Input
+                                                value="{taxCode}"
+                                                visible="{appView>/isEditable}"
+                                            />
+                                            <m:Text
+                                                text="{taxCode}"
+                                                visible="{= !${appView>/isEditable}}"
+                                            />
+                                        </m:VBox>
+                                    </m:ColumnListItem>
+                                </m:items>
+                            </m:Table>
                         </blocks>
                     </ObjectPageSubSection>
                 </subSections>
@@ -331,10 +597,15 @@
                     <ObjectPageSubSection>
                         <blocks>
                             <m:List items="{to_InvoiceLogs}">
-                               <m:Toolbar>
-                                        <m:ToolbarSpacer/>
-                                        <m:Button text="Create" press="oncreateLogs" type="Emphasized" visible="{=!! ${appView>/isEditable}}" />
-                                    </m:Toolbar>
+                                <m:Toolbar>
+                                    <m:ToolbarSpacer />
+                                    <m:Button
+                                        text="Create"
+                                        press="oncreateLogs"
+                                        type="Emphasized"
+                                        visible="{=!! ${appView>/isEditable}}"
+                                    />
+                                </m:Toolbar>
                                 <m:items>
                                     <m:StandardListItem title="{Message}" />
                                 </m:items>
@@ -344,48 +615,69 @@
                 </subSections>
             </ObjectPageSection>
 
-              <ObjectPageSection title="Attachment" titleUppercase="false">
-    <subSections>
-        <ObjectPageSubSection>
-            <blocks>
-                <m:VBox class="sapUiSmallMargin">
-                    <!-- Toolbar with Upload Button -->
-                    <m:Toolbar>
-                        <m:Title text="Attachments" level="H3" />
-                        <m:ToolbarSpacer/>
-                         <u:FileUploader
-                        id="fileUploader"
-                        name="uploadFile"
-                        change="onFileSelected"
-                       />
-                        <m:Button icon="sap-icon://upload" text="Upload File" press="onUploadPress"/>
-                    </m:Toolbar>
+            <ObjectPageSection
+                title="Attachment"
+                titleUppercase="false"
+            >
+                <subSections>
+                    <ObjectPageSubSection>
+                        <blocks>
+                            <m:VBox class="sapUiSmallMargin">
+                                <!-- Toolbar with Upload Button -->
+                                <m:Toolbar>
+                                    <m:Title
+                                        text="Attachments"
+                                        level="H3"
+                                    />
+                                    <m:ToolbarSpacer />
+                                    <u:FileUploader
+                                        id="fileUploader"
+                                        name="uploadFile"
+                                        change="onFileSelected"
+                                    />
+                                    <m:Button
+                                        icon="sap-icon://upload"
+                                        text="Upload File"
+                                        press="onUploadPress"
+                                    />
+                                </m:Toolbar>
 
-                    <!-- Hidden FileUploader -->
-                   
+                                <!-- Hidden FileUploader -->
 
-                    <!-- Uploaded File List -->
-                    <m:Table id="uploadedFilesTable" inset="false" growing="true" >
-                        <m:columns>
-                            <m:Column><m:Text text="File Name"/></m:Column>
-                            <m:Column><m:Text text="Uploaded On"/></m:Column>
-                            <m:Column><m:Text text="Status"/></m:Column>
-                        </m:columns>
-                        <m:items>
-                            <m:ColumnListItem>
-                                <m:cells>
-                                    <m:Text text="{fileName}"/>
-                                    <m:Text text="{uploadDate}"/>
-                                    <m:Text text="{status}"/>
-                                </m:cells>
-                            </m:ColumnListItem>
-                        </m:items>
-                    </m:Table>
-                </m:VBox>
-            </blocks>
-        </ObjectPageSubSection>
-    </subSections>
-</ObjectPageSection>
+                                <!-- Uploaded File List -->
+                                <m:Table
+                                    id="uploadedFilesTable"
+                                    inset="false"
+                                    growing="true"
+                                    items="{attachments>/files}"                                      
+                                    itemPress=""
+                                >
+                                    <m:columns>
+                                        <m:Column>
+                                            <m:Text text="File Name" />
+                                        </m:Column>
+                                        <m:Column>
+                                            <m:Text text="Uploaded On" />
+                                        </m:Column>
+                                        <m:Column>
+                                            <m:Text text="Status" />
+                                        </m:Column>
+                                    </m:columns>
+                                    <m:items>
+                                        <m:ColumnListItem>
+                                            <m:cells>
+                                               <m:Text text="{attachments>fileName}" />
+                                               <m:Text text="{attachments>uploadDate}" />
+                                              <m:Text text="{attachments>status}" />
+                                            </m:cells>
+                                        </m:ColumnListItem>
+                                    </m:items>
+                                </m:Table>
+                            </m:VBox>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
         </sections>
     </ObjectPageLayout>
 </mvc:View>

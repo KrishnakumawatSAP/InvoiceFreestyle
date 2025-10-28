@@ -11,6 +11,16 @@
     },
     "dataSources": {
       "mainService": {
+        "uri": "/odata/v4/dashboard/",
+        "type": "OData",
+        "settings": {
+          "annotations": [
+            "annotation"
+          ],
+          "odataVersion": "4.0"
+        }
+      },
+      "SubService": {
         "uri": "/odata/v2/dashboard/",
         "type": "OData",
         "settings": {

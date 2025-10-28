@@ -50,38 +50,24 @@
                         expanded="false"
                         key="main"
                     />
-                    <tnt:NavigationListItem
-                        id="_IDGenNavigationListItem1"
-                        text="Invoices"
-                        icon="sap-icon://course-program"
-                        enabled="true"
-                        expanded="false"
-                        key="files"
-                    />
+                   
                     <tnt:NavigationListItem
                         id="_IDGenNavigationListItem2"
-                        text="Parameters"
+                        text="Invoices"
                         icon="sap-icon://role"
                         enabled="true"
                         expanded="{appView>/paramsExpanded}"
-                        key="params"
+                        key="files"
                     >
                         <tnt:items>
-                            <tnt:NavigationListItem
-                                id="_IDGenNavigationListItem3"
-                                text="Contacts"
-                                icon="sap-icon://contact"
-                                enabled="true"
-                                expanded="false"
-                                key="contacts"
-                            />
+                           
                             <tnt:NavigationListItem
                                 id="_IDGenNavigationListItem4"
-                                text="Segments"
+                                text="Invoice Details"
                                 icon="sap-icon://SAP-icons-TNT/connector"
                                 enabled="true"
                                 expanded="false"
-                                key="segments"
+                                key="InvoiceDetails"
                             />
                         </tnt:items>
                     </tnt:NavigationListItem>
