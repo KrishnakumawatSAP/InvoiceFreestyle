@@ -2,6 +2,7 @@ using Zdashboard as persistence from '../db/schema';
 using {Attachments} from '@cap-js/sdm';
 
 service DashboardService {
+    @odata.draft.enabled
     entity Invoice      as projection on persistence.InvoiceEntity;
     extend persistence.InvoiceEntity with {
         @description: 'Attachments Composition'

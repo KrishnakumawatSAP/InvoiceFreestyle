@@ -1,167 +1,108 @@
 <mvc:View
-    height="100%"
-    xmlns:core="sap.ui.core"
+    controllerName="zdashboard.controller.Files"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.f"
-    xmlns:uxap="sap.uxap"
-    xmlns:sfb="sap.ui.comp.smartfilterbar"
-    xmlns:smarttable="sap.ui.comp.smarttable"
+    xmlns:core="sap.ui.core"
     xmlns:html="http://www.w3.org/1999/xhtml"
-    xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
-    controllerName="zdashboard.controller.Files"
-    xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    height="100%"
 >
     <f:FlexibleColumnLayout
         id="_IDGenFlexibleColumnLayout1"
         layout="{appView>/layout}"
     >
+        <!-- BEGIN COLUMN -->
         <f:beginColumnPages>
-            <FlexBox>
-                <sfb:SmartFilterBar
-                    id="smartFilterBar"
-                    entitySet="Invoice"
-                    persistencyKey="SmartFilter_Invoice"
-                    enableBasicSearch="true"
-                    useToolbar="true" >
-                   
-               </sfb:SmartFilterBar>
+            <FlexBox direction="Column" fitContainer="true">
+                
+                <!-- Search and Filter Toolbar -->
+                <Toolbar>
+                    <SearchField
+                        id="searchField"
+                        width="40%"
+                        liveChange="onSearch"
+                        placeholder="Search Invoice..."
+                        showSearchButton="true"
+                        search="onSearch"
+                    />
+                    <ToolbarSpacer/>
+                    <Button text="Create" press="onOpenCreateDialogV41" type="Emphasized" />
+                    <Button text="Delete" press="onPressDelete" enabled="{filesView>/bDeletionEnabled}" />
+                    <Button text="Copy" press="onPressCopy" enabled="{filesView>/bCopyEnabled}" />
+                    <Button text="Extract PDF" press="onPressExtractPDF" />
+                </Toolbar>
 
+                <!-- Tabs -->
                 <IconTabBar
                     expandable="false"
                     class="sapUiMediumMarginTop"
                     select="onTabSelect"
                 >
                     <items>
-                        <IconTabFilter
-                            text="All Invoices"
-                            key="all"
-                        />
-                        <IconTabFilter
-                            text="PDF Extracted"
-                            key="pdf"
-                        />
-                        <IconTabFilter
-                            text="Email Automated"
-                            key="email"
-                        />
-                        <IconTabFilter
-                            text="Posted Invoices"
-                            key="posted"
-                        />
-                        <IconTabFilter
-                            text="Erroneous Invoices"
-                            key="error"
-                        />
+                        <IconTabFilter text="All Invoices" key="all" />
+                        <IconTabFilter text="PDF Extracted" key="pdf" />
+                        <IconTabFilter text="Email Automated" key="email" />
+                        <IconTabFilter text="Posted Invoices" key="posted" />
+                        <IconTabFilter text="Erroneous Invoices" key="error" />
                     </items>
 
+                    <!-- Main Table -->
                     <content>
-                      <ScrollContainer height="1000px" vertical="true" horizontal="false">
-                        <smarttable:SmartTable
-                            id="InvoiceSmartTable"
-                            entitySet="Invoice"
-                            smartFilterId="smartFilterBar"
-                            tableType="ResponsiveTable"
-                            useTablePersonalisation="true"
-                            header="Approval Documents"
-                            persistencyKey="SmartTableAnalytical_Explored"
-                            enableAutoBinding="true"
-                            demandPopin="true"
+                        <ScrollContainer height="1000px" vertical="true" horizontal="false">
+                           <Table
+                            id="InvoiceTable"
+                            mode="MultiSelect"
+                            sticky="ColumnHeaders"
+                            growing="true"
+                            growingScrollToLoad="true"
+                            itemPress="onListItemPress"
+                            selectionChange="onSelectionChange"
                             class="sapUiResponsiveContentPadding"
-                            requestAtLeastFields="documentId,statusFlag,fiscalYear,mode,companyCode,documentDate,postingDate,documentCurrency_code,invGrossAmount,supInvParty"
+                            items="{
+                                path: 'filesView>/Invoices'
+                            }"
                         >
-                      
-                            <Table
-                                id="InvoiceTable"
-                                mode="MultiSelect"
-                                sticky="ColumnHeaders"
-                                growing="true"
-                                growingScrollToLoad="true"
-                                itemPress="onListItemPress"
-                                selectionChange="onSelectionChange"
-                             
-                            >
-                           
-                                <headerToolbar>
-                                   <Toolbar>
-                                        <ToolbarSpacer/>
-                                        <Button text="Create" press="onOpenCreateDialog" type="Emphasized" />
-                                        <Button text="Delete" press="onPressDelete" enabled="{filesView>/bDeletionEnabled}"/>
-                                        <Button text="Copy" press="onPressCopy" enabled="{filesView>/bCopyEnabled}" />
-                                        <Button text="Extract PDF" press="onPressExtractPDF" />
-                                    </Toolbar>
-                                </headerToolbar>
-                                <columns>
-                                    <Column>
-                                        <Text text="Document ID" />
-                                    </Column>
-                                    <Column>
-                                        <Text text="Status" />
-                                    </Column>
-                                    <Column>
-                                        <Text text="Invoice Desc" />
-                                    </Column>
-                                    <Column>
-                                        <Text text="Fiscal Year" />
-                                    </Column>
-                                    <Column>
-                                        <Text text="Company Code" />
-                                    </Column>
-                                    <Column>
-                                        <Text text="Document Date" />
-                                    </Column>
-                                    <Column>
-                                        <Text text="Posting Date" />
-                                    </Column>
-                                    <Column>
-                                        <Text text="Currency" />
-                                    </Column>
-                                    <Column>
-                                        <Text text="Gross Amount" />
-                                    </Column>
-                                    <Column>
-                                        <Text text="Supplier Invoice Party" />
-                                    </Column>
-                                </columns>
+                            <columns>
+                                <Column><Text text="Document ID"/></Column>
+                                <Column><Text text="Status"/></Column>
+                                <Column><Text text="Invoice Desc"/></Column>
+                                <Column><Text text="Fiscal Year"/></Column>
+                                <Column><Text text="Company Code"/></Column>
+                                <Column><Text text="Document Date"/></Column>
+                                <Column><Text text="Posting Date"/></Column>
+                                <Column><Text text="Currency"/></Column>
+                                <Column><Text text="Gross Amount"/></Column>
+                                <Column><Text text="Supplier Invoice Party"/></Column>
+                            </columns>
 
-                                <items>
-                                    <ColumnListItem type="Navigation"
-                                    >
-                                        <cells>
-                                            <ObjectIdentifier
-                                                title="{documentId}"
-                                            />
-                                            <ObjectStatus
-                                                text="{= ${statusFlag} === 'S' ? 'Success' : 'Error'}"
-                                                state="{= ${statusFlag} === 'S' ? 'Success' : 'Error'}"
-                                            />
-                                            <!-- <Text text="{statusFlag}"/> -->
-                                            <Text text="{DocumentHeaderText}" />
-                                            <Text text="{fiscalYear}" />
-                                            <Text text="{companyCode}" />
-                                            <Text
-                                                text="{path: 'documentDate', type: 'sap.ui.model.type.Date', formatOptions: { style: 'medium' }}"
-                                            />
-                                            <Text
-                                                text="{path: 'postingDate', type: 'sap.ui.model.type.Date', formatOptions: { style: 'medium' }}"
-                                            />
-                                            <Text
-                                                text="{documentCurrency_code}"
-                                            />
-                                            <ObjectNumber
-                                                number="{invGrossAmount}"
-                                            />
-                                            <Text text="{supInvParty}" />
-                                        </cells>
-                                    </ColumnListItem>
-                                </items>
-                            </Table>
-                        </smarttable:SmartTable>
-                         </ScrollContainer>
+                            <items>
+                                <ColumnListItem type="Navigation">
+                                    <cells>
+                                        <ObjectIdentifier title="{filesView>documentId}" />
+                                        <ObjectStatus
+                                            text="{= ${filesView>statusFlag} === 'S' ? 'Success' : 'Error'}"
+                                            state="{= ${filesView>statusFlag} === 'S' ? 'Success' : 'Error'}"
+                                        />
+                                        <Text text="{filesView>DocumentHeaderText}" />
+                                        <Text text="{filesView>fiscalYear}" />
+                                        <Text text="{filesView>companyCode}" />
+                                        <Text text="{path: 'filesView>documentDate', type: 'sap.ui.model.type.Date', formatOptions: { style: 'medium' }}" />
+                                        <Text text="{path: 'filesView>postingDate', type: 'sap.ui.model.type.Date', formatOptions: { style: 'medium' }}" />
+                                        <Text text="{filesView>documentCurrency_code}" />
+                                        <ObjectNumber number="{filesView>invGrossAmount}" />
+                                        <Text text="{filesView>supInvParty}" />
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+
+                        </ScrollContainer>
                     </content>
                 </IconTabBar>
             </FlexBox>
         </f:beginColumnPages>
+
+        <!-- MID COLUMN -->
         <f:midColumnPages>
             <mvc:XMLView
                 id="FilesDetailView"

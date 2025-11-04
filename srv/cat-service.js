@@ -61,7 +61,7 @@ class InvCatalogService extends cds.ApplicationService {
         });
 
         this.before("SAVE", "Invoice", async (req) => {
-
+            debugger;
             if (req.data.mode === 'email' && !req.data.editmode) {
 
                 let logs = [];

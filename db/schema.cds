@@ -8,7 +8,7 @@ using {
   Language,
   managed,
   Currency,
-  sap,
+  sap, 
     } from '@sap/cds/common';
 using {
   sap.common.Region,
@@ -22,7 +22,7 @@ entity Users {
       Name : String;
   toFiles  : association to many FileUsers on toFiles.UserId = Id;
 }
-entity InvoiceEntity : cuid, managed, {
+entity InvoiceEntity : cuid, managed {
   documentId             : Integer;
   fiscalYear             : String(4);
   companyCode            : String(4);

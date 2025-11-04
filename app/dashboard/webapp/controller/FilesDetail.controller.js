@@ -49,8 +49,14 @@ sap.ui.define([
                 var iOriginalBusyDelay = this.getView().getBusyIndicatorDelay();
                 this.setModel(oViewModel, "filesDetailView");
 
-                this.getOwnerComponent().getModel().metadataLoaded().then(function () {
+                const oModel = this.getOwnerComponent().getModel();
+
+                // OData V4 equivalent of metadataLoaded()
+                oModel.getMetaModel().requestObject("/").then(function () {
                     // Restore original busy indicator delay for the object view
+                    oViewModel.setProperty("/delay", iOriginalBusyDelay);
+                }).catch(function () {
+                    // Even if metadata fails, remove busy state safely
                     oViewModel.setProperty("/delay", iOriginalBusyDelay);
                 });
 
@@ -114,8 +120,8 @@ sap.ui.define([
                     ]
                 };
 
-                var oModel = new sap.ui.model.json.JSONModel(oData);
-                oView.setModel(oModel, "ProcessFlow");
+                var oModelPF = new sap.ui.model.json.JSONModel(oData);
+                oView.setModel(oModelPF, "ProcessFlow");
                 var oAttachmentModel = new sap.ui.model.json.JSONModel({
                     files: [] // initial empty list
                 });
@@ -153,8 +159,40 @@ sap.ui.define([
              * @public
              * @param {sap.ui.base.Event} oEvent 
              */
-            onEdit: function (oEvent) {
+            onEdit :async function (oEvent) {
                 this._toggleEdit();
+                const oView = this.getView();
+                const oModel = oView.getModel();
+                const oCtx = oView.getBindingContext();
+                const bActive = oCtx.getProperty("IsActiveEntity");
+
+                if (!bActive) {
+                    MessageToast.show("Already in draft mode.");
+                    return;
+                }
+               
+                if (oModel.hasPendingChanges()) {
+                    await oModel.submitBatch("$auto");
+                }
+
+                const oAction = oModel.bindContext(
+                    `${oCtx.getPath()}/DashboardService.draftEdit(...)`
+                    // null,
+                    // { $$groupId: "draftGroup" }
+                );
+
+                await oAction.execute();
+                await oModel.submitBatch("draftGroup");
+
+                const sDraftPath = oCtx.getPath().replace("IsActiveEntity=true", "IsActiveEntity=false");
+
+                oView.bindElement({
+                    path: sDraftPath,
+                    model: undefined,
+                    parameters: { $$updateGroupId: "draftGroup" }
+                });
+
+                MessageToast.show("Draft mode activated.");
             },
 
             onOpenFullPage: function () {
@@ -185,7 +223,7 @@ sap.ui.define([
                     return;
                 }
 
-                var oFile = aFiles[0]; 
+                var oFile = aFiles[0];
                 var sFileName = oFile.name;
                 var sUploadDate = new Date().toLocaleString();
                 var oAttachmentModel = this.getView().getModel("attachments");
@@ -319,7 +357,108 @@ sap.ui.define([
                     this.getRouter().navTo("files");
                 }
             },
-            onSave: function () {
+
+
+            onSave: async function () {
+                var oView = this.getView();
+                var oModel = oView.getModel();
+                var oContext = oView.getBindingContext();
+                var oAppViewModel = oView.getModel("appView");
+
+                try {
+
+                    if (oContext && !oContext.bCreated) {
+                        await oModel.submitBatch("updateGroup");
+                        MessageToast.show("Changes saved successfully!");
+                    }
+
+
+                    oAppViewModel.setProperty("/isEditable", false);
+
+                } catch (error) {
+                    console.error("Save failed:", error);
+                    MessageBox.error("Failed to save changes. Please check console logs for details.");
+                }
+            },
+            onSavePressV4: async function () {
+                var oView = this.getView();
+                var oModel = oView.getModel();
+                var oAppViewModel = oView.getModel("appView");
+
+                try {
+                    await oModel.submitBatch("updateGroup");
+                    sap.m.MessageToast.show("Saved successfully!");
+                    oAppViewModel.setProperty("/isEditable", false);
+                } catch (oError) {
+                    sap.m.MessageBox.error("Error while saving: " + oError.message);
+                }
+            },
+
+
+
+            onSavePressV41: async function () {
+              const oView  = this.getView();
+                const oModel = oView.getModel();
+                const oCtx   = oView.getBindingContext();
+
+                if (!oCtx) {
+                    sap.m.MessageBox.error("No draft context found.");
+                    return;
+                }
+
+                if (oModel.hasPendingChanges()) {
+                    await oModel.submitBatch("$auto");
+                    await oModel.submitBatch("draftGroup");
+                }
+                try {
+                     // For safety, ensure any previous group finishes
+                    await oModel.submitBatch("$auto").catch(() => {});
+                    var bActive = oCtx.getProperty("IsActiveEntity");
+                    var oAction;
+                    if(bActive){
+                        oAction = oModel.bindContext(
+                         `${oCtx.getPath()}/DashboardService.draftEdit(...)`
+                    //      ,{
+                    //      $$groupId: "draftGroup"
+                    // }
+                );
+                    } else {
+                       oAction = oModel.bindContext(
+                         `${oCtx.getPath()}/DashboardService.draftActivate(...)`
+                    //      ,{
+                    //      $$groupId: "draftGroup"
+                    // }
+                ); 
+                    }
+                    
+                    const oResult = await oAction.execute("draftGroup");
+                    await oModel.submitBatch("draftGroup");
+
+                     let sNewPath;
+                        if (bActive) {
+                            // After draftEdit → show draft
+                            sNewPath = oCtx.getPath().replace("IsActiveEntity=true", "IsActiveEntity=false");
+                        } else {
+                            // After draftActivate → show active
+                            sNewPath = oCtx.getPath().replace("IsActiveEntity=false", "IsActiveEntity=true");
+                        }
+
+                        oView.bindElement({
+                            path: sNewPath,
+                            parameters: { $$updateGroupId: "draftGroup" },
+                            events: {
+                                change: () => sap.m.MessageToast.show("Invoice saved successfully!")
+                            }
+                        });
+                        oAppViewModel.setProperty("/isEditable", false);
+
+                } catch (err) {
+                    console.error("Save failed:", err);
+                    sap.m.MessageBox.error("Failed to save invoice. See console for details.");
+                }
+            },
+
+            onSave1: function () {
                 var oView = this.getView();
                 var oModel = oView.getModel();
                 var oAppViewModel = oView.getModel("appView");
@@ -342,7 +481,7 @@ sap.ui.define([
 
                         oModel.refresh(true);
                         oAppViewModel.refresh(true);
-                       // that.getOwnerComponent().getEventBus().publish("Invoice", "Saved");
+                        // that.getOwnerComponent().getEventBus().publish("Invoice", "Saved");
                         if (oAppViewModel.getProperty("/layout") !== "TwoColumnsMidExpanded") {
                             oAppViewModel.setProperty("/layout", "TwoColumnsMidExpanded");
                         }
@@ -464,6 +603,14 @@ sap.ui.define([
                         dataReceived: function () { oViewModel.setProperty("/busy", false); }
                     }
                 });
+                const sId = oEvent.getParameter("arguments").ID;
+                const sPath = "/Invoice(" + sId + ")";
+                this.getView().bindElement({
+                    path: sPath,
+                    parameters: {
+                        expand: "to_InvoiceItem,to_InvoiceLogs"
+                    }
+                });
             },
             oncreateItem: function () {
                 var oAppViewModel = this.getModel("appView");
@@ -491,6 +638,25 @@ sap.ui.define([
                 this._oNewItemCtx = oContext;
 
                 sap.m.MessageToast.show("New row added");
+            },
+            onDiscardDraftV4: async function () {
+                const oView = this.getView();
+                const oModel = oView.getModel();
+                const oCtx = oView.getBindingContext();
+                this._toggleEdit();
+                if (oCtx.getProperty("IsActiveEntity")) {
+                    MessageToast.show("Nothing to cancel.");
+                    return;
+                }
+
+                // Delete draft
+                await oModel.delete(oCtx.getPath(), { groupId: "draftGroup" });
+                await oModel.submitBatch("draftGroup");
+
+                const sActivePath = oCtx.getPath().replace("IsActiveEntity=false", "IsActiveEntity=true");
+                oView.bindElement({ path: sActivePath, model: "Invoice" });
+
+                MessageToast.show("Draft discarded.");
             },
             onDiscardDraft: function () {
 

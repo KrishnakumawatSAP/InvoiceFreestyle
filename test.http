@@ -1,0 +1,10 @@
+### Create Supplier Invoice with Items
+POST http://localhost:4004/odata/v2/dashboard/Invoice
+Content-Type: application/json
+Accept: application/json
+ 
+{
+  "companyCode": "123",
+  "supInvParty": "test",
+  "IsActiveEntity": true
+   }
