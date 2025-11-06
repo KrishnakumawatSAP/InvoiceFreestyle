@@ -11,6 +11,13 @@
         },
         "dataSources": {
             "mainService": {
+                "uri": "odata/v4/dashboard/",
+                "type": "OData",
+                "settings": {
+                    "odataVersion": "4.0"
+                }
+            },
+            "SubService": {
                 "uri": "odata/v2/dashboard/",
                 "type": "OData",
                 "settings": {
@@ -100,10 +107,21 @@
                 "dataSource": "mainService",
                 "preload": true,
                 "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "groupId": "$auto",
+                    "updateGroupId": "draftGroup",
+                    "autoExpandSelect": false
+                }
+            },
+            "modelV2": {
+                "dataSource": "SubService",
+                "preload": true,
+                "settings": {
                     "operationMode": "Server",
                     "autoExpandSelect": true,
                     "earlyRequests": true,
-                    "refreshAfterChange": true,
+                    "refreshAfterChange": false,
                     "defaultBindingMode": "TwoWay",
                     "defaultCountMode": "Inline",
                     "useBatch": true

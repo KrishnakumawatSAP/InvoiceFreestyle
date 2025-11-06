@@ -1,10 +1,41 @@
 ### Create Supplier Invoice with Items
-POST http://localhost:4004/odata/v2/dashboard/Invoice
+# POST http://localhost:4004/odata/v2/dashboard
+
+# GET http://localhost:4004/odata/v2/dashboard/Invoice(guid'0891c370-62dc-4cf0-a220-1d88686baa94')?$expand=to_InvoiceItem 
+
+
+# GET Invoice(guid'731c1e63-7a0d-48b1-8572-729c3fb88e71')?$expand=to_InvoiceItem 
+# Content-Type: application/json
+# Content-ID: id-1762274582593-266
+# sap-contextid-accept: header
+# Accept: application/json
+# Accept-Language: en-US
+# DataServiceVersion: 2.0
+# MaxDataServiceVersion: 2.0
+# X-Requested-With: XMLHttpRequest
+# Content-Length: 216
+
+# {"purchaseOrder":"","poQuantityUnit":"","quantityPOUnit":0.00,"sup_InvoiceItem":"","supInvItemAmount":0,"Plant":"","ProductType":"","TaxJurisdiction":"","taxCode":"","__metadata":{"type":"DashboardService.InvoiceItem"}}
+# --changeset_feff-f6a2-5ade
+# Content-Type: application/http
+# Content-Transfer-Encoding: binary
+
+# POST Invoice HTTP/1.1
+# sap-contextid-accept: header
+# Accept: application/json
+# Accept-Language: en-US
+# DataServiceVersion: 2.0
+# MaxDataServiceVersion: 2.0
+# X-Requested-With: XMLHttpRequest
+# Content-Type: application/json
+# Content-ID: id-1762411167451-137
+# Content-Length: 561
+
+# {"fiscalYear":"2025","companyCode":"12","documentDate":"","postingDate":"","supInvParty":"","documentCurrency_code":"","invGrossAmount":"100","DocumentHeaderText":"","PaymentTerms":"","AccountingDocumentType":"","InvoicingParty":"test","statusFlag":"","to_InvoiceItem":[{"sup_InvoiceItem":"0010","purchaseOrder":"11111","purchaseOrderItem":"","referenceDocument":"","refDocFiscalYear":"","refDocItem":"","taxCode":"","documentCurrency_code":"","supInvItemAmount":"","poQuantityUnit":"PC","quantityPOUnit":"10","Plant":"","TaxJurisdiction":"","ProductType":""}]}
+
+
+PATCH  http://localhost:33389/odata/v2/dashboard/Invoice('0891c370-62dc-4cf0-a220-1d88686baa94')
 Content-Type: application/json
-Accept: application/json
- 
-{
-  "companyCode": "123",
-  "supInvParty": "test",
-  "IsActiveEntity": true
-   }
+
+# {"fiscalYear":"2025","companyCode":"12","documentDate":"/Date(1595116800000)/","postingDate":"/Date(1595116800000)/","supInvParty":"","documentCurrency_code":"","invGrossAmount":"100","DocumentHeaderText":"","PaymentTerms":"","AccountingDocumentType":"","InvoicingParty":"test","statusFlag":"","to_InvoiceItem":[{"sup_InvoiceItem":"0010","purchaseOrder":"11111","purchaseOrderItem":"","referenceDocument":"","refDocFiscalYear":"","refDocItem":"","taxCode":"","documentCurrency_code":"","supInvItemAmount":"0.0","poQuantityUnit":"PC","quantityPOUnit":"10","Plant":"","TaxJurisdiction":"","ProductType":""}]}
+{"fiscalYear":"2025","companyCode":"123","documentDate":"\/Date(1762387200000)\/","postingDate":"\/Date(1762413770846)\/","supInvParty":"","documentCurrency_code":"","invGrossAmount":"0.00","DocumentHeaderText":"","PaymentTerms":"","AccountingDocumentType":"","InvoicingParty":"","statusFlag":"","to_InvoiceItem":[{"sup_InvoiceItem":"","purchaseOrder":"111111","purchaseOrderItem":"","referenceDocument":"","refDocFiscalYear":"","refDocItem":"","taxCode":"","documentCurrency_code":"","supInvItemAmount":"0.0","poQuantityUnit":"","quantityPOUnit":"0.00","Plant":"","TaxJurisdiction":"","ProductType":""}]}

@@ -54,10 +54,17 @@ sap.ui.define([
 					oViewModel.setProperty("/delay", iOriginalBusyDelay);
 				};
 
-				// disable busy indication when the metadata is loaded and in case of errors
-				this.getOwnerComponent().getModel().metadataLoaded().
-					then(fnSetAppNotBusy);
-				this.getOwnerComponent().getModel().attachMetadataFailed(fnSetAppNotBusy);
+				const oModel = this.getOwnerComponent().getModel();
+
+				// OData V4: use MetaModel promise to detect metadata readiness
+				oModel.getMetaModel().requestObject("/").then(
+					function () {
+						fnSetAppNotBusy();
+					},
+					function () {
+						fnSetAppNotBusy(); // also clear busy state on metadata failure
+					}
+				);
 
 				// apply content density mode to root view
 				this.getView().addStyleClass(this.getOwnerComponent().getContentDensityClass());

@@ -124,7 +124,15 @@
               "refreshAfterChange": false,
               "defaultBindingMode": "TwoWay",
               "defaultCountMode": "Inline",
-              "useBatch": true    
+              "useBatch": true,
+              "deferredGroups": ["CREATE"],
+              "changeGroups": {
+                "*": {
+                  "groupId": "CREATE",
+                  "changeSetId": "DeepCreate",
+                  "single": false
+                }
+              }  
         }
       }
     },
@@ -174,7 +182,7 @@
           ]
         },
          {
-          "pattern": "filesDetail/{objectId}",
+          "pattern": "files/filesDetail/{objectId}",
           "name": "fileDetail",
           "target": ["fileDetail"]
         }

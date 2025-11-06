@@ -42,23 +42,55 @@ sap.ui.define([
                     data: [],
                     bProcessFlowVisible: true
                 });
-
-                this.getRouter().getRoute("fileDetail").attachPatternMatched(this._onObjectMatched, this);
+              
+                this._InvGUID = "00000000-0000-0000-0000-000000000000";
+                var oJSONModel = new sap.ui.model.json.JSONModel({
+                    Header: {
+                        documentId: "",
+                        fiscalYear: "",
+                        companyCode: "",
+                        documentDate: "",
+                        postingDate: "",
+                        supInvParty: "",
+                        documentCurrency_code: "",
+                        invGrossAmount: "",
+                        DocumentHeaderText: "",
+                        PaymentTerms: "",
+                        AccountingDocumentType: "",
+                        InvoicingParty: "",
+                        statusFlag: "",
+                        mode: ""
+                    },
+                    Items: [
+                        {
+                            sup_InvoiceItem: "",
+                            purchaseOrder: "",
+                            purchaseOrderItem: "",
+                            referenceDocument: "",
+                            refDocFiscalYear: "",
+                            refDocItem: "",
+                            taxCode: "",
+                            documentCurrency_code: "",
+                            supInvItemAmount: "",
+                            poQuantityUnit: "",
+                            quantityPOUnit: "",
+                            Plant: "",
+                            TaxJurisdiction: "",
+                            ProductType: ""
+                        }
+                    ]
+                });
+                this._bEditMode;
+                this.getView().setModel(oJSONModel, "CreateModel");
+                // this.getRouter().getRoute("fileDetail").attachPatternMatched(this._onObjectMatched, this);
+                this.getRouter().getRoute("fileDetail").attachPatternMatched(this._onObjectMatchedV2, this);
 
                 // Store original busy indicator delay, so it can be restored later on
                 var iOriginalBusyDelay = this.getView().getBusyIndicatorDelay();
                 this.setModel(oViewModel, "filesDetailView");
 
-                const oModel = this.getOwnerComponent().getModel();
-
-                // OData V4 equivalent of metadataLoaded()
-                oModel.getMetaModel().requestObject("/").then(function () {
-                    // Restore original busy indicator delay for the object view
-                    oViewModel.setProperty("/delay", iOriginalBusyDelay);
-                }).catch(function () {
-                    // Even if metadata fails, remove busy state safely
-                    oViewModel.setProperty("/delay", iOriginalBusyDelay);
-                });
+                const oModelV2 = this.getOwnerComponent().getModel("modelV2");
+                oView.setModel(oModelV2);
 
                 var oData = {
                     lanes: [
@@ -127,8 +159,7 @@ sap.ui.define([
                 });
                 this.getView().setModel(oAttachmentModel, "attachments");
 
-                // Optional: a second process flow model (pf2)
-
+            
             },
 
             /* =========================================================== */
@@ -161,49 +192,18 @@ sap.ui.define([
              */
             onEdit :async function (oEvent) {
                 this._toggleEdit();
-                const oView = this.getView();
-                const oModel = oView.getModel();
-                const oCtx = oView.getBindingContext();
-                const bActive = oCtx.getProperty("IsActiveEntity");
-
-                if (!bActive) {
-                    MessageToast.show("Already in draft mode.");
-                    return;
-                }
-               
-                if (oModel.hasPendingChanges()) {
-                    await oModel.submitBatch("$auto");
-                }
-
-                const oAction = oModel.bindContext(
-                    `${oCtx.getPath()}/DashboardService.draftEdit(...)`
-                    // null,
-                    // { $$groupId: "draftGroup" }
-                );
-
-                await oAction.execute();
-                await oModel.submitBatch("draftGroup");
-
-                const sDraftPath = oCtx.getPath().replace("IsActiveEntity=true", "IsActiveEntity=false");
-
-                oView.bindElement({
-                    path: sDraftPath,
-                    model: undefined,
-                    parameters: { $$updateGroupId: "draftGroup" }
-                });
-
-                MessageToast.show("Draft mode activated.");
+                var oAppViewModel = this.getModel("appView");
+                oAppViewModel.setProperty("/CreateMode", false)
+                //this._bEditMode = true;
             },
 
             onOpenFullPage: function () {
-                // this.getModel("appView").setProperty("/isFullPage", false);
                 var oAppView = this.getView().getModel("appView");
                 oAppView.setProperty("/layout", "MidColumnFullScreen");
                 oAppView.setProperty("/isFullPage", false);
             },
 
             onCloseFullPage: function () {
-                //this.getModel("appView").setProperty("/isFullPage", true);
                 var oAppView = this.getView().getModel("appView");
                 oAppView.setProperty("/layout", "TwoColumnsMidExpanded");
                 oAppView.setProperty("/isFullPage", true);
@@ -266,98 +266,6 @@ sap.ui.define([
 
                 sap.m.MessageToast.show("New blank invoice added after upload.");
             },
-            /**
-             * Evento chamado ao clicar em Adicionar Usuário
-             * @public
-             * @param {sap.ui.base.Event} oEvent 
-             */
-            onAddUser: function (oEvent) {
-                var sCurrentBindingPath = this.getView().getBindingContext().getPath();
-                var sCurrentFileId = this.getModel().getProperty(sCurrentBindingPath + "/Id");
-                var oContext = this.getModel().createEntry("/FileUsers", {
-                    properties: {
-                        FileId: sCurrentFileId
-                    },
-                    refreshAfterChange: false,
-                    groupId: 'changes'
-                });
-                var oNewColumnListItem = this.byId("idFilesUsersColumnListItem").clone();
-                oNewColumnListItem.bindElement(oContext.getPath());
-                this.byId("idFilesUsersTable").addItem(oNewColumnListItem);
-
-            },
-
-            /**
-             * Evento chamado ao clicar em Excluir usuário
-             * @public
-             * @param {sap.ui.base.Event} oEvent 
-             */
-            onDeleteUser: function (oEvent) {
-                var sPath = oEvent.getParameter("listItem").getBindingContext().getPath();
-                this.getModel().setProperty(sPath + "/Level", this.DELETED_LEVEL);
-                this.getModel().remove(sPath, {
-                    groupId: 'changes'
-                });
-            },
-
-            /**
-             * Evento chamado ao clicar em Exibir Mensagens
-             * @public
-             * @param {sap.ui.base.Event} oEvent
-             */
-            onShowMessages: function (oEvent) {
-                var oShowMessagesButton = oEvent.getSource();
-                this.openFragment("zdashboard.view.MessagePopover", {
-                    id: "idMessagePopover",
-                    openBy: oShowMessagesButton,
-                });
-            },
-
-            /**
-             * Evento chamado ao cliacr em Cancelar edição
-             * @public
-             * @param {sap.ui.base.Event} oEvent 
-             */
-            onCancel: function (oEvent) {
-
-                if (!this.getModel().hasPendingChanges()) {
-                    this.onConfirm(oEvent);
-                    return
-                }
-
-                var oCancelButton = oEvent.getSource();
-                this.openFragment("zdashboard.view.ConfirmationPopover", {
-                    id: "idConfirmationPopover",
-                    openBy: oCancelButton,
-                    title: "As modificações serão perdidas. Deseja continuar?"
-                });
-
-            },
-
-            /**
-             * Evento chamado ao clicar em confirmar (tanto fechamento ou cancelamento)
-             * @public
-             * @param {sap.ui.base.Event} oEvent 
-             */
-            onConfirm: function (oEvent) {
-                this.getModel().resetChanges();
-                sap.ui.getCore().getMessageManager().removeAllMessages();
-                var oConfirmationPopover = this.byId("idConfirmationPopover");
-                var oOpenedBy;
-                if (oConfirmationPopover) {
-                    oConfirmationPopover.close();
-                    oOpenedBy = oConfirmationPopover.getOpenedBy();
-                }
-                this.getModel("appView").setProperty("/isEditable", true);
-                //this.getModel("filesDetailView").setProperty("/editable", false);
-                // @ts-ignore
-                var sId = oOpenedBy ? oOpenedBy.getId() : oEvent.getSource().getId();
-                if (sId.includes("idCloseButton")) {
-                    this.getModel("appView").setProperty("/layout", LayoutType.OneColumn);
-                    this.getRouter().navTo("files");
-                }
-            },
-
 
             onSave: async function () {
                 var oView = this.getView();
@@ -367,182 +275,141 @@ sap.ui.define([
 
                 try {
 
-                    if (oContext && !oContext.bCreated) {
-                        await oModel.submitBatch("updateGroup");
-                        MessageToast.show("Changes saved successfully!");
+                    if (oModel.hasPendingChanges()) {
+                        await oModel.submitChanges({
+                             groupId: "CREATE",
+                            success: function(oData) {
+                                this._toggleEdit();
+                                MessageToast.show("Changes saved successfully!");
+                              
+                            },
+                            error: function(oError) {
+                               
+                                MessageToast.show("Error in saving Changes!");
+                              
+                            }
+                        });
+                      
+                    } else {
+                        MessageToast.show("Changes Already Saved" )
                     }
-
-
-                    oAppViewModel.setProperty("/isEditable", false);
-
                 } catch (error) {
+
                     console.error("Save failed:", error);
                     MessageBox.error("Failed to save changes. Please check console logs for details.");
                 }
             },
-            onSavePressV4: async function () {
-                var oView = this.getView();
-                var oModel = oView.getModel();
-                var oAppViewModel = oView.getModel("appView");
 
-                try {
-                    await oModel.submitBatch("updateGroup");
-                    sap.m.MessageToast.show("Saved successfully!");
-                    oAppViewModel.setProperty("/isEditable", false);
-                } catch (oError) {
-                    sap.m.MessageBox.error("Error while saving: " + oError.message);
-                }
-            },
-
-
-
-            onSavePressV41: async function () {
-              const oView  = this.getView();
-                const oModel = oView.getModel();
-                const oCtx   = oView.getBindingContext();
-
-                if (!oCtx) {
-                    sap.m.MessageBox.error("No draft context found.");
-                    return;
+            _formatToODataDate: function (vDate) {
+                 if (!vDate) {
+                    var today = new Date();
+                    return "/Date(" + today.getTime() + ")/";
                 }
 
-                if (oModel.hasPendingChanges()) {
-                    await oModel.submitBatch("$auto");
-                    await oModel.submitBatch("draftGroup");
+                // If already in /Date(...) format, return as-is
+                if (typeof vDate === "string" && vDate.includes("/Date")) {
+                    return vDate;
                 }
-                try {
-                     // For safety, ensure any previous group finishes
-                    await oModel.submitBatch("$auto").catch(() => {});
-                    var bActive = oCtx.getProperty("IsActiveEntity");
-                    var oAction;
-                    if(bActive){
-                        oAction = oModel.bindContext(
-                         `${oCtx.getPath()}/DashboardService.draftEdit(...)`
-                    //      ,{
-                    //      $$groupId: "draftGroup"
-                    // }
-                );
-                    } else {
-                       oAction = oModel.bindContext(
-                         `${oCtx.getPath()}/DashboardService.draftActivate(...)`
-                    //      ,{
-                    //      $$groupId: "draftGroup"
-                    // }
-                ); 
-                    }
-                    
-                    const oResult = await oAction.execute("draftGroup");
-                    await oModel.submitBatch("draftGroup");
 
-                     let sNewPath;
-                        if (bActive) {
-                            // After draftEdit → show draft
-                            sNewPath = oCtx.getPath().replace("IsActiveEntity=true", "IsActiveEntity=false");
-                        } else {
-                            // After draftActivate → show active
-                            sNewPath = oCtx.getPath().replace("IsActiveEntity=false", "IsActiveEntity=true");
-                        }
+                var oDate = new Date(vDate);
+                return "/Date(" + oDate.getTime() + ")/";
+            },
+            onSavePress: function () {
+            sap.ui.core.BusyIndicator.show(0)
+            var oJSON = this.getView().getModel("CreateModel").getData();
+            var oODataModel = this.getView().getModel();
+            this._ValidatePayload(oJSON);    
+            var oAppViewModel = this.getModel("appView");
+            var bCreateMode = oAppViewModel.getProperty("/CreateMode")
+            // Prepare deep insert payload
+            var oPayload = {
+                fiscalYear: oJSON.Header.fiscalYear,
+                companyCode: oJSON.Header.companyCode,
+                documentDate: this._formatToODataDate(oJSON.Header.documentDate),
+                postingDate: this._formatToODataDate(oJSON.Header.postingDate),
+                supInvParty: oJSON.Header.supInvParty,
+                documentCurrency_code: oJSON.Header.documentCurrency_code,
+                invGrossAmount: oJSON.Header.invGrossAmount || "0.00",
+                DocumentHeaderText: oJSON.Header.DocumentHeaderText,
+                PaymentTerms: oJSON.Header.PaymentTerms,
+                AccountingDocumentType: oJSON.Header.AccountingDocumentType,
+                InvoicingParty: oJSON.Header.InvoicingParty,
+                statusFlag: oJSON.Header.statusFlag,
 
-                        oView.bindElement({
-                            path: sNewPath,
-                            parameters: { $$updateGroupId: "draftGroup" },
-                            events: {
-                                change: () => sap.m.MessageToast.show("Invoice saved successfully!")
-                            }
-                        });
-                        oAppViewModel.setProperty("/isEditable", false);
+                // deep navigation property for items
+                to_InvoiceItem: oJSON.Items.map(item => ({
+                    sup_InvoiceItem: item.sup_InvoiceItem,
+                    purchaseOrder: item.purchaseOrder,
+                    purchaseOrderItem: item.purchaseOrderItem,
+                    referenceDocument: item.referenceDocument,
+                    refDocFiscalYear: item.refDocFiscalYear,
+                    refDocItem: item.refDocItem,
+                    taxCode: item.taxCode,
+                    documentCurrency_code: item.documentCurrency_code,
+                    supInvItemAmount: item.supInvItemAmount || 0.0,
+                    poQuantityUnit: item.poQuantityUnit,
+                    quantityPOUnit: item.quantityPOUnit,
+                    Plant: item.Plant,
+                    TaxJurisdiction: item.TaxJurisdiction,
+                    ProductType: item.ProductType
+                }))
+            };
 
-                } catch (err) {
-                    console.error("Save failed:", err);
-                    sap.m.MessageBox.error("Failed to save invoice. See console for details.");
+            if(bCreateMode) {
+                 // Perform deep create
+            oODataModel.create("/Invoice", oPayload, {
+                success: function (oData) {
+                    sap.m.MessageToast.show("Invoice Created Successfully");
+                   // history.go(-1);
+                    this._toggleEdit();
+                    sap.ui.core.BusyIndicator.hide(0);
+                    sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
+                    //this.onNavBack();
+                }.bind(this),
+                error: function (oError) {
+                    sap.m.MessageToast.show("Error Creating Invoice");
+                    sap.ui.core.BusyIndicator.hide(0);
                 }
-            },
+            });
+            } else {
+                this._InvGUID = this.getView().getModel("CreateModel").getData().Header.ID
+                $.ajax({
+                url: "/odata/v2/dashboard/Invoice('" + this._InvGUID + "')",
+                type: "PATCH",
+                data: JSON.stringify(oPayload),
+                contentType: "application/json",
+                headers: {
+                    "If-Match": "*",          // allow update without ETag
+                    "Accept": "application/json"
+                },
+                success: function (response) {
+                    sap.m.MessageToast.show("Invoice updated successfully");
+                    this._toggleEdit();
+                    sap.ui.core.BusyIndicator.hide(0);
+                    sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
+                }.bind(this),
+                error: function (xhr) {
+                    sap.m.MessageToast.show("Update failed");
+                    console.error(xhr.responseText);
+                    sap.ui.core.BusyIndicator.hide(0);
+                }
+            });
+            }
+           
+        },
 
-            onSave1: function () {
-                var oView = this.getView();
-                var oModel = oView.getModel();
-                var oAppViewModel = oView.getModel("appView");
-                var oTable = oView.byId("ItemTable");
-                var oSmartTable = this.getView().byId("InvoiceSmartTable");
-                var that = this;
+        _ValidatePayload: function(oData) {
+            var aMessage = []
+            // if(oData.items.purchaseOrder.length > 10){
+            //     aMessage.push("Purchase Order length is greater then 10 character");
+            // }
+            // if(oData.item.quantityPOUnit.length <= 0){
+            //     aMessage.push("Purchase Order Qunatity is mandatorya");
+            // }
+            // MessageBox.error(aMessage.join("\r\n"));
+        },
 
-                oModel.submitChanges({
-                    success: function () {
-                        //   if (!oModel.hasPendingChanges()) {
-                        sap.m.MessageToast.show("Invoice saved successfully");
-                        oAppViewModel.setProperty("/isEditable", false);
-                        oTable.getItems().forEach(function (oItem) {
-                            var oCtx = oItem.getBindingContext();
-                            if (oCtx && oCtx.bCreated) {
-                                oModel.deleteCreatedEntry(oCtx);
-                            }
-                        });
-                        this.getRouter().navTo("files");
-
-                        oModel.refresh(true);
-                        oAppViewModel.refresh(true);
-                        // that.getOwnerComponent().getEventBus().publish("Invoice", "Saved");
-                        if (oAppViewModel.getProperty("/layout") !== "TwoColumnsMidExpanded") {
-                            oAppViewModel.setProperty("/layout", "TwoColumnsMidExpanded");
-                        }
-                        that._bHandlingNew = false;
-                        delete that.getOwnerComponent()._oCreateContext;
-                        // }
-                    },
-                    error: function () {
-                        sap.m.MessageBox.error("Error while saving invoice. Please try again.");
-                    }
-                });
-            },
-
-
-
-            /**
-             * Evento chamado ao clicar em Salvar
-             * @public
-             * @param {sap.ui.base.Event} oEvent 
-             */
-            onSave1: function (oEvent) {
-                // if (!this.isValid("fileUser")) {
-                //     MessageBox.error("Verifique os erros e tente novamente");
-                //     return
-                // }
-
-                // // Atualiza data de modificação
-                // this.getModel().setProperty(this.getView().getBindingContext().getPath() + "/ModifiedAt", new Date());
-
-                // this.getModel().submitChanges({
-                //     success: function (oData) {
-                //         if (!this.getModel().hasPendingChanges()) {
-                //             MessageToast.show("Atualizado com sucesso");
-                //             this._toggleEdit();
-                //         }
-                //     }.bind(this)
-                // });
-
-                var oModel = this.getView().getModel();
-                var oViewModel = this.getModel("appView");
-                var that = this;
-
-                // commit pending changes
-                oModel.submitChanges({
-                    success: function (oData) {
-                        if (!oModel.hasPendingChanges()) {
-                            sap.m.MessageToast.show("Invoice updated successfully");
-
-                            // back to display mode
-                            oViewModel.setProperty("/isEditable", false);
-
-                            // reset flag (in case it was new before)
-                            that._bHandlingNew = false;
-                            delete that.getOwnerComponent()._oCreateContext;
-                        }
-                    },
-                    error: function (oError) {
-                        sap.m.MessageBox.error("Error while updating invoice. Please try again.");
-                    }
-                });
-            },
+          
 
             /* =========================================================== */
             /* internal methods                                            */
@@ -569,11 +436,6 @@ sap.ui.define([
                         this.getRouter().navTo("files");
                         return;
                     }
-
-                    // if (oCurrentContext && oCurrentContext.getPath() === oCreateContext.getPath()) {
-                    //     return; 
-                    // }
-
                     this.getView().setBindingContext(oCreateContext);
                     oAppViewModel.setProperty("/isEditable", true);
                     var oHeader = this.byId("ObjectPageHeader");
@@ -612,6 +474,150 @@ sap.ui.define([
                     }
                 });
             },
+
+            _createEmptyInvoiceModel: function () {
+                return new sap.ui.model.json.JSONModel({
+                    Header: {
+                        documentId: "",
+                        fiscalYear: "",
+                        companyCode: "",
+                        documentDate: "",
+                        postingDate: "",
+                        supInvParty: "",
+                        documentCurrency_code: "",
+                        invGrossAmount: "",
+                        DocumentHeaderText: "",
+                        PaymentTerms: "",
+                        AccountingDocumentType: "",
+                        InvoicingParty: "",
+                        statusFlag: "",
+                        mode: "CREATE"
+                    },
+                    Items: [
+                        {
+                            sup_InvoiceItem: "",
+                            purchaseOrder: "",
+                            purchaseOrderItem: "",
+                            referenceDocument: "",
+                            refDocFiscalYear: "",
+                            refDocItem: "",
+                            taxCode: "",
+                            documentCurrency_code: "",
+                            supInvItemAmount: "",
+                            poQuantityUnit: "",
+                            quantityPOUnit: "",
+                            Plant: "",
+                            TaxJurisdiction: "",
+                            ProductType: ""
+                        }
+                    ]
+                });
+            },
+
+            _onObjectMatchedV2: function (oEvent) {
+                sap.ui.core.BusyIndicator.hide()
+                var sObjectId = oEvent.getParameter("arguments").objectId;
+                this._bEditMode = (sObjectId !== "new");
+                var oViewModel = this.getModel("filesDetailView");
+                var oModel = this.getView().getModel("modelV2")
+                var oAppViewModel = this.getModel("appView");
+             
+                // var oComponent = this.getOwnerComponent();
+                // var oCreateContext = oComponent._oCreateContext; // set earlier by list controller
+
+
+                this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
+
+                if (sObjectId === "new") {
+                    this.getModel("appView").setProperty("/bProcessFlowVisible", false);
+                     var oJSONModel = this._createEmptyInvoiceModel();
+                    this.getView().setModel(oJSONModel, "CreateModel");
+                    oAppViewModel.setProperty("/isEditable", true);
+                    var oHeader = this.byId("ObjectPageHeader");
+                    if (oHeader) {
+                        oHeader.setObjectTitle("New Invoice");
+                    }
+                    return;
+                } else {
+                    this._InvGUID = oEvent.getParameter("arguments").objectId;
+                    this.getModel("appView").setProperty("/bProcessFlowVisible", true);
+                    var oODataModel = this.getView().getModel();
+                    var sPath = oEvent.getParameter("arguments").objectId;
+                    oODataModel.read("/Invoice(" + sPath + ")" , {
+                    urlParameters: {
+                        "$expand": "to_InvoiceItem"
+                    },
+                    success: (oData) => {
+
+                        var oJSONData = {
+                            Header: {
+                                ID: oData.ID,
+                                documentId: oData.documentId,
+                                fiscalYear: oData.fiscalYear,
+                                companyCode: oData.companyCode,
+                                documentDate: oData.documentDate,
+                                postingDate: oData.postingDate,
+                                supInvParty: oData.supInvParty,
+                                documentCurrency_code: oData.documentCurrency_code,
+                                invGrossAmount: oData.invGrossAmount || "0.00",
+                                DocumentHeaderText: oData.DocumentHeaderText,
+                                PaymentTerms: oData.PaymentTerms,
+                                AccountingDocumentType: oData.AccountingDocumentType,
+                                InvoicingParty: oData.InvoicingParty,
+                                statusFlag: oData.statusFlag
+                            },
+                            Items: oData.to_InvoiceItem.results.map(item => ({
+                                ID: item.ID,
+                                sup_InvoiceItem: item.sup_InvoiceItem,
+                                purchaseOrder: item.purchaseOrder,
+                                purchaseOrderItem: item.purchaseOrderItem,
+                                referenceDocument: item.referenceDocument,
+                                refDocFiscalYear: item.refDocFiscalYear,
+                                refDocItem: item.refDocItem,
+                                taxCode: item.taxCode,
+                                documentCurrency_code: item.documentCurrency_code,
+                                supInvItemAmount: item.supInvItemAmount,
+                                poQuantityUnit: item.poQuantityUnit,
+                                quantityPOUnit: item.quantityPOUnit || "0.00",
+                                Plant: item.Plant,
+                                TaxJurisdiction: item.TaxJurisdiction,
+                                ProductType: item.ProductType
+                            }))
+                        };
+
+                        var oJSONModel = new sap.ui.model.json.JSONModel(oJSONData);
+                        this.getView().setModel(oJSONModel, "CreateModel");
+                    }
+                });
+                }
+                // oAppViewModel.setProperty("/isEditable", false);
+                // delete oComponent._oCreateContext;
+
+
+                // var sObjectPath = this.getModel().createKey("/Invoice", {
+                //     DocumentId: sObjectId
+                // });
+
+                // this.getView().bindElement({
+                //     path: sObjectPath,
+                //     events: {
+                //         change: this._onBindingChange.bind(this),
+                //         dataRequested: function () { oViewModel.setProperty("/busy", true); },
+                //         dataReceived: function () { oViewModel.setProperty("/busy", false); }
+                //     }
+                // });
+                // const sId = oEvent.getParameter("arguments").ID;
+                // const sPath = "/Invoice(" + sId + ")";
+                // this.getView().bindElement({
+                //     path: sPath,
+                //     parameters: {
+                //         expand: "to_InvoiceItem,to_InvoiceLogs"
+                //     }
+                // });
+            },
+
+
+
             oncreateItem: function () {
                 var oAppViewModel = this.getModel("appView");
                 oAppViewModel.setProperty("/isEditable", true);
@@ -639,25 +645,7 @@ sap.ui.define([
 
                 sap.m.MessageToast.show("New row added");
             },
-            onDiscardDraftV4: async function () {
-                const oView = this.getView();
-                const oModel = oView.getModel();
-                const oCtx = oView.getBindingContext();
-                this._toggleEdit();
-                if (oCtx.getProperty("IsActiveEntity")) {
-                    MessageToast.show("Nothing to cancel.");
-                    return;
-                }
-
-                // Delete draft
-                await oModel.delete(oCtx.getPath(), { groupId: "draftGroup" });
-                await oModel.submitBatch("draftGroup");
-
-                const sActivePath = oCtx.getPath().replace("IsActiveEntity=false", "IsActiveEntity=true");
-                oView.bindElement({ path: sActivePath, model: "Invoice" });
-
-                MessageToast.show("Draft discarded.");
-            },
+           
             onDiscardDraft: function () {
 
                 var oView = this.getView();
@@ -720,7 +708,7 @@ sap.ui.define([
             },
 
             /**
-             * Alterna modo de edição
+             * Mode change
              * @private
              */
             _toggleEdit: function () {

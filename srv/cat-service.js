@@ -37,6 +37,7 @@ class InvCatalogService extends cds.ApplicationService {
 
         this.before("NEW", "Invoice.drafts", async (req) => {
             // console.log(req.target.name)
+            debugger;
             if (req.target.name !== "InvCatalogService.Invoice.drafts") { return; }
             const { ID } = req.data;
             req.data.statusFlag = 'D';
@@ -54,6 +55,7 @@ class InvCatalogService extends cds.ApplicationService {
         });
 
         this.after("SAVE", "Invoice", async (req) => {
+            
             await db.run(
                 UPDATE('ZDASHBOARD_INVOICEENTITY_ATTACHMENTS')
                     .set({ mimeType: 'application/pdf' })
@@ -61,7 +63,6 @@ class InvCatalogService extends cds.ApplicationService {
         });
 
         this.before("SAVE", "Invoice", async (req) => {
-            debugger;
             if (req.data.mode === 'email' && !req.data.editmode) {
 
                 let logs = [];
@@ -627,13 +628,13 @@ class InvCatalogService extends cds.ApplicationService {
                 const amountTolerancePercentage = 0.05;   // 5% tolerance
 
                 // Group Invoice Lines by PO Item
-                const invoiceItemGroups = req.data.to_InvoiceItem.reduce((acc, item) => {
+                 const invoiceItemGroups = req.data.to_InvoiceItem.reduce((acc, item) => {
                     const key = `${item.purchaseOrder}-${item.purchaseOrderItem}`;
                     acc[key] = acc[key] || { quantity: 0, amount: 0, items: [] };
                     acc[key].quantity += Number(item.quantityPOUnit);
                     acc[key].amount += Number(item.supInvItemAmount);
                     acc[key].items.push(item);
-                    return acc;
+                   return acc;
                 }, {});
 
                 // Process Each Invoice Line Group
