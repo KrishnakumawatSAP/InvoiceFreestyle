@@ -1,4 +1,9 @@
 using Zdashboard as persistence from '../db/schema';
+using {sap.common as common} from '../db/common';
+using {CE_PURCHASEORDER_0001 as po} from './external/CE_PURCHASEORDER_0001';
+using {API_MATERIAL_DOCUMENT_SRV as gr} from './external/API_MATERIAL_DOCUMENT_SRV';
+using {API_PRODUCT_SRV as pr} from './external/API_PRODUCT_SRV';
+using {API_BUSINESS_PARTNER as bp} from './external/API_BUSINESS_PARTNER';
 using {Attachments} from '@cap-js/sdm';
 
 service DashboardService {
@@ -10,7 +15,24 @@ service DashboardService {
     };
     entity InvoiceItem              as projection on persistence.InvoiceEntity.to_InvoiceItem;
     entity InvoiceLogs              as projection on persistence.InvoiceEntity.to_InvoiceLogs;
- 
+     entity PurchaseOrder            as
+        projection on po.PurchaseOrder {
+            *,
+            _PurchaseOrderItem : redirected to PurchaseOrderItem,
+            _PurchaseOrderPartner,
+            _SupplierAddress
+        };
+
+    entity PurchaseOrderItem        as
+        projection on po.PurchaseOrderItem {
+            *
+        };
+    entity A_MaterialDocumentHeader as
+        projection on gr.A_MaterialDocumentHeader {
+            *
+        };
+    entity Currencies               as projection on common.Currencies;
+    entity StatusValues             as projection on persistence.StatusValues;
     entity Segments     as projection on persistence.Segments;
     entity Users        as projection on persistence.Users;
     entity Files        as projection on persistence.Files;

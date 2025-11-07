@@ -44,6 +44,7 @@ sap.ui.define([
 					breadcrumbLinks: [{}],
 					layout: "TwoColumnsBeginExpanded",
 					isEditable: false,
+					CreateMode: false,
 					bProcessFlowVisible: true,
 					isFullPage: true
 				});
@@ -150,7 +151,9 @@ sap.ui.define([
 
 				var sParentPath = sTargetPath.replace(/\/\:.+\:/, "");
 				var aTargets = sParentPath.split('/');
-				aTargets.pop()
+				if(aTargets.length > 1){
+					aTargets.pop()
+				}
 				for (var i in aTargets) {
 					aLinks.push({
 						key: aTargets[i],

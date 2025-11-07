@@ -45,39 +45,38 @@ sap.ui.define([
 				this.oRouter = this.getOwnerComponent().getRouter();
 				this.oRouter.getRoute("files").attachPatternMatched(this._onProductMatched, this);
 				this._oInnerTable = this.byId("InvoiceTable");
-				if (this._oInnerTable) {
-					this._oInnerTable.attachEventOnce("updateFinished", this.onTableUpdateFinished, this);
-				}
+				// if (this._oInnerTable) {
+				// 	this._oInnerTable.attachEventOnce("updateFinished", this.onTableUpdateFinished, this);
+				// }
 				this.getOwnerComponent().getEventBus().subscribe("Invoice", "Saved", this._onInvoiceSaved, this);
+				sap.ui.getCore().getEventBus().subscribe("InvoiceChannel", "ReloadList", this._loadInvoices, this);
 			},
 
 			/**
 			 * 
 			 */
 			_loadInvoices: async function () {
-				const oModel = this.getOwnerComponent().getModel(); // OData V4 model
+				const oModel = this.getOwnerComponent().getModel("modelV2"); // OData V4 model
 				var oRouter = this.getOwnerComponent().getRouter();
 				try {
-					// Bind to the collection
-					const oBinding = oModel.bindList("/Invoice");
+				
+				var that = this;
+					oModel.read("/Invoice",{
+						success: function(oData){
+							that.getView().getModel("filesView").setProperty("/Invoices",  oData.results)
+							// var oTable = this.byId("InvoiceTable");
+							// var aItems = oTable.getItems();
+							// if (aItems && aItems.length > 0) {
+							// 	oTable.setSelectedItem(aItems[0], true);
+							// 	aItems[0].firePress();
+							// }
+						}.bind(this),
+						error: function(oErr){
 
-					// Request data (GET /Invoice)
-					const aContexts = await oBinding.requestContexts();
-
-					// Convert to plain objects
-					const aInvoices = aContexts.map(oCtx => oCtx.getObject());
-
-					// Set data to view model
-					this.getView().getModel("filesView").setProperty("/Invoices",  aInvoices)
-					// oRouter.navTo("fileDetail", {
-					// 	objectId: "new"
-					// });
-					// var oAppViewModel = this.getModel("appView");
-					// if (oAppViewModel) {
-					// 	oAppViewModel.setProperty("/layout", sap.f.LayoutType.TwoColumnsMidExpanded);
-					// 	oAppViewModel.setProperty("/isEditable", true);
-					// }
-
+						}
+					})
+					
+					
 				} catch (err) {
 					console.error("Failed to load invoices:", err);
 					sap.m.MessageToast.show("Error loading invoices");
@@ -136,7 +135,7 @@ sap.ui.define([
 					}
 				}
 			},
-//Not relavant as update finish is not really works for
+
 			onTableUpdateFinished: function (oEvent) {
 				var oTable = oEvent.getSource();
 				var aItems = oTable.getItems();
@@ -146,7 +145,7 @@ sap.ui.define([
 					this.getView().getModel("filesView").setProperty("/bDeletionEnabled", true);
 					this.getView().getModel("filesView").setProperty("/bCopyEnabled", true);
 					//this is for the first row
-					this._bindDetail(oFirstItem.getBindingContext());
+				//	this._bindDetail(oFirstItem.getBindingContext());
 				}
 			},
 			_bindDetail: function (oContext) {
@@ -157,79 +156,78 @@ sap.ui.define([
 				this.getView().getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			},
 			onListItemPress: function (oEvent) {
-
-				//const oItem = oEvent.getSource();                 // The pressed item (ColumnListItem)
-				// this.getView().getModel("filesView").getProperty()
-				// const oContext = oItem.getBindingContext("filesView");  // Context from model
-				// const oFCL = this.byId("_IDGenFlexibleColumnLayout1");  // Your FCL control
-				// const oDetailView = this.byId("FilesDetailView");       // The mid-column view
-
-				// // if (oDetailView) {
-				// // 	// Bind the detail view element to the same context path
-				// // 	oDetailView.bindElement({
-				// // 		path: oEvent.getParameter("listItem").getBindingContextPath(),
-				// // 		model: "filesView"
-				// // 	});
-
-				// // 	// Switch layout to show mid column
-				// // 	oFCL.setLayout(sap.f.LayoutType.TwoColumnsMidExpanded);
-				// // }
-
-				// var sPathInv = oEvent.getParameter("listItem").getBindingContextPath();
-				// var oInvoiceObject = this.getView().getModel("filesView").getProperty(sPathInv)
-				//  const oModel = this.getView().getModel();
-
-				// // Bind with expand to fetch related entities
-				// const oBinding = oDetailView.bindElement("/Invoice" + "(" + oInvoiceObject.ID + ")", undefined, undefined, undefined, {
-				// 	$expand: "to_InvoiceItem,to_InvoiceLogs,attachments",
-				// 	model: "InvoiceDetail"
-				// });
-
-				// 	oBinding.requestObject().then(oData => {
-				// 	// Navigate or set model to detail view
-				// 	const oDetailModel = new sap.ui.model.json.JSONModel(oData);
-				// 	this.getOwnerComponent().getRouter().navTo("FilesDetail", {
-				// 		invoiceId: oData.documentId
-				// 	});
-
-				// 	// // Optionally set detail model globally
-				// 	// this.getOwnerComponent().setModel(oDetailModel, "InvoiceDetail");
-				// });
-
+				sap.ui.core.BusyIndicator.show(0);
+				var oAppViewModel = this.getModel("appView");
+				oAppViewModel.setProperty("/CreateMode", false);
 				const oItem = oEvent.getParameter("listItem");
 				const oCtx = oItem.getBindingContext("filesView");
 				const oInvoice = oCtx.getObject();
-				const sInvoiceID = `'${oInvoice.ID}'`;
-
-				const oModel = this.getOwnerComponent().getModel(); // OData V4 model
+				const sInvoiceID = `${oInvoice.ID}`;
+				// const oModel = this.getOwnerComponent().getModel(); // OData V4 model
 				const oFCL = this.byId("_IDGenFlexibleColumnLayout1");
-				const oDetailView = this.byId("FilesDetailView");
-
-				// ⚙️ Bind the detail view with $expand to get related entities
-				oDetailView.bindElement({
-					path: `/Invoice(ID=${sInvoiceID})`,
-					// path: `/Invoice(ID=${sInvoiceID},IsActiveEntity=true)` //V4
-					parameters: {
-						$expand: "to_InvoiceItem,to_InvoiceLogs,attachments"
-					},
-					model: undefined, // default model
-					events: {
-						dataReceived: function (oData) {
-							console.log("Invoice details loaded", oData);
-						}
-					}
-				});
-
-				// Switch layout to show detail page
+			
 				oFCL.setLayout(sap.f.LayoutType.TwoColumnsMidExpanded);
+				this._BindDetailPage(sInvoiceID);
+				// this.getRouter().navTo("fileDetail", {
+				// 		objectId: sInvoiceID
+				// 	}, false);	
 
 
-				//V2 code
+			},
 
-				// var oContext = oEvent.getParameter("listItem").getBindingContext()
+			_BindDetailPage: function(sInvoiceID) {
+                    this.getModel("appView").setProperty("/bProcessFlowVisible", true);
+					var oDetailView = this.byId("FilesDetailView");
+                    var oODataModel = oDetailView.getModel();
+                    oODataModel.read("/Invoice(" + sInvoiceID + ")" , {
+                    urlParameters: {
+                        "$expand": "to_InvoiceItem"
+                    },
+                    success: function(oData){
+						sap.ui.core.BusyIndicator.hide(0);
+				        var oJSONData = {
+                            Header: {
+                                ID: oData.ID,
+                                documentId: oData.documentId,
+                                fiscalYear: oData.fiscalYear,
+                                companyCode: oData.companyCode,
+                                documentDate: oData.documentDate,
+                                postingDate: oData.postingDate,
+                                supInvParty: oData.supInvParty,
+                                documentCurrency_code: oData.documentCurrency_code,
+                                invGrossAmount: oData.invGrossAmount || "0.00",
+                                DocumentHeaderText: oData.DocumentHeaderText,
+                                PaymentTerms: oData.PaymentTerms,
+                                AccountingDocumentType: oData.AccountingDocumentType,
+                                InvoicingParty: oData.InvoicingParty,
+                                statusFlag: oData.statusFlag
+                            },
+                            Items: oData.to_InvoiceItem.results.map(item => ({
+                                ID: item.ID,
+                                sup_InvoiceItem: item.sup_InvoiceItem,
+                                purchaseOrder: item.purchaseOrder,
+                                purchaseOrderItem: item.purchaseOrderItem,
+                                referenceDocument: item.referenceDocument,
+                                refDocFiscalYear: item.refDocFiscalYear,
+                                refDocItem: item.refDocItem,
+                                taxCode: item.taxCode,
+                                documentCurrency_code: item.documentCurrency_code,
+                                supInvItemAmount: item.supInvItemAmount,
+                                poQuantityUnit: item.poQuantityUnit,
+                                quantityPOUnit: item.quantityPOUnit || "0.00",
+                                Plant: item.Plant,
+                                TaxJurisdiction: item.TaxJurisdiction,
+                                ProductType: item.ProductType
+                            }))
+                        };
 
-				// this._bindDetail(oContext);
-				// this.getModel("appView").setProperty("/bProcessFlowVisible", true);
+                        var oJSONModel = new sap.ui.model.json.JSONModel(oJSONData);
+                        oDetailView.setModel(oJSONModel, "CreateModel");
+                    }.bind(this),
+					error:function(){
+
+					}
+                });
 			},
 			_onProductMatched: function (oEvent) {
 				sap.ui.core.BusyIndicator.hide();
@@ -245,8 +243,6 @@ sap.ui.define([
 			onTabSelect: function (oEvent) {
 				var sKey = oEvent.getParameter("key"); // tab key (all, pdf, email, posted, error)
 				var oSmartTable = this.byId("InvoiceSmartTable");
-
-
 				var oBinding = oSmartTable.getTable().getBinding("items");
 
 				var aFilters = [];
@@ -275,18 +271,18 @@ sap.ui.define([
 					oBinding.filter(aFilters, "Application");
 				}
 			},
+
 			/**
 			 * 
 			 * @param {object} oEvent 
 			 */
-
 			onPressDelete: function (oEvent) {
 				var oTable = this.byId("InvoiceTable");
 			},
+
 			/**
 			 * 
 			 */
-
 			onSelectionChange: function (oEvt) {
 				var isSelect = oEvt.getParameter("selected");
 				this._oInnerTable = this.byId("InvoiceTable");
@@ -342,8 +338,6 @@ sap.ui.define([
 				});
 			},
 
-
-
 			/* =========================================================== */
 			/* event handlers                                              */
 			/* =========================================================== */
@@ -356,43 +350,18 @@ sap.ui.define([
 			 * @public
 			 */
 			onOpenCreateDialog: function (oEvent) {
-				// var oContext = this.getModel().createEntry("/Invoice", {
-				// 	properties: {},
-				// 	success: function (oData) {
-				// 		this.onCloseCreateDialog();
-				// 		MessageToast.show("Arquivo criado com sucesso");
-				// 	}.bind(this),
-				// 	error: function (oError) {
-				// 		MessageBox.error("Ocorreu um erro ao tentar criar um arquivo");
-				// 	}
-				// });
-
-				// this.openFragment("zdashboard.view.FilesCreate", {
-				// 	id: "idFilesCreateDialog",
-				// 	bindingPath: oContext.getPath()
-				// });
-				//var oModel = this.getView().getModel();
-				var oModelV2 = this.getOwnerComponent().getModel("modelV2");
 				var oAppViewModel = this.getModel("appView");
-				var oContext = oModelV2.create("/Invoice", {
-						companyCode: "",
-						fiscalYear: ""
-					
-				});
-
-
 				oAppViewModel.setProperty("/layout", "TwoColumnsMidExpanded");
-				oAppViewModel.setProperty("/isFullPage", false);
-				//this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
-				oAppViewModel.setProperty("/isEditable", true);
-				this.getRouter().navTo("fileDetail", {
-					objectId: "new"
-				}, false);
-
-				// store context for new object
-				oModelV2._oCreateContext = oContext;
-				console.log(oAppViewModel.getProperty("/layout"));  // This should print "TwoColumnsMidExpanded"
-
+				oAppViewModel.setProperty("/CreateMode", true);
+				if(oAppViewModel.getProperty("/isEditable")){
+					MessageToast.show("Already in Edit mode")
+				} else {
+					oAppViewModel.setProperty("/isEditable", true);
+					this.getRouter().navTo("fileDetail", {
+						objectId: "new"
+					}, false);		
+				}
+					
 			},
 
 			formatDate: function (date) {
@@ -409,98 +378,6 @@ sap.ui.define([
 			/**
 			 * 
 			 */
-			onOpenCreateDialogV41: async function () {
-
-				const oModel = this.getView().getModel(); //Krishna - 30/10 for OData V4 model
-				const formatDate = d => d.toISOString().split("T")[0];
-
-				try {
-					// var oDetailView = this.byId("FilesDetailView");
-					// var oCtx = oDetailView.getBindingContext();
-					// oCtx.create(fiscalYear, "")
-					// const oBinding = oModel.bindContext("/Invoice", undefined, { create: true });
-					// const oContext = oBinding.getBoundContext(); // transient (unsaved) context
-					var oBindList = await oModel.bindList("/Invoice");
-					 const oContext = oBindList.create({
-						companyCode: "",
-						fiscalYear: "",
-						documentDate: this.formatDate(new Date()),
-						postingDate: this.formatDate(new Date()),
-						invGrossAmount: 0,
-						supInvParty: "",
-						InvoicingParty: ""
-					});
-					this.getOwnerComponent()._oCreateContext = oContext;
-					// oBindList.requestContexts().then(function (aContexts) {
-					// 	aContexts.forEach(oContext => {
-					// 		console.log(oContext.getObject());
-					// 	});
-					// });
-
-
-					//const oData = await oContext.requestObject(); 
-					//console.log("Draft created:", oData);
-
-
-					// this.getView().bindElement({
-					// 	path: oContext.getPath(),
-					// 	parameters: {
-					// 		expand: "to_InvoiceItem,to_InvoiceLogs,attachments"
-					// 	}
-					// });
-					const oRouter = this.getOwnerComponent().getRouter();
-					const oAppViewModel = this.getModel("appView");
-					oAppViewModel.setProperty("/layout", sap.f.LayoutType.TwoColumnsMidExpanded);
-					oRouter.navTo("fileDetail", {
-						objectId: "new"
-					});
-					const oDetailView = this.byId("FilesDetailView");
-        			oDetailView.setBindingContext(oContext);
-					
-					
-					oAppViewModel.setProperty("/isEditable", true);
-
-					sap.m.MessageToast.show("Draft invoice created successfully");
-				} catch (err) {
-					console.error("Error creating draft:", err);
-					sap.m.MessageBox.error("Failed to create draft invoice");
-				}
-			},
-
-			onOpenCreateDialogV4: async function () {
-				var oModel = this.getView().getModel();
-
-				try {
-					var oListBinding = oModel.bindList("/Invoice");
-					var oContext = oListBinding.create({
-						companyCode: "123",
-						fiscalYear: "100",
-						documentDate: new Date()
-					});
-
-					var oCreatedData = await oContext.created();
-
-					console.log("Created Invoice:", oCreatedData);
-
-				 	this.getView().bindElement({
-						path: oContext.getPath(),
-						parameters: {
-							expand: "to_InvoiceItem,to_InvoiceLogs,attachments"
-						}
-					}); 
-					var oAppViewModel = this.getModel("appView");
-					oAppViewModel.setProperty("/layout", sap.f.LayoutType.TwoColumnsMidExpanded);
-					oAppViewModel.setProperty("/isEditable", true);
-
-					sap.m.MessageToast.show("Draft invoice created successfully");
-
-				} catch (err) {
-					console.error("Error creating draft:", err);
-					sap.m.MessageBox.error("Failed to create draft invoice");
-				}
-			},
-
-
 
 			/**
 			 * Evento chamado ao fechar dialog de criação 
@@ -514,15 +391,7 @@ sap.ui.define([
 				this.getModel().resetChanges();
 			},
 
-			/**
-			 * Evento chamado ao clicar em "Salvar" na dialog de
-			 * criação de arquivo
-			 * @param {sap.ui.base.Event} oEvent
-			 */
-			onCreate: function (oEvent) {
-				this.getModel().submitChanges();
-			},
-
+			
 			/**
 			 * Evento chamado ao clicar em remover arquivo da lista
 			 * Há algumas validações que devem ser feitas antes de realizar a exclusão

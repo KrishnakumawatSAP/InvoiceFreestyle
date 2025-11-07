@@ -38,7 +38,7 @@
                     />
                     <m:Button
                         text="Void"
-                        press="onDiscardDraftV4"
+                        press="onDiscardDraft"
                         visible="{appView>/isEditable}"
                     />
                     <m:Button
@@ -536,13 +536,15 @@
                                     <u:FileUploader
                                         id="fileUploader"
                                         name="uploadFile"
-                                        change="onFileSelected"
+                                        change="onFileSelectedV4"
+                                        visible="{appView>/isEditable}"
                                     />
-                                    <m:Button
+                                    <!-- <m:Button
                                         icon="sap-icon://upload"
                                         text="Upload File"
                                         press="onUploadPress"
-                                    />
+                                        visible="{appView>/isEditable}"
+                                    /> -->
                                 </m:Toolbar>
 
                                 <!-- Hidden FileUploader -->

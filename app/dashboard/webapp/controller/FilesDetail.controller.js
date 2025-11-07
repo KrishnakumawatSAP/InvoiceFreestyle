@@ -213,6 +213,85 @@ sap.ui.define([
                 oAppView.setProperty("/layout", "OneColumn");
                 oAppView.setProperty("/isFullPage", true);
             },
+            onFileSelectedV4: async function (oEvent) {
+                const oFile = oEvent.getParameter("files")[0];
+                if (!oFile) return;
+
+                const oModelV2 = this.getView().getModel("modelV2");
+                const oModel = this.getOwnerComponent().getModel()
+
+                // 1) Create attachment metadata
+                const sInvoiceID = oModelV2.getProperty("/Header/ID");
+                const oList = oModel.bindList(`/Invoice(ID='${sInvoiceID}',IsActiveEntity=false)/attachments`);
+                const oContext = await oList.create({ filename: oFile.name });   // ✅ creates metadata
+
+                // 2) Upload Binary to $value using V4 streaming
+                const oContentBinding = oModel.bindProperty("$value", oContext.getPath());
+                await oContentBinding.setValue(oFile); // ✅ uploads binary automatically
+
+                sap.m.MessageToast.show("Upload complete.");
+            },
+            onFileSelectedNew: function (oEvent) {
+                var oFile = oEvent.getParameter("files")[0];
+                if (!oFile) return;
+
+                var oView = this.getView();
+                var oModel = oView.getModel("modelV2");
+                var sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+
+                var oPayload = {
+                    filename: oFile.name
+                };
+
+                var sPath = "/Invoice(ID='" + sInvoiceID + "')/attachments";
+
+                oModel.create(sPath, oPayload, {
+                    groupId: "$auto",
+                    success: function (oData) {
+                        sap.m.MessageToast.show("Attachment metadata created.");
+                        
+                        // ✅ The backend returned the attachment key ID here:
+                        var sAttachmentID = oData.ID;
+
+                        // Proceed to upload file binary
+                        this._uploadBinaryFile(sInvoiceID, sAttachmentID, oFile);
+                    }.bind(this),
+                    error: function (oError) {
+                        sap.m.MessageBox.error("Failed to create attachment.");
+                        console.error(oError);
+                    }
+                });
+            },
+            _uploadBinaryFile: function (sInvoiceID, sAttachmentID, oFile) {
+
+                var sUploadUrl = "/odata/v2/dashboard/Invoice_attachments(" +
+                    "up__ID='" + sInvoiceID + "'," +
+                    "ID='" + sAttachmentID + "'," +
+                    "IsActiveEntity=false" +
+                ")/$value";   // ✅ correct for OData V2 media stream
+
+                sap.ui.core.BusyIndicator.show();
+
+                $.ajax({
+                    url: sUploadUrl,
+                    type: "PUT",           // ✅ must be PUT
+                    data: oFile,           // ✅ send raw file bytes
+                    processData: false,
+                    contentType: oFile.type, // e.g. application/pdf
+                    success: function () {
+                        sap.ui.core.BusyIndicator.hide();
+                        sap.m.MessageToast.show("File uploaded successfully!");
+                        this.getView().getModel("attachments").refresh(true);
+                    }.bind(this),
+                    error: function (xhr) {
+                        sap.ui.core.BusyIndicator.hide();
+                        sap.m.MessageBox.error("File upload failed.");
+                        console.error(xhr.responseText || xhr);
+                    }.bind(this)
+                });
+            },
+
+
 
 
             onFileSelected: function (oEvent) {
@@ -661,12 +740,12 @@ sap.ui.define([
                 // 🔹 2️⃣ Handle "new create" scenario (transient entry)
                 // Find any transient contexts (created but not submitted)
                 var aItems = oTable.getItems();
-                aItems.forEach(function (oItem) {
-                    var oCtx = oItem.getBindingContext();
-                    if (oCtx && oCtx.bCreated) {  // transient created entry
-                        oModel.deleteCreatedEntry(oCtx);
-                    }
-                });
+                // aItems.forEach(function (oItem) {
+                //     var oCtx = oItem.getBindingContext();
+                //     if (oCtx && oCtx.bCreated) {  // transient created entry
+                //         oModel.deleteCreatedEntry(oCtx);
+                //     }
+                // });
 
                 // 🔹 3️⃣ Rebind or refresh the table data to original state
                 oModel.refresh(true);

@@ -33,9 +33,44 @@
 
 # {"fiscalYear":"2025","companyCode":"12","documentDate":"","postingDate":"","supInvParty":"","documentCurrency_code":"","invGrossAmount":"100","DocumentHeaderText":"","PaymentTerms":"","AccountingDocumentType":"","InvoicingParty":"test","statusFlag":"","to_InvoiceItem":[{"sup_InvoiceItem":"0010","purchaseOrder":"11111","purchaseOrderItem":"","referenceDocument":"","refDocFiscalYear":"","refDocItem":"","taxCode":"","documentCurrency_code":"","supInvItemAmount":"","poQuantityUnit":"PC","quantityPOUnit":"10","Plant":"","TaxJurisdiction":"","ProductType":""}]}
 
-
+1
 PATCH  http://localhost:33389/odata/v2/dashboard/Invoice('0891c370-62dc-4cf0-a220-1d88686baa94')
 Content-Type: application/json
 
 # {"fiscalYear":"2025","companyCode":"12","documentDate":"/Date(1595116800000)/","postingDate":"/Date(1595116800000)/","supInvParty":"","documentCurrency_code":"","invGrossAmount":"100","DocumentHeaderText":"","PaymentTerms":"","AccountingDocumentType":"","InvoicingParty":"test","statusFlag":"","to_InvoiceItem":[{"sup_InvoiceItem":"0010","purchaseOrder":"11111","purchaseOrderItem":"","referenceDocument":"","refDocFiscalYear":"","refDocItem":"","taxCode":"","documentCurrency_code":"","supInvItemAmount":"0.0","poQuantityUnit":"PC","quantityPOUnit":"10","Plant":"","TaxJurisdiction":"","ProductType":""}]}
 {"fiscalYear":"2025","companyCode":"123","documentDate":"\/Date(1762387200000)\/","postingDate":"\/Date(1762413770846)\/","supInvParty":"","documentCurrency_code":"","invGrossAmount":"0.00","DocumentHeaderText":"","PaymentTerms":"","AccountingDocumentType":"","InvoicingParty":"","statusFlag":"","to_InvoiceItem":[{"sup_InvoiceItem":"","purchaseOrder":"111111","purchaseOrderItem":"","referenceDocument":"","refDocFiscalYear":"","refDocItem":"","taxCode":"","documentCurrency_code":"","supInvItemAmount":"0.0","poQuantityUnit":"","quantityPOUnit":"0.00","Plant":"","TaxJurisdiction":"","ProductType":""}]}
+
+###
+POST http://localhost:4004/odata/v4/dashboard/DashboardService.postInvoice
+Content-Type: application/json
+
+{
+    "documentNumber": "5000000010",
+    "netAmount": "$ 1600.00",
+    "taxId": "12-5846832",
+    "taxName": "Sales Tax:",
+    "purchaseOrderNumber": "4500000011",
+    "grossAmount": "$ 1600.00",
+    "currencyCode": "CAD",
+    "receiverContact": "Curtis V. Brown",
+    "documentDate": "2025-02-05",
+    "taxAmount": "$ 0.00",
+    "taxRate": "0.0",
+    "receiverName": "Standard Products",
+    "receiverAddress": "3150 SW 9th Street Toronto, ON L5V 1X2 CANADA",
+    "paymentTerms": "Due upon receipt",
+    "senderAddress": "3451 NE Willoughby Blvd. Sturt, ON LV5 1X2 CANADA",
+    "senderName": "Alfreds Futterkiste",
+    "senderMail": "jibin.thomas@msitek.us",
+    "dmsFolder": "spa-res:cmis:folderid:41y4Txs0ZaFMpWNMSVE4E5gfRdg1jg5UiAyeswYbbJM",
+    "to_Item": [
+        {
+            "description": "Professional Service",
+            "netAmount": "1600.00",
+            "quantity": "100.00",
+            "unitPrice": "16.00",
+            "materialNumber": "2001",
+            "unitOfMeasure": "PC"
+        }
+    ]
+}
