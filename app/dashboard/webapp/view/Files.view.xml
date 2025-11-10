@@ -57,6 +57,7 @@
                             growingScrollToLoad="true"
                             itemPress="onListItemPress"
                             selectionChange="onSelectionChange"
+                            updateFinished="onTableUpdateFinished"
                             class="sapUiResponsiveContentPadding"
                             items="{
                                 path: 'filesView>/Invoices'

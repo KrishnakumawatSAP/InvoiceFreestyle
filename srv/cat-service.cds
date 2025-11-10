@@ -7,7 +7,7 @@ using {API_BUSINESS_PARTNER as bp} from './external/API_BUSINESS_PARTNER';
 using {Attachments} from '@cap-js/sdm';
 
 service DashboardService {
-    // @odata.draft.enabled
+    @odata.draft.enabled
     entity Invoice      as projection on persistence.InvoiceEntity;
     extend persistence.InvoiceEntity with {
         @description: 'Attachments Composition'
@@ -15,18 +15,18 @@ service DashboardService {
     };
     entity InvoiceItem              as projection on persistence.InvoiceEntity.to_InvoiceItem;
     entity InvoiceLogs              as projection on persistence.InvoiceEntity.to_InvoiceLogs;
-     entity PurchaseOrder            as
-        projection on po.PurchaseOrder {
-            *,
-            _PurchaseOrderItem : redirected to PurchaseOrderItem,
-            _PurchaseOrderPartner,
-            _SupplierAddress
-        };
+    //  entity PurchaseOrder            as
+    //     projection on po.PurchaseOrder {
+    //         *,
+    //         _PurchaseOrderItem : redirected to PurchaseOrderItem,
+    //         _PurchaseOrderPartner,
+    //         _SupplierAddress
+    //     };
 
-    entity PurchaseOrderItem        as
-        projection on po.PurchaseOrderItem {
-            *
-        };
+    // entity PurchaseOrderItem        as
+    //     projection on po.PurchaseOrderItem {
+    //         *
+    //     };
     entity A_MaterialDocumentHeader as
         projection on gr.A_MaterialDocumentHeader {
             *

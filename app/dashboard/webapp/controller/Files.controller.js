@@ -45,6 +45,7 @@ sap.ui.define([
 				this.oRouter = this.getOwnerComponent().getRouter();
 				this.oRouter.getRoute("files").attachPatternMatched(this._onProductMatched, this);
 				this._oInnerTable = this.byId("InvoiceTable");
+				this._oLastSelectedItem = null;
 				// if (this._oInnerTable) {
 				// 	this._oInnerTable.attachEventOnce("updateFinished", this.onTableUpdateFinished, this);
 				// }
@@ -59,11 +60,11 @@ sap.ui.define([
 				const oModel = this.getOwnerComponent().getModel("modelV2"); // OData V4 model
 				var oRouter = this.getOwnerComponent().getRouter();
 				try {
-				
-				var that = this;
-					oModel.read("/Invoice",{
-						success: function(oData){
-							that.getView().getModel("filesView").setProperty("/Invoices",  oData.results)
+
+					var that = this;
+					oModel.read("/Invoice", {
+						success: function (oData) {
+							that.getView().getModel("filesView").setProperty("/Invoices", oData.results)
 							// var oTable = this.byId("InvoiceTable");
 							// var aItems = oTable.getItems();
 							// if (aItems && aItems.length > 0) {
@@ -71,17 +72,18 @@ sap.ui.define([
 							// 	aItems[0].firePress();
 							// }
 						}.bind(this),
-						error: function(oErr){
+						error: function (oErr) {
 
 						}
 					})
-					
-					
+
+
 				} catch (err) {
 					console.error("Failed to load invoices:", err);
 					sap.m.MessageToast.show("Error loading invoices");
 				}
 			},
+
 			onSearch: function (oEvent) {
 				const sQuery = oEvent.getParameter("query") || oEvent.getParameter("newValue");
 				const oTable = this.byId("InvoiceTable");
@@ -123,7 +125,8 @@ sap.ui.define([
 				oBinding.filter(aFilters);
 			},
 
-//Not relavant
+
+			//Not relavant
 			_onInvoiceSaved: function () {
 				var oSmartTable = this.byId("InvoiceSmartTable");
 				if (oSmartTable) {
@@ -139,13 +142,18 @@ sap.ui.define([
 			onTableUpdateFinished: function (oEvent) {
 				var oTable = oEvent.getSource();
 				var aItems = oTable.getItems();
+
 				if (aItems.length > 0) {
 					var oFirstItem = aItems[0];
 					oTable.setSelectedItem(oFirstItem);
 					this.getView().getModel("filesView").setProperty("/bDeletionEnabled", true);
 					this.getView().getModel("filesView").setProperty("/bCopyEnabled", true);
+					this._oLastSelectedItem = aItems[0];
+
+					// Open detail
+					//this.onListItemPress({ getParameter: () => ({ listItem: aItems[0] }) });
 					//this is for the first row
-				//	this._bindDetail(oFirstItem.getBindingContext());
+					//this._bindDetail(oFirstItem.getBindingContext());
 				}
 			},
 			_bindDetail: function (oContext) {
@@ -155,6 +163,27 @@ sap.ui.define([
 				}
 				this.getView().getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			},
+			onListItemPress1: function (oEvent) {
+				sap.ui.core.BusyIndicator.show(0);
+				var oAppViewModel = this.getModel("appView");
+				oAppViewModel.setProperty("/CreateMode", false);
+				var oItem = oEvent.getParameter("item") || oEvent.listItem;
+				if (!oItem) {
+					sap.ui.core.BusyIndicator.hide();
+					return;
+				}
+				var oCtx = oItem.getBindingContext("filesView");
+				if (!oCtx) {
+					sap.ui.core.BusyIndicator.hide();
+					return;
+				}
+				var oInvoice = oCtx.getObject();
+				var sInvoiceID = oInvoice.ID;
+				var oFCL = this.byId("_IDGenFlexibleColumnLayout1");
+				oFCL.setLayout(sap.f.LayoutType.TwoColumnsMidExpanded);
+				this._BindDetailPage(sInvoiceID);
+			},
+
 			onListItemPress: function (oEvent) {
 				sap.ui.core.BusyIndicator.show(0);
 				var oAppViewModel = this.getModel("appView");
@@ -165,7 +194,7 @@ sap.ui.define([
 				const sInvoiceID = `${oInvoice.ID}`;
 				// const oModel = this.getOwnerComponent().getModel(); // OData V4 model
 				const oFCL = this.byId("_IDGenFlexibleColumnLayout1");
-			
+
 				oFCL.setLayout(sap.f.LayoutType.TwoColumnsMidExpanded);
 				this._BindDetailPage(sInvoiceID);
 				// this.getRouter().navTo("fileDetail", {
@@ -174,60 +203,86 @@ sap.ui.define([
 
 
 			},
-
-			_BindDetailPage: function(sInvoiceID) {
-                    this.getModel("appView").setProperty("/bProcessFlowVisible", true);
-					var oDetailView = this.byId("FilesDetailView");
-                    var oODataModel = oDetailView.getModel();
-                    oODataModel.read("/Invoice(" + sInvoiceID + ")" , {
-                    urlParameters: {
-                        "$expand": "to_InvoiceItem"
-                    },
-                    success: function(oData){
+			
+			_BindDetailPage: function (sInvoiceID) {
+				this.getModel("appView").setProperty("/bProcessFlowVisible", true);
+				var oDetailView = this.byId("FilesDetailView");
+				var oODataModel = oDetailView.getModel();
+				oODataModel.read(`/Invoice(ID=${sInvoiceID}, IsActiveEntity=true)`, {
+					urlParameters: {
+						"$expand": "to_InvoiceItem"
+					},
+					success: function (oData) {
 						sap.ui.core.BusyIndicator.hide(0);
-				        var oJSONData = {
-                            Header: {
-                                ID: oData.ID,
-                                documentId: oData.documentId,
-                                fiscalYear: oData.fiscalYear,
-                                companyCode: oData.companyCode,
-                                documentDate: oData.documentDate,
-                                postingDate: oData.postingDate,
-                                supInvParty: oData.supInvParty,
-                                documentCurrency_code: oData.documentCurrency_code,
-                                invGrossAmount: oData.invGrossAmount || "0.00",
-                                DocumentHeaderText: oData.DocumentHeaderText,
-                                PaymentTerms: oData.PaymentTerms,
-                                AccountingDocumentType: oData.AccountingDocumentType,
-                                InvoicingParty: oData.InvoicingParty,
-                                statusFlag: oData.statusFlag
-                            },
-                            Items: oData.to_InvoiceItem.results.map(item => ({
-                                ID: item.ID,
-                                sup_InvoiceItem: item.sup_InvoiceItem,
-                                purchaseOrder: item.purchaseOrder,
-                                purchaseOrderItem: item.purchaseOrderItem,
-                                referenceDocument: item.referenceDocument,
-                                refDocFiscalYear: item.refDocFiscalYear,
-                                refDocItem: item.refDocItem,
-                                taxCode: item.taxCode,
-                                documentCurrency_code: item.documentCurrency_code,
-                                supInvItemAmount: item.supInvItemAmount,
-                                poQuantityUnit: item.poQuantityUnit,
-                                quantityPOUnit: item.quantityPOUnit || "0.00",
-                                Plant: item.Plant,
-                                TaxJurisdiction: item.TaxJurisdiction,
-                                ProductType: item.ProductType
-                            }))
-                        };
+						var oJSONData = {
+							Header: { ...oData },
+							Items: oData.to_InvoiceItem.results.map(item => ({ ...item }))
+						};
 
-                        var oJSONModel = new sap.ui.model.json.JSONModel(oJSONData);
-                        oDetailView.setModel(oJSONModel, "CreateModel");
-                    }.bind(this),
-					error:function(){
+						var oJSONModel = new sap.ui.model.json.JSONModel(oJSONData);
+						oDetailView.setModel(oJSONModel, "CreateModel");
+					}.bind(this),
+					error: function () {
+						sap.ui.core.BusyIndicator.hide(0);
+						MessageToast.show("Failed to load invoice details.");
+					}
+				});
+			},
+
+
+			_BindDetailPage1: function (sInvoiceID) {
+				this.getModel("appView").setProperty("/bProcessFlowVisible", true);
+				var oDetailView = this.byId("FilesDetailView");
+				var oODataModel = oDetailView.getModel();
+				oODataModel.read("/Invoice(" + sInvoiceID + ")", {
+					urlParameters: {
+						"$expand": "to_InvoiceItem"
+					},
+					success: function (oData) {
+						sap.ui.core.BusyIndicator.hide(0);
+						var oJSONData = {
+							Header: {
+								ID: oData.ID,
+								documentId: oData.documentId,
+								fiscalYear: oData.fiscalYear,
+								companyCode: oData.companyCode,
+								documentDate: oData.documentDate,
+								postingDate: oData.postingDate,
+								supInvParty: oData.supInvParty,
+								documentCurrency_code: oData.documentCurrency_code,
+								invGrossAmount: oData.invGrossAmount || "0.00",
+								DocumentHeaderText: oData.DocumentHeaderText,
+								PaymentTerms: oData.PaymentTerms,
+								AccountingDocumentType: oData.AccountingDocumentType,
+								InvoicingParty: oData.InvoicingParty,
+								statusFlag: oData.statusFlag
+							},
+							Items: oData.to_InvoiceItem.results.map(item => ({
+								ID: item.ID,
+								sup_InvoiceItem: item.sup_InvoiceItem,
+								purchaseOrder: item.purchaseOrder,
+								purchaseOrderItem: item.purchaseOrderItem,
+								referenceDocument: item.referenceDocument,
+								refDocFiscalYear: item.refDocFiscalYear,
+								refDocItem: item.refDocItem,
+								taxCode: item.taxCode,
+								documentCurrency_code: item.documentCurrency_code,
+								supInvItemAmount: item.supInvItemAmount,
+								poQuantityUnit: item.poQuantityUnit,
+								quantityPOUnit: item.quantityPOUnit || "0.00",
+								Plant: item.Plant,
+								TaxJurisdiction: item.TaxJurisdiction,
+								ProductType: item.ProductType
+							}))
+						};
+
+						var oJSONModel = new sap.ui.model.json.JSONModel(oJSONData);
+						oDetailView.setModel(oJSONModel, "CreateModel");
+					}.bind(this),
+					error: function () {
 
 					}
-                });
+				});
 			},
 			_onProductMatched: function (oEvent) {
 				sap.ui.core.BusyIndicator.hide();
@@ -279,11 +334,46 @@ sap.ui.define([
 			onPressDelete: function (oEvent) {
 				var oTable = this.byId("InvoiceTable");
 			},
+			onSelectionChange: function (oEvt) {
+				var oTable = this.byId("InvoiceTable");
+				var oAppViewModel = this.getModel("appView");
+				var bEditMode = oAppViewModel.getProperty("/isEditable");
+				var oNewSelectedItem = oEvt.getParameter("listItem");
+				if (bEditMode && this._oLastSelectedItem && oNewSelectedItem !== this._oLastSelectedItem) {
+
+					MessageBox.warning(
+						"You have unsaved changes. Do you want to discard and switch?",
+						{
+							actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+							onClose: function (sAction) {
+
+								if (sAction === MessageBox.Action.YES) {
+									this.getView().getModel().resetChanges();
+									oAppViewModel.setProperty("/isEditable", false);
+									this._oLastSelectedItem = oNewSelectedItem;
+									this.onListItemPress({ getParameter: () => ({ listItem: oNewSelectedItem }) });
+
+								} else {
+									oTable.setSelectedItem(this._oLastSelectedItem, true);
+								}
+
+							}.bind(this)
+						}
+					);
+
+				} else {
+					this._oLastSelectedItem = oNewSelectedItem;
+					this.onListItemPress(oEvt);
+				}
+			},
+
+
+
 
 			/**
 			 * 
 			 */
-			onSelectionChange: function (oEvt) {
+			onSelectionChange1: function (oEvt) {
 				var isSelect = oEvt.getParameter("selected");
 				this._oInnerTable = this.byId("InvoiceTable");
 				isSelect = this._oInnerTable.getSelectedItems().length > 0;
@@ -353,15 +443,15 @@ sap.ui.define([
 				var oAppViewModel = this.getModel("appView");
 				oAppViewModel.setProperty("/layout", "TwoColumnsMidExpanded");
 				oAppViewModel.setProperty("/CreateMode", true);
-				if(oAppViewModel.getProperty("/isEditable")){
+				if (oAppViewModel.getProperty("/isEditable")) {
 					MessageToast.show("Already in Edit mode")
 				} else {
 					oAppViewModel.setProperty("/isEditable", true);
 					this.getRouter().navTo("fileDetail", {
 						objectId: "new"
-					}, false);		
+					}, false);
 				}
-					
+
 			},
 
 			formatDate: function (date) {
@@ -373,7 +463,7 @@ sap.ui.define([
 					console.warn("Invalid date:", date);
 					return null;
 				}
-        	},
+			},
 
 			/**
 			 * 
@@ -391,7 +481,7 @@ sap.ui.define([
 				this.getModel().resetChanges();
 			},
 
-			
+
 			/**
 			 * Evento chamado ao clicar em remover arquivo da lista
 			 * Há algumas validações que devem ser feitas antes de realizar a exclusão
