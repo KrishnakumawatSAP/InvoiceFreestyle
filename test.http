@@ -74,3 +74,33 @@ Content-Type: application/json
         }
     ]
 }
+
+###
+POST https://port4004-workspaces-ws-pu6id.us10.applicationstudio.cloud.sap/odata/v4/dashboard/Invoice(ID='c1b0ca2e-4999-4a97-9d32-e81800b95451',IsActiveEntity=false)/attachments HTTP/1.1
+Accept:application/json;odata.metadata=minimal;IEEE754Compatible=true
+Accept-Language:en-US
+Content-Type:application/json;charset=UTF-8;IEEE754Compatible=true
+
+{"filename":"Frame 119.pdf",
+"note": "test"}
+--batch_id-1762801738477-95--
+Group ID: $auto
+
+
+###
+POST http://localhost:46769/odata/v4/dashboard/Invoice(ID=c1b0ca2e-4999-4a97-9d32-e81800b95451,IsActiveEntity=false)/attachments
+Content-Type: application/json
+Accept: application/json
+
+{
+    "up__ID": "c1b0ca2e-4999-4a97-9d32-e81800b95451",
+    "filename": "Frame 144.pdf",
+    "note": "test"
+}
+
+###
+GET http://localhost:46769/odata/v4/dashboard/Invoice(ID=c1b0ca2e-4999-4a97-9d32-e81800b95451,IsActiveEntity=false)/attachments
+
+###
+pos
+GET https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v4/dashboard/Invoice(ID=140ced70-683d-4aea-8548-3ba7b4ee1ddc,IsActiveEntity=true)

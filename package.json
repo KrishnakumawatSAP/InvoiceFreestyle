@@ -15,7 +15,6 @@
     "@sap-cloud-sdk/http-client": "^3.16.0",
     "@sap-cloud-sdk/resilience": "^3.9.0",
     "@sap-cloud-sdk/util": "^3.16.0",
-    "@sap/cds-hana": "^2",
     "@sap/eslint-plugin-cds": "^3.0.3",
     "@sap/ux-cds-odata-language-server-extension": "^1.12.0",
     "@sap/xsenv": "^5.2.0",
@@ -73,6 +72,11 @@
         "impl": "@cap-js/sqlite",
         "credentials": {
           "url": "memory"
+        }
+      },
+      "sdm": {
+        "settings": {
+          "repositoryId": "892137e0-6733-4d62-af33-396218298252"
         }
       },
       "[production]": {

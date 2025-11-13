@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: dashboards
 description: Vendor Invoice Administration.
-version: 0.0.2
+version: 0.0.5
 modules:
   - name: dashboards-srv
     type: nodejs
@@ -13,7 +13,7 @@ modules:
       - name: dashboards-destination-service
       - name: dashboards-db
       - name: dashboards-metadata
-      - name: dashboards-attachments
+      - name: sbpa_dms_repo
     provides:
       - name: srv-api
         properties:
@@ -218,11 +218,8 @@ resources:
       service-name: dashboards-api-metadata
       config:
         default-domain: ${default-domain}
-  - name: dashboards-attachments
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: objectstore
-      service-plan: standard
+  - name: sbpa_dms_repo
+    type: org.cloudfoundry.existing-service
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true

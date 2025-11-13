@@ -38,7 +38,7 @@
                     />
                     <m:Button
                         text="Void"
-                        press="onDiscardDraftV4"
+                        press="onDiscardDraft"
                         visible="{appView>/isEditable}"
                     />
                     <m:Button
@@ -536,13 +536,20 @@
                                     <u:FileUploader
                                         id="fileUploader"
                                         name="uploadFile"
-                                        change="onFileSelected"
-                                    />
-                                    <m:Button
+                                        change="uploadFile"
+                                        visible="{appView>/isEditable}"
+                                                                           />
+                                     <m:Button icon="sap-icon://delete"
+                                    type="Reject"
+                                    press=".onDeleteAttachment"
+                                     visible="{appView>/isEditable}"
+                                        />
+                                    <!-- <m:Button
                                         icon="sap-icon://upload"
                                         text="Upload File"
                                         press="onUploadPress"
-                                    />
+                                        visible="{appView>/isEditable}"
+                                    /> -->
                                 </m:Toolbar>
 
                                 <!-- Hidden FileUploader -->
@@ -552,7 +559,8 @@
                                     id="uploadedFilesTable"
                                     inset="false"
                                     growing="true"
-                                    items="{attachments>/files}"                                      
+                                    items="{Attachments>/files}"   
+                                    mode="SingleSelectLeft"                                   
                                     itemPress=""
                                 >
                                     <m:columns>
@@ -569,14 +577,16 @@
                                     <m:items>
                                         <m:ColumnListItem>
                                             <m:cells>
-                                               <m:Text text="{attachments>fileName}" />
-                                               <m:Text text="{attachments>uploadDate}" />
-                                              <m:Text text="{attachments>status}" />
+                                               <m:Text text="{Attachments>fileName}" />
+                                               <m:Text text="{Attachments>uploadDate}" />
+                                              <m:Text text="{Attachments>status}" />
+                                               
                                             </m:cells>
                                         </m:ColumnListItem>
                                     </m:items>
                                 </m:Table>
                             </m:VBox>
+
                         </blocks>
                     </ObjectPageSubSection>
                 </subSections>
