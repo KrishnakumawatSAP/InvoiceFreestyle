@@ -245,7 +245,6 @@
                                 growingScrollToLoad="true"
                                 sticky="ColumnHeaders"
                                 autoPopinMode="true"
-                                demandPopin="true"
                                 width="100%"
                             >
                                 <m:headerToolbar>
@@ -593,7 +592,8 @@
                                         </m:ColumnListItem>
                                     </m:items>
                                 </m:Table>
-                                <m:PDFViewer   id="pdfViewer" source="{attachments>/currentFileUrl}"  title="Attachment Preview"  visible="false"/>
+                                <!-- <m:PDFViewer   id="pdfViewer" source="{attachments>/currentFileUrl}"  title="Attachment Preview"  visible="false"/> -->
+                                <m:PDFViewer id="_IDGenPDFViewer" source="{attachments>/content}" isTrustedSource="true" loaded=".isLoaded" height="700px" width="auto" title="{attachments>/status}"/>
                             </m:VBox>
 
                         </blocks>

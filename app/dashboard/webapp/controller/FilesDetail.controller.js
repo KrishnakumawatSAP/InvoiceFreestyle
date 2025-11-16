@@ -516,11 +516,14 @@ sap.ui.define([
 
             },
 
-            _prepareDraft: function () {
+            _prepareDraft: function (ID) {
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    var sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    if(!sInvoiceID){
+                        sInvoiceID = ID;
+                    }
                     const baseUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)/draftPrepare`;
 
                     jQuery.ajax({
@@ -547,7 +550,10 @@ sap.ui.define([
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    var sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    if(!sInvoiceID){
+                        sInvoiceID = ID;
+                    }
                     const baseUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)/draftActivate?$expand=DraftAdministrativeData`;
 
                     jQuery.ajax({
@@ -660,7 +666,7 @@ sap.ui.define([
                 var oDate = new Date(vDate);
                 return "/Date(" + oDate.getTime() + ")/";
             },
-            onSavePress: function () {
+            onSavePress: async function () {
                 sap.ui.core.BusyIndicator.show(0)
                 var oJSON = this.getView().getModel().getData();
                 var sDataPath = this.getView().getBindingContext().getPath();
@@ -731,6 +737,7 @@ sap.ui.define([
                             sap.ui.core.BusyIndicator.hide(0);
                             sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
                             this._aNewItemContexts =[];
+                            this._prepareDraft(oData.ID).then(() => this._activateDraft(oData.ID))
                             //this.onNavBack();
                         }.bind(this),
                         error: function (oError) {

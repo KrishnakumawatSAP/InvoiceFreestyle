@@ -84,6 +84,7 @@ sap.ui.define([
                 this.getView().setModel(oJSONModel, "CreateModel");
                 // this.getRouter().getRoute("fileDetail").attachPatternMatched(this._onObjectMatched, this);
                 this.getRouter().getRoute("fileDetail").attachPatternMatched(this._onObjectMatchedV2, this);
+                // this.getRouter().getRoute("fileDetail").attachOnce("patternMatched", this._onObjectMatchedV2, this);
 
                 // Store original busy indicator delay, so it can be restored later on
                 var iOriginalBusyDelay = this.getView().getBusyIndicatorDelay();
@@ -158,6 +159,8 @@ sap.ui.define([
                     files: [] // initial empty list
                 });
                 this.getView().setModel(oAttachmentModel, "attachments");
+                this._newCreatedOnce = false;
+                this._aNewItemContexts = [];
 
 
             },
@@ -513,11 +516,14 @@ sap.ui.define([
 
             },
 
-            _prepareDraft: function () {
+            _prepareDraft: function (ID) {
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    var sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    if(!sInvoiceID){
+                        sInvoiceID = ID;
+                    }
                     const baseUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)/draftPrepare`;
 
                     jQuery.ajax({
@@ -540,11 +546,14 @@ sap.ui.define([
 
             },
 
-            _activateDraft: function () {
+            _activateDraft: function (ID) {
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    var sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    if(!sInvoiceID){
+                        sInvoiceID = ID;
+                    }
                     const baseUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)/draftActivate?$expand=DraftAdministrativeData`;
 
                     jQuery.ajax({
@@ -657,17 +666,33 @@ sap.ui.define([
                 var oDate = new Date(vDate);
                 return "/Date(" + oDate.getTime() + ")/";
             },
-            onSavePress: function () {
+            onSavePress: async function () {
                 sap.ui.core.BusyIndicator.show(0)
                 var oJSON = this.getView().getModel().getData();
                 var sDataPath = this.getView().getBindingContext().getPath();
-                var oDirectPayload = this.getView().getModel().getData(sDataPath);
-                // //add invoice items to the payload
-                oDirectPayload.to_InvoiceItem = this.byId("ItemTable").getBinding("items").getContexts().map(ctx => ctx.getObject());
                 var oODataModel = this.getView().getModel();
-                //this._ValidatePayload(oJSON);
                 var oAppViewModel = this.getModel("appView");
                 var bCreateMode = oAppViewModel.getProperty("/CreateMode")
+                var oDirectPayload = this.getView().getModel().getData(sDataPath);
+                var oTable = this.byId("ItemTable");
+                // //add invoice items to the payload
+                if(bCreateMode){
+                    const aItemPaths = this._aNewItemContexts.map(ctx => ctx.getPath());
+                    oDirectPayload.to_InvoiceItem = this._aNewItemContexts.map(ctx => ctx.getObject());     
+                } else {
+                    const existing = oTable.getBinding("items").getContexts().map(c => c.getObject());
+                    const newOnes = (this._aNewItemContexts || []).map(c => c.getObject());
+
+                    oDirectPayload.to_InvoiceItem = [...existing, ...newOnes];
+                    // oDirectPayload.to_InvoiceItem = oTable.getBinding("items").getContexts().map(ctx => ctx.getObject());
+                    // if(this._aNewItemContexts.length > 0) {
+                    //     oDirectPayload.to_InvoiceItem.push(this._aNewItemContexts.map(ctx => ctx.getObject()))
+                    // }
+                }
+                           
+                //this._ValidatePayload(oJSON);
+                
+                
                 // Prepare deep insert payload
                 // var oPayload = {
                 //     fiscalYear: oJSON.Header.fiscalYear,
@@ -711,6 +736,8 @@ sap.ui.define([
                             this._toggleEdit();
                             sap.ui.core.BusyIndicator.hide(0);
                             sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
+                            this._aNewItemContexts =[];
+                            this._prepareDraft(oData.ID).then(() => this._activateDraft(oData.ID))
                             //this.onNavBack();
                         }.bind(this),
                         error: function (oError) {
@@ -734,6 +761,7 @@ sap.ui.define([
                             this._toggleEdit();
                             sap.ui.core.BusyIndicator.hide(0);
                             sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
+                            this._aNewItemContexts =[];
                         }.bind(this),
                         error: function (xhr) {
                             sap.m.MessageToast.show("Update failed");
@@ -818,99 +846,131 @@ sap.ui.define([
                 var sObjectId = oEvent.getParameter("arguments").objectId;
                 this._bEditMode = (sObjectId !== "new");
                 var oViewModel = this.getModel("filesDetailView");
-                var oModel = this.getView().getModel("modelV2")
+                var oModel = this.getOwnerComponent().getModel("modelV2");
                 var oAppViewModel = this.getModel("appView");
 
                 // var oComponent = this.getOwnerComponent();
                 // var oCreateContext = oComponent._oCreateContext; // set earlier by list controller
 
 
-                this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
-
-                if (sObjectId === "new") {
-                    // var oModel = this.getView().getModel();
-
-                    var oContext = oModel.createEntry("/Invoice", {
-                        properties: {
-                            // OPTIONAL initial values
-                            IsActiveEntity: false,
-                            HasActiveEntity: false
-                        },
-                         expand: "to_InvoiceItem"
-                    });
-
-                    this.getView().bindElement({
-                        path: oContext.getPath(), //added expand items
-                        parameters: {
-                            expand: "to_InvoiceItem"
-                        }
-                    });
-                    var oAppView = this.getModel("appView");
-                    oAppView.setProperty("/isEditable", true);
-                    oAppView.setProperty("/bProcessFlowVisible", false);
-
-                    this.byId("ObjectPageHeader").setObjectTitle("New Invoice");
-                    // this.getModel("appView").setProperty("/bProcessFlowVisible", false);
-                    // var oJSONModel = this._createEmptyInvoiceModel();
-                    // this.getView().setModel(oJSONModel, "CreateModel");
-                    // oAppViewModel.setProperty("/isEditable", true);
-                    // var oHeader = this.byId("ObjectPageHeader");
-                    // if (oHeader) {
-                    //     oHeader.setObjectTitle("New Invoice");
-                    // }
-                    // return;
-                } else {
-                    this._InvGUID = oEvent.getParameter("arguments").objectId;
-                    this.getModel("appView").setProperty("/bProcessFlowVisible", true);
-                    var oODataModel = this.getView().getModel();
-                    var sPath = oEvent.getParameter("arguments").objectId;
-                    oODataModel.read("/Invoice(" + sPath + ")", {
-                        urlParameters: {
-                            "$expand": "to_InvoiceItem"
-                        },
-                        success: (oData) => {
-
-                            var oJSONData = {
-                                Header: {
-                                    ID: oData.ID,
-                                    documentId: oData.documentId,
-                                    fiscalYear: oData.fiscalYear,
-                                    companyCode: oData.companyCode,
-                                    documentDate: oData.documentDate,
-                                    postingDate: oData.postingDate,
-                                    supInvParty: oData.supInvParty,
-                                    documentCurrency_code: oData.documentCurrency_code,
-                                    invGrossAmount: oData.invGrossAmount || "0.00",
-                                    DocumentHeaderText: oData.DocumentHeaderText,
-                                    PaymentTerms: oData.PaymentTerms,
-                                    AccountingDocumentType: oData.AccountingDocumentType,
-                                    InvoicingParty: oData.InvoicingParty,
-                                    statusFlag: oData.statusFlag
-                                },
-                                Items: oData.to_InvoiceItem.results.map(item => ({
-                                    ID: item.ID,
-                                    sup_InvoiceItem: item.sup_InvoiceItem,
-                                    purchaseOrder: item.purchaseOrder,
-                                    purchaseOrderItem: item.purchaseOrderItem,
-                                    referenceDocument: item.referenceDocument,
-                                    refDocFiscalYear: item.refDocFiscalYear,
-                                    refDocItem: item.refDocItem,
-                                    taxCode: item.taxCode,
-                                    documentCurrency_code: item.documentCurrency_code,
-                                    supInvItemAmount: item.supInvItemAmount,
-                                    poQuantityUnit: item.poQuantityUnit,
-                                    quantityPOUnit: item.quantityPOUnit || "0.00",
-                                    Plant: item.Plant,
-                                    TaxJurisdiction: item.TaxJurisdiction,
-                                    ProductType: item.ProductType
-                                }))
-                            };
-
-                            var oJSONModel = new sap.ui.model.json.JSONModel(oJSONData);
-                            this.getView().setModel(oJSONModel, "CreateModel");
-                        }
-                    });
+              //  this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
+                if(oModel.hasPendingChanges()){
+                    oModel.resetChanges();
                 }
+                if(this.getView().getParent() && this.getView().getParent().getParent().getParent() && this.getView().getParent().getParent().getParent().getId() !== "container-zdashboard---files"){
+                    if (sObjectId === "new") {
+                        // var oModel = this.getView().getModel();
+                        //  if (this._newCreatedOnce) {
+                        //     console.warn("Skipping duplicate createEntry");
+                        //     return;
+                        // }
+                        // this._newCreatedOnce = true;
+                        var oContext = oModel.createEntry("/Invoice", {
+                            properties: {
+                                // OPTIONAL initial values
+                                IsActiveEntity: false,
+                                HasActiveEntity: false
+                            },
+                            expand: "to_InvoiceItem"
+                        });
+
+                        this.getView().bindElement({
+                            path: oContext.getPath(), //added expand items
+                            parameters: {
+                                expand: "to_InvoiceItem"
+                            },
+                            urlParameters: {
+                                "$expand": "to_InvoiceItem"   // REQUIRED for OData V2
+                            }
+                        });
+                        this.oncreateItem();
+                        // var sHeaderPath = oContext.getPath();
+
+                        // oModel.createEntry(sHeaderPath + "/to_InvoiceItem", {
+                        //     properties: {
+                        //         IsActiveEntity: false,
+                        //         HasActiveEntity: false,
+                        //         HasDraftEntity: false,
+
+                        //         // your actual business fields (fill as needed)
+                        //         purchaseOrderItem: "",
+                        //         purchaseOrder: "",
+                        //         supInvItemAmount: "0",
+                        //         quantityPOUnit: "",
+                        //         poQuantityUnit: "",
+                        //         taxCode: ""
+                        //     }
+                        // });
+
+                        var oAppView = this.getModel("appView");
+                        oAppView.setProperty("/isEditable", true);
+                        oAppView.setProperty("/bProcessFlowVisible", false);
+
+                        this.byId("ObjectPageHeader").setObjectTitle("New Invoice");
+                        // this.getModel("appView").setProperty("/bProcessFlowVisible", false);
+                        // var oJSONModel = this._createEmptyInvoiceModel();
+                        // this.getView().setModel(oJSONModel, "CreateModel");
+                        // oAppViewModel.setProperty("/isEditable", true);
+                        // var oHeader = this.byId("ObjectPageHeader");
+                        // if (oHeader) {
+                        //     oHeader.setObjectTitle("New Invoice");
+                        // }
+                        // return;
+                    } else {
+                        this._newCreatedOnce = false; 
+                        this._InvGUID = oEvent.getParameter("arguments").objectId;
+                        this.getModel("appView").setProperty("/bProcessFlowVisible", true);
+                        var oODataModel = this.getView().getModel();
+                        var sPath = oEvent.getParameter("arguments").objectId;
+                        oODataModel.read("/Invoice(" + sPath + ")", {
+                            urlParameters: {
+                                "$expand": "to_InvoiceItem"
+                            },
+                            success: (oData) => {
+
+                                var oJSONData = {
+                                    Header: {
+                                        ID: oData.ID,
+                                        documentId: oData.documentId,
+                                        fiscalYear: oData.fiscalYear,
+                                        companyCode: oData.companyCode,
+                                        documentDate: oData.documentDate,
+                                        postingDate: oData.postingDate,
+                                        supInvParty: oData.supInvParty,
+                                        documentCurrency_code: oData.documentCurrency_code,
+                                        invGrossAmount: oData.invGrossAmount || "0.00",
+                                        DocumentHeaderText: oData.DocumentHeaderText,
+                                        PaymentTerms: oData.PaymentTerms,
+                                        AccountingDocumentType: oData.AccountingDocumentType,
+                                        InvoicingParty: oData.InvoicingParty,
+                                        statusFlag: oData.statusFlag
+                                    },
+                                    Items: oData.to_InvoiceItem.results.map(item => ({
+                                        ID: item.ID,
+                                        sup_InvoiceItem: item.sup_InvoiceItem,
+                                        purchaseOrder: item.purchaseOrder,
+                                        purchaseOrderItem: item.purchaseOrderItem,
+                                        referenceDocument: item.referenceDocument,
+                                        refDocFiscalYear: item.refDocFiscalYear,
+                                        refDocItem: item.refDocItem,
+                                        taxCode: item.taxCode,
+                                        documentCurrency_code: item.documentCurrency_code,
+                                        supInvItemAmount: item.supInvItemAmount,
+                                        poQuantityUnit: item.poQuantityUnit,
+                                        quantityPOUnit: item.quantityPOUnit || "0.00",
+                                        Plant: item.Plant,
+                                        TaxJurisdiction: item.TaxJurisdiction,
+                                        ProductType: item.ProductType
+                                    }))
+                                };
+
+                                var oJSONModel = new sap.ui.model.json.JSONModel(oJSONData);
+                                this.getView().setModel(oJSONModel, "CreateModel");
+                            }
+                        });
+                    }
+                }
+                
                 // oAppViewModel.setProperty("/isEditable", false);
                 // delete oComponent._oCreateContext;
 
@@ -936,14 +996,12 @@ sap.ui.define([
                 //     }
                 // });
             },
-
-
-
+    
             oncreateItem: function () {
                 var oAppViewModel = this.getModel("appView");
                 oAppViewModel.setProperty("/isEditable", true);
                 var oTable = this.getView().byId("ItemTable")
-                var oModel = this.getView().getModel()
+                var oModel = this.getView().getModel();
                 var oInvoiceCtx = this.getView().getBindingContext();
                 const oContext = oModel.createEntry(oInvoiceCtx.getPath() + "/to_InvoiceItem", {
                     properties: {
@@ -962,7 +1020,9 @@ sap.ui.define([
                 const oTemplate = oTable.getBindingInfo("items").template.clone();
                 oTemplate.setBindingContext(oContext);
                 oTable.addItem(oTemplate);
-                this._oNewItemCtx = oContext;
+                // this._oNewItemCtx = oContext;
+                this._aNewItemContexts.push(oContext);
+                //  oTable.getBinding("items").refresh(true);
 
                 sap.m.MessageToast.show("New row added");
             },
