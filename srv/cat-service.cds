@@ -8,7 +8,11 @@ using {Attachments} from '@cap-js/sdm';
 
 service DashboardService {
     @odata.draft.enabled
-    entity Invoice      as projection on persistence.InvoiceEntity;
+    entity Invoice      as projection on persistence.InvoiceEntity
+     actions {
+            @(Common.SideEffects.TargetEntities: ['/InvCatalogService.EntityContainer/Invoice'])
+            action copyInvoice(in : $self) returns Invoice;
+        };
     extend persistence.InvoiceEntity with {
         @description: 'Attachments Composition'
         attachments : Composition of many Attachments;

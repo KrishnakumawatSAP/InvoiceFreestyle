@@ -34,7 +34,9 @@ sap.ui.define([
 			 */
 			onInit: function () {
 				this.oModel = this.getOwnerComponent().getModel(); // OData V4 model
-
+				// this.getView().getModel("appView").setProperty("/layout", "OneColumn");
+				this._OriginalDataLocalJSON;
+				this._firstTime = true;
 				this.setModel(new JSONModel({
 					Invoices: [],
 					layout: LayoutType.TwoColumnsBeginExpanded,
@@ -140,66 +142,60 @@ sap.ui.define([
 			},
 
 			onTableUpdateFinished: function (oEvent) {
-				var oTable = oEvent.getSource();
-				var aItems = oTable.getItems();
-
-				if (aItems.length > 0) {
-					var oFirstItem = aItems[0];
-					oTable.setSelectedItem(oFirstItem);
-					this.getView().getModel("filesView").setProperty("/bDeletionEnabled", true);
-					this.getView().getModel("filesView").setProperty("/bCopyEnabled", true);
-					this._oLastSelectedItem = aItems[0];
-
-					// Open detail
-					//this.onListItemPress({ getParameter: () => ({ listItem: aItems[0] }) });
-					//this is for the first row
-					//this._bindDetail(oFirstItem.getBindingContext());
-				}
+				
 			},
 			_bindDetail: function (oContext) {
 				var oDetailView = this.byId("FilesDetailView");
 				if (oDetailView) {
 					oDetailView.setBindingContext(oContext);
 				}
-				this.getView().getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+				this.getView().getModel("appView").setProperty("/layout", "OneColumn");
 			},
-			onListItemPress1: function (oEvent) {
-				sap.ui.core.BusyIndicator.show(0);
-				var oAppViewModel = this.getModel("appView");
-				oAppViewModel.setProperty("/CreateMode", false);
-				var oItem = oEvent.getParameter("item") || oEvent.listItem;
-				if (!oItem) {
-					sap.ui.core.BusyIndicator.hide();
-					return;
-				}
-				var oCtx = oItem.getBindingContext("filesView");
-				if (!oCtx) {
-					sap.ui.core.BusyIndicator.hide();
-					return;
-				}
-				var oInvoice = oCtx.getObject();
-				var sInvoiceID = oInvoice.ID;
-				var oFCL = this.byId("_IDGenFlexibleColumnLayout1");
-				oFCL.setLayout(sap.f.LayoutType.TwoColumnsMidExpanded);
-				this._BindDetailPage(sInvoiceID);
-			},
+			
 
 			onListItemPress: function (oEvent) {
 				sap.ui.core.BusyIndicator.show(0);
 				var oAppViewModel = this.getModel("appView");
-				oAppViewModel.setProperty("/CreateMode", false);
-				const oItem = oEvent.getParameter("listItem");
-				const oCtx = oItem.getBindingContext("filesView");
-				const oInvoice = oCtx.getObject();
-				const sInvoiceID = `${oInvoice.ID}`;
-				// const oModel = this.getOwnerComponent().getModel(); // OData V4 model
-				const oFCL = this.byId("_IDGenFlexibleColumnLayout1");
+				oAppViewModel.setProperty("/sideBarExpanded",false);
+				var oDetailView = this.byId("FilesDetailView");
 
-				oFCL.setLayout(sap.f.LayoutType.TwoColumnsMidExpanded);
-				this._BindDetailPage(sInvoiceID);
-				// this.getRouter().navTo("fileDetail", {
-				// 		objectId: sInvoiceID
-				// 	}, false);	
+				if (oDetailView.getModel().hasPendingChanges()) {
+					MessageBox.warning(
+						"You have unsaved changes. Do you want to discard and switch?",
+						{
+							actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+							onClose: function (sAction) {
+								if (sAction === MessageBox.Action.YES) {
+									oDetailView.getModel().resetChanges();
+									oAppViewModel.setProperty("/isEditable", false);
+									oAppViewModel.setProperty("/CreateMode", false);
+
+									const oItem = oEvent.getParameter("listItem");
+									const oCtx = oItem.getBindingContext("filesView");
+									const oInvoice = oCtx.getObject();
+									const sInvoiceID = oInvoice.ID;
+									const oFCL = this.byId("_IDGenFlexibleColumnLayout1");
+
+									oFCL.setLayout(sap.f.LayoutType.TwoColumnsMidExpanded);
+									this._BindDetailPage(sInvoiceID); // ✅ only proceed here
+								} 
+								// Optional: else branch if NO selected
+							}.bind(this)
+						}
+					);
+				} else {
+					// ✅ No pending changes, safe to proceed directly
+					oAppViewModel.setProperty("/isEditable", false);
+					oAppViewModel.setProperty("/CreateMode", false);
+					const oItem = oEvent.getParameter("listItem");
+					const oCtx = oItem.getBindingContext("filesView");
+					const oInvoice = oCtx.getObject();
+					const sInvoiceID = oInvoice.ID;
+					const oFCL = this.byId("_IDGenFlexibleColumnLayout1");
+
+					oFCL.setLayout(sap.f.LayoutType.TwoColumnsMidExpanded);
+					this._BindDetailPage(sInvoiceID);
+				}
 
 
 			},
@@ -208,82 +204,46 @@ sap.ui.define([
 				this.getModel("appView").setProperty("/bProcessFlowVisible", true);
 				var oDetailView = this.byId("FilesDetailView");
 				var oODataModel = oDetailView.getModel();
-				oODataModel.read(`/Invoice(ID=${sInvoiceID}, IsActiveEntity=true)`, {
-					urlParameters: {
-						"$expand": "to_InvoiceItem"
+				var sPath = `/Invoice(ID=${sInvoiceID},IsActiveEntity=true)`;
+				oDetailView.bindElement({
+					path: sPath,
+					parameters: {
+						expand: "to_InvoiceItem"
 					},
-					success: function (oData) {
-						sap.ui.core.BusyIndicator.hide(0);
-						var oJSONData = {
-							Header: { ...oData },
-							Items: oData.to_InvoiceItem.results.map(item => ({ ...item }))
-						};
-
-						var oJSONModel = new sap.ui.model.json.JSONModel(oJSONData);
-						oDetailView.setModel(oJSONModel, "CreateModel");
-					}.bind(this),
-					error: function () {
-						sap.ui.core.BusyIndicator.hide(0);
-						MessageToast.show("Failed to load invoice details.");
+					events: {
+						dataRequested: function () {
+							sap.ui.core.BusyIndicator.show();
+						},
+						dataReceived: function () {
+							sap.ui.core.BusyIndicator.hide();
+						}
 					}
 				});
+				// oODataModel.read(`/Invoice(ID=${sInvoiceID}, IsActiveEntity=true)`, {
+				// 	urlParameters: {
+				// 		"$expand": "to_InvoiceItem"
+				// 	},
+				// 	success: function (oData) {
+				// 		sap.ui.core.BusyIndicator.hide(0);
+				// 		var oJSONData = {
+				// 			Header: { ...oData },
+				// 			Items: oData.to_InvoiceItem.results.map(item => ({ ...item }))
+				// 		};
+
+				// 		var oJSONModel = new sap.ui.model.json.JSONModel(oJSONData);
+				// 		this._OriginalDataLocalJSON = structuredClone(oJSONData);
+
+				// 		oDetailView.setModel(oJSONModel, "CreateModel");
+				// 	}.bind(this),
+				// 	error: function () {
+				// 		sap.ui.core.BusyIndicator.hide(0);
+				// 		MessageToast.show("Failed to load invoice details.");
+				// 	}
+				// });
 			},
 
 
-			_BindDetailPage1: function (sInvoiceID) {
-				this.getModel("appView").setProperty("/bProcessFlowVisible", true);
-				var oDetailView = this.byId("FilesDetailView");
-				var oODataModel = oDetailView.getModel();
-				oODataModel.read("/Invoice(" + sInvoiceID + ")", {
-					urlParameters: {
-						"$expand": "to_InvoiceItem"
-					},
-					success: function (oData) {
-						sap.ui.core.BusyIndicator.hide(0);
-						var oJSONData = {
-							Header: {
-								ID: oData.ID,
-								documentId: oData.documentId,
-								fiscalYear: oData.fiscalYear,
-								companyCode: oData.companyCode,
-								documentDate: oData.documentDate,
-								postingDate: oData.postingDate,
-								supInvParty: oData.supInvParty,
-								documentCurrency_code: oData.documentCurrency_code,
-								invGrossAmount: oData.invGrossAmount || "0.00",
-								DocumentHeaderText: oData.DocumentHeaderText,
-								PaymentTerms: oData.PaymentTerms,
-								AccountingDocumentType: oData.AccountingDocumentType,
-								InvoicingParty: oData.InvoicingParty,
-								statusFlag: oData.statusFlag
-							},
-							Items: oData.to_InvoiceItem.results.map(item => ({
-								ID: item.ID,
-								sup_InvoiceItem: item.sup_InvoiceItem,
-								purchaseOrder: item.purchaseOrder,
-								purchaseOrderItem: item.purchaseOrderItem,
-								referenceDocument: item.referenceDocument,
-								refDocFiscalYear: item.refDocFiscalYear,
-								refDocItem: item.refDocItem,
-								taxCode: item.taxCode,
-								documentCurrency_code: item.documentCurrency_code,
-								supInvItemAmount: item.supInvItemAmount,
-								poQuantityUnit: item.poQuantityUnit,
-								quantityPOUnit: item.quantityPOUnit || "0.00",
-								Plant: item.Plant,
-								TaxJurisdiction: item.TaxJurisdiction,
-								ProductType: item.ProductType
-							}))
-						};
-
-						var oJSONModel = new sap.ui.model.json.JSONModel(oJSONData);
-						oDetailView.setModel(oJSONModel, "CreateModel");
-					}.bind(this),
-					error: function () {
-
-					}
-				});
-			},
+			
 			_onProductMatched: function (oEvent) {
 				sap.ui.core.BusyIndicator.hide();
 				var sObject = oEvent.getParameter("arguments").objectId || "0",
@@ -295,37 +255,7 @@ sap.ui.define([
 				}
 				//oTable.getItems()[oTable.getBinding("items").aIndices.indexOf(+sObject)].setSelected(true);
 			},
-			onTabSelect: function (oEvent) {
-				var sKey = oEvent.getParameter("key"); // tab key (all, pdf, email, posted, error)
-				var oSmartTable = this.byId("InvoiceSmartTable");
-				var oBinding = oSmartTable.getTable().getBinding("items");
-
-				var aFilters = [];
-				//for icon tab bar switch table refrsh
-				switch (sKey) {
-					case "pdf":
-						aFilters.push(new Filter("mode", FilterOperator.EQ, "pdf"));
-						break;
-					case "email":
-						aFilters.push(new Filter("mode", FilterOperator.EQ, "email"));
-						break;
-					case "posted":
-						aFilters.push(new Filter("statusFlag", FilterOperator.EQ, "S"));
-						break;
-					case "error":
-						aFilters.push(new Filter("statusFlag", FilterOperator.EQ, "E")); // assuming 'E' = Error
-						break;
-					case "all":
-					default:
-						// no extra filter
-						break;
-				}
-
-				// apply filters
-				if (oBinding) {
-					oBinding.filter(aFilters, "Application");
-				}
-			},
+			
 
 			/**
 			 * 
@@ -336,97 +266,99 @@ sap.ui.define([
 			},
 			onSelectionChange: function (oEvt) {
 				var oTable = this.byId("InvoiceTable");
-				var oAppViewModel = this.getModel("appView");
-				var bEditMode = oAppViewModel.getProperty("/isEditable");
-				var oNewSelectedItem = oEvt.getParameter("listItem");
-				if (bEditMode && this._oLastSelectedItem && oNewSelectedItem !== this._oLastSelectedItem) {
+				var oViewModel = this.getView().getModel("filesView");
+				//var oNewSelectedItem = oEvt.getParameter("listItem");
+				const aSelectedItems = oTable.getSelectedItems(); // array of sap.m.ColumnListItem
+				const iSelectedCount = aSelectedItems.length;
+				// Enable Copy only if exactly 1 item is selected
+				const bCopyEnabled = iSelectedCount === 1;
 
-					MessageBox.warning(
-						"You have unsaved changes. Do you want to discard and switch?",
-						{
-							actions: [MessageBox.Action.YES, MessageBox.Action.NO],
-							onClose: function (sAction) {
+				// Enable Delete if 1 or more are selected
+				const bDeletionEnabled = iSelectedCount > 0;
 
-								if (sAction === MessageBox.Action.YES) {
-									this.getView().getModel().resetChanges();
-									oAppViewModel.setProperty("/isEditable", false);
-									this._oLastSelectedItem = oNewSelectedItem;
-									this.onListItemPress({ getParameter: () => ({ listItem: oNewSelectedItem }) });
-
-								} else {
-									oTable.setSelectedItem(this._oLastSelectedItem, true);
-								}
-
-							}.bind(this)
-						}
-					);
-
-				} else {
-					this._oLastSelectedItem = oNewSelectedItem;
-					this.onListItemPress(oEvt);
-				}
+				// Update the view model
+				oViewModel.setProperty("/bCopyEnabled", bCopyEnabled);
+				oViewModel.setProperty("/bDeletionEnabled", bDeletionEnabled);
 			},
 
 
 
+			// onPressCopy: function (oEvent) {
+			// 	var oItem = this._oInnerTable.getSelectedItem();
+			// 	var oData = oItem.getBindingContext().getObject();
+			// 	var oModel = this.getView().getModel(), oAppViewModel = this.getModel("appView");
+			// 	const oContext = oModel.createEntry("/Invoice", {
+			// 		properties: {
+			// 			companyCode: oData.companyCode,
+			// 			documentDate: new Date(),
+			// 			postingDate: new Date(),
+			// 			invGrossAmount: oData.invGrossAmount,
+			// 			documentCurrency: oData.documentCurrency,
+			// 			supInvParty: oData.supInvParty,
+			// 			InvoicingParty: oData.InvoicingParty,
+			// 			// reset system-generated fields
+			// 			InvoiceNumber: "",
+			// 			//Status: "DRAFT"
+			// 		}
+			// 	});
 
-			/**
-			 * 
-			 */
-			onSelectionChange1: function (oEvt) {
-				var isSelect = oEvt.getParameter("selected");
-				this._oInnerTable = this.byId("InvoiceTable");
-				isSelect = this._oInnerTable.getSelectedItems().length > 0;
-				var isSelectCopy = this._oInnerTable.getSelectedItems().length === 1;
-				var oModel = this.getView().getModel("filesView").setProperty("/bDeletionEnabled", isSelect)
-				var oModel = this.getView().getModel("filesView").setProperty("/bCopyEnabled", isSelectCopy)
-			},
+			// 	// 🔹 Update view state
+			// 	oAppViewModel.setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
+			// 	oAppViewModel.setProperty("/isEditable", true);
 
-			/**
-			 * 
-			 */
+			// 	// 🔹 Navigate to detail page
+			// 	this.getRouter().navTo("fileDetail", {
+			// 		objectId: "new" //changed copy to new
+			// 	});
 
-			onPressCopy: function (oEvent) {
-				var oItem = this._oInnerTable.getSelectedItem();
-				var oData = oItem.getBindingContext().getObject();
-				var oModel = this.getView().getModel(), oAppViewModel = this.getModel("appView");
-				const oContext = oModel.createEntry("/Invoice", {
-					properties: {
-						companyCode: oData.companyCode,
-						documentDate: new Date(),
-						postingDate: new Date(),
-						invGrossAmount: oData.invGrossAmount,
-						documentCurrency: oData.documentCurrency,
-						supInvParty: oData.supInvParty,
-						InvoicingParty: oData.InvoicingParty,
-						// reset system-generated fields
-						InvoiceNumber: "",
-						//Status: "DRAFT"
+			// 	// 🔹 Store context for binding in detail page
+			// 	this.getOwnerComponent()._oCreateContext = oContext;
+			// },
+
+			onPressCopy: async function () {
+				const oTable = this.byId("InvoiceTable");
+				const oSelectedItems = oTable.getSelectedItems();
+
+				// if (oSelectedItems.length !== 1) {
+				// 	sap.m.MessageToast.show("Please select exactly one invoice to copy.");
+				// 	return;
+				// }
+
+				const oCtx = oSelectedItems[0].getBindingContext("filesView");
+				const oInvoice = oCtx.getObject();
+				const sInvoiceID = oInvoice.ID;
+
+				// Get your OData V2 model (usually default or named)
+				const oModel = this.getOwnerComponent().getModel("modelV2"); // OData V2 model
+
+				sap.ui.core.BusyIndicator.show(0);
+
+				// ✅ Build OData Action URL
+				//const sPath = `/Invoice(ID=guid'${sInvoiceID}',IsActiveEntity=true)/Invoice_copyInvoice`;
+
+				// Perform POST call
+				oModel.callFunction("/Invoice_copyInvoice", {
+					method: "POST",
+					urlParameters: {
+						ID: `${sInvoiceID}`,
+						IsActiveEntity: true
+					},
+					success: (oData, response) => {
+						sap.ui.core.BusyIndicator.hide(0);
+						sap.m.MessageToast.show("Invoice copied successfully!");
+
+						// Refresh list binding to show the new invoice
+						const oListBinding = oTable.getBinding("items");
+						oListBinding.refresh(true);
+					},
+					error: (oError) => {
+						sap.ui.core.BusyIndicator.hide(0);
+						console.error(oError);
+						sap.m.MessageBox.error("Failed to copy invoice.");
 					}
 				});
-
-				// 🔹 Update view state
-				oAppViewModel.setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
-				oAppViewModel.setProperty("/isEditable", true);
-
-				// 🔹 Navigate to detail page
-				this.getRouter().navTo("fileDetail", {
-					objectId: "new" //changed copy to new
-				});
-
-				// 🔹 Store context for binding in detail page
-				this.getOwnerComponent()._oCreateContext = oContext;
 			},
 
-			NavigateToInvoiceDetails: function (oEvent) {
-				var oCtx = oEvent.getSource().getBindingContext();
-				var sDocId = oCtx.getProperty("documentId");
-
-				// Example: navigate to detail route
-				this.getOwnerComponent().getRouter().navTo("InvoiceDetail", {
-					docId: sDocId
-				});
-			},
 
 			/* =========================================================== */
 			/* event handlers                                              */

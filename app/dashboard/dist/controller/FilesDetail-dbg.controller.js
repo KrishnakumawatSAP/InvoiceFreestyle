@@ -235,6 +235,9 @@ sap.ui.define([
 
                 sap.m.MessageToast.show("Upload complete.");
             },
+
+
+
             onDeleteAttachment: async function (oEvent) {
                 const oModel = this.getOwnerComponent().getModel();
                 const oAttachmentsModel = this.getView().getModel("attachments");
@@ -264,261 +267,44 @@ sap.ui.define([
             },
 
 
-            onFileSelectedV41: async function (oEvent) {
-                const oFile = oEvent.getParameter("files")[0];
-               // if (!oFile) return;
 
-                const oView = this.getView();
-                const oModel = this.getOwnerComponent().getModel(); // V4 model
-                const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
-
-
-               await  $.ajax({
-                    url: `/odata/v4/dashboard/`,
-                    type: "GET",
-                    headers: { "X-CSRF-Token": "Fetch" },
-                    success: (data, status, xhr) => {
-                        this._csrfToken = xhr.getResponseHeader("X-CSRF-Token");
-                    }
-                    });
-
-            //    await $.ajax({
-            //         url: `/odata/v4/dashboard/Invoice(ID='${sInvoiceID}',IsActiveEntity=true)/draftEdit(PreserveChanges=true)`,
-            //         type: "POST",
-            //         headers: {
-            //             "X-CSRF-Token": this._csrfToken || "Fetch",   
-            //             "Accept": "application/json"
-            //         },
-            //         contentType: "application/json",
-            //         data: JSON.stringify({}),  
-            //         success: (oData) => {
-            //             console.log("Draft Edit Success:", oData);
-            //         },
-            //         error: (xhr) => {
-            //             console.error("Draft Edit Failed:", xhr.responseText || xhr);
-            //         }
-            //     });
-
-
-
-            
-                // sap.m.MessageToast.show("Upload complete.");
-
-                // Navigation property list binding for attachments
-            //     const oAttachmentList = oModel.bindList(
-            //     `/Invoice(ID='${sInvoiceID}',IsActiveEntity=false)/attachments`,
-            //      undefined,
-            //     undefined,
-            //     undefined,
-            //     { $$updateGroupId: "$auto" }
-            // );
-                // const oDraftCtx = oModel.bindContext(
-                //     `/Invoice(ID='${sInvoiceID}',IsActiveEntity=true)/draftEdit(PreserveChanges=true)`,
-                //     null,
-                //     { $$groupId: "$auto" }   
-                // );
-                // await Promise.resolve();
-                // // Execute action
-                // await oDraftCtx.execute();
-
-
-
-            // const oAttachmentList1 = oModel.bindList(
-            //         `/Invoice(ID='${sInvoiceID}',IsActiveEntity=false)/attachments`,
-            //         undefined,
-            //         undefined,
-            //         undefined,
-            //         { $$updateGroupId: "draftGroup" }
-            //         );
-
-
-            //         const oCtx = oAttachmentList1.create({ filename: oFile.name });
-
-            //         // 4) Send metadata create to backend before reading keys
-            //         await oModel.submitBatch("draftGroup");
-
-            //         // 5) Now metadata is persisted → ID exists
-            //         const oAttachment = await oCtx.created();
-
-
-                    await this._test(sInvoiceID,oFile );
-                    // var Promise_res = new Promise(function(resolve, reject) {
-                    //         $.ajax({
-                    //             url: `/odata/v4/dashboard/Invoice(ID='${sInvoiceID}',IsActiveEntity=false)/attachments`,
-                    //             type: "POST",
-                    //             headers: {
-                    //                 // "X-CSRF-Token": this._csrfToken,
-                    //                 // "Prefer": "return=representation",
-                    //                 "Accept": "application/json"
-                    //                 // "Prefer" header purposely omitted
-                    //             },
-                    //             contentType: "application/json",
-                    //             data: JSON.stringify({ filename: oFile.name })
-                    //         }).done(function(response) {
-                    //             resolve(response);
-                    //         }).fail(function(jqXHR, textStatus, errorThrown) {
-                    //             reject({ jqXHR, textStatus, errorThrown });
-                    //         });
-                    //     });
-                    
-                    // const response = await $.ajax({
-                    //     url: `/odata/v4/dashboard/Invoice(ID='${sInvoiceID}',IsActiveEntity=false)/attachments`,
-                    //     type: "POST",
-                    //     headers: {
-                    //         // "X-CSRF-Token": this._csrfToken,
-                    //         // "Prefer": "return=representation",
-                    //         "Accept": "application/json"
-                    //         // DO NOT send Prefer here – SDM ignores it anyway
-                    //     },
-                    //     contentType: "application/json",
-                    //     data: JSON.stringify({ filename: oFile.name })
-                    // });
-
-
-                    const response1 = await $.ajax({
-                        url: `/odata/v4/dashboard/Invoice(ID='${sInvoiceID}',IsActiveEntity=false)/attachments`,
-                        type: "GET",
-                        // headers: {
-                        //     "X-CSRF-Token": this._csrfToken,
-                        //     "Prefer": "return=representation",
-                        //     "Accept": "application/json"
-                        //     // DO NOT send Prefer here – SDM ignores it anyway
-                        // },
-                         success: (data, status, xhr) => {
-                        this.Response = data;
-                    }
-                        // contentType: "application/json",
-                        // data: JSON.stringify({ filename: oFile.name })
-                    });
-                  
-
-                    const sAttachmentID =  response1.ID
-
-                    await this._uploadBinaryFile(sInvoiceID, sAttachmentID, oFile);
-
-
-                    //  oAttachmentList1.create({
-                    //     filename: oFile.name
-                    // }).created().then((oData) => {
-                    //     sap.m.MessageToast.show("Attachment metadata created.");
-
-                    //     const sAttachmentID = oData.ID; // Returned from backend
-
-                    //     this._uploadBinaryFile(sInvoiceID, sAttachmentID, oFile);
-                    // }).catch((oError) => {
-                    //     sap.m.MessageBox.error("Failed to create attachment.");
-                    //     console.error(oError);
-                    // });
-
-
-
-                        // const aData = aContexts.map(ctx => ctx.getObject());
-                        // this.getView().getModel("Attachments").setProperty("/files", aData);
-                       // }).bind(this);
-            // Create metadata entry for attachment
-            // oAttachmentList.create({
-            //     filename: oFile.name
-            // }).created().then((oData) => {
-            //     sap.m.MessageToast.show("Attachment metadata created.");
-
-            //     const sAttachmentID = oData.ID; // Returned from backend
-
-            //     this._uploadBinaryFile(sInvoiceID, sAttachmentID, oFile);
-            // }).catch((oError) => {
-            //     sap.m.MessageBox.error("Failed to create attachment.");
-            //     console.error(oError);
-            // });
-        },
-        _test: function(sInvoiceID, oFile){
-            return new Promise((resolve, reject) => {
-                    jQuery.ajax({
-                    url: '/odata/v4/dashboard/' + `Invoice(ID=${sInvoiceID},IsActiveEntity=false)/attachments`,
-                    type: "POST",
-                    data: JSON.stringify({ filename: oFile.name }),
-                    contentType: 'application/json',
-                    processData: false,
-                    success: function (response) {
-            
-                        resolve(response);
-                    },
-                    error: function (err) {
-                        reject(new Error(err.responseText));
-                    }
-                    });
-                });
-        },
-
-        _uploadBinaryFile: function (sInvoiceID, sAttachmentID, oFile) {
-
-            // OData V4 Stream Upload Endpoint
-            const sUploadUrl =
-                `/odata/v4/dashboard/Invoice_attachments(` +
-                `up__ID=${sInvoiceID},ID=${sAttachmentID},IsActiveEntity=false)/content`;
-
-            sap.ui.core.BusyIndicator.show();
-
-            $.ajax({
-                url: sUploadUrl,
-                type: "PUT",
-                data: oFile,
-                processData: false,
-                contentType: oFile.type, // e.g., "application/pdf"
-                success: () => {
-                    sap.ui.core.BusyIndicator.hide();
-                    sap.m.MessageToast.show("File uploaded successfully!");
-
-                    // refresh attachment table binding
-                    this.getView().getModel("attachments").refresh();
-                },
-                error: (xhr) => {
-                    sap.ui.core.BusyIndicator.hide();
-                    sap.m.MessageBox.error("File upload failed.");
-                    console.error(xhr.responseText || xhr);
-                }
-            });
-        },
-
-
-
-
-
-
-
-        editDraftInitial: function () {
+            editDraftInitial: function () {
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                     const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
                     const baseUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=true)/draftEdit?$expand=DraftAdministrativeData`;
-                
+                    const FileUploader = this.byId("fileUploader");
+
                     jQuery.ajax({
-                    url: baseUrl,
-                    type: "POST",
-                    contentType: "application/json",
-                    processData: false,
-                    success: data => resolve(data),
-                    error: firstErr => {
-                        const draftUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)`;
-                        jQuery.ajax({
-                        url: draftUrl,
-                        type: "GET",
+                        url: baseUrl,
+                        type: "POST",
+                        contentType: "application/json",
+                        processData: false,
                         success: data => resolve(data),
-                        error: xhr => reject(new Error(xhr.responseText || "Unable to start or fetch draft"))
-                        });
-                    }
+                        error: firstErr => {
+                            const draftUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)`;
+                            FileUploader.clear();
+                            jQuery.ajax({
+                                url: draftUrl,
+                                type: "GET",
+                                success: data => resolve(data),
+                                error: xhr => reject(new Error(xhr.responseText || "Unable to start or fetch draft"))
+                            });
+                        }
                     });
                 });
-                },
+            },
 
-        uploadFile: function (fileItem) {
+            uploadFile: function (fileItem) {
 
-           //     this._oBusyDialog.open();
-                 const oFile = fileItem.getParameter("files")[0];
+                //     this._oBusyDialog.open();
+                const oFile = fileItem.getParameter("files")[0];
                 const entity = "Invoice";
 
                 //const typeKey = this.getView().byId("cmbType").getSelectedKey();
-                  const oView = this.getView();
-                 const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                const oView = this.getView();
+                const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
                 const fileMeta = {
 
                     up__ID: sInvoiceID,
@@ -530,120 +316,145 @@ sap.ui.define([
                     note: "test"
 
                 };
-                
+
                 const payload = [fileMeta];
 
                 let firstError = null;
-                
-                this.editDraftInitial()
 
-                    .then(() => 
-                this._createFileEntry(entity, payload)
-                )
+                //file upload
+                const reader = new FileReader();
 
-                    .then(res => {
+                reader.onload = (e) => {
+                    const base64File = e.target.result;   // base64 PDF
+                    const oAttachmentsModel = this.getView().getModel("attachments");
+                    let aFiles = oAttachmentsModel.getProperty("/files") || [];
 
-                    this._sendFileContent(oFile, res, entity);
-
-                    return this._updateFileNote("test", entity);
-
-                    })
-
-                    .catch(err => {
-
-                    firstError = err;
-
-                    this._showError("Failed while creating file entry", err);
-
-                    })
-
-                    .then(() => new Promise(r => setTimeout(r, 3000)))
-
-                    .then(() => this._prepareDraft())
-
-                    .then(() => this._activateDraft())
-
-                    .then(() => {
-
-                    //this._oBusyDialog.close();
-
-                    if (!firstError) {
-
-                        MessageBox.success("File uploaded successfully.");
-
-                       // this.onAttachmentsRead();
-
-                    } else {
-
-                        this._showError("File upload failed", firstError);
-
-                    }
-
-                    })
-
-                    .catch(finalErr => {
-
-                   // this._oBusyDialog.close();
-
-                    this._showError("Draft processing failed", finalErr);
-
+                    aFiles.push({
+                        fileName: oFile.name,
+                        //  attachment: "PDF File",
+                        createdOn: new Date().toLocaleDateString(),
+                        createdBy: "",
+                        notes: "test",
+                        fileContent: base64File
                     });
 
-                },
-                
-                _createFileEntry: function (entity, dataObj) {
+                    oAttachmentsModel.setProperty("/files", aFiles);
+
+
+                    this.editDraftInitial()
+
+                        .then(() =>
+                            this._createFileEntry(entity, payload)
+                        )
+
+                        .then(res => {
+
+                            this._sendFileContent(oFile, res, entity);
+
+                            return this._updateFileNote("test", entity);
+
+                        })
+
+                        .catch(err => {
+
+                            firstError = err;
+                            const FileUploader = this.byId("fileUploader");
+                            FileUploader.clear();
+
+                            this._showError("Failed while creating file entry", err);
+
+                        })
+
+                        .then(() => new Promise(r => setTimeout(r, 3000)))
+
+                        .then(() => this._prepareDraft())
+
+                        .then(() => this._activateDraft())
+
+                        .then(() => {
+
+                            //this._oBusyDialog.close();
+
+                            if (!firstError) {
+
+                                MessageBox.success("File uploaded successfully.");
+
+                                // this.onAttachmentsRead();
+
+                            } else {
+
+                                this._showError("File upload failed", firstError);
+
+                            }
+
+                        })
+
+                        .catch(finalErr => {
+
+                            // this._oBusyDialog.close();
+                            const FileUploader = this.byId("fileUploader");
+                            FileUploader.clear();
+                            this._showError("Draft processing failed", finalErr);
+
+                        });
+                };
+
+                reader.readAsDataURL(oFile); // triggers above block
+            },
+
+            _createFileEntry: function (entity, dataObj) {
 
                 return new Promise((resolve, reject) => {
 
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                 const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
 
                     jQuery.ajax({
 
-                    url: `${model.sServiceUrl}${entity}(ID=${sInvoiceID},IsActiveEntity=false)/attachments`,
+                        url: `${model.sServiceUrl}${entity}(ID=${sInvoiceID},IsActiveEntity=false)/attachments`,
 
-                    type: "POST",
+                        type: "POST",
 
-                    data: JSON.stringify(dataObj[0]),
+                        data: JSON.stringify(dataObj[0]),
 
-                    contentType: "application/json",
+                        contentType: "application/json",
 
-                    Accept: "application/json",
+                        Accept: "application/json",
 
-                    processData: false,
+                        processData: false,
 
-                      success: (data, status, xhr) => {
-                        if (data && data.ID) {
-                        resolve(data);
-                        } else {
-                        const loc = xhr.getResponseHeader("Location");
-                        if (loc) {
-                           const match = loc.match(/up__ID=([^) ,]+).*ID=([^) ,]+)/);
-                            const up__ID = match ? match[1] : null;
-                            const ID = match ? match[2] : null;
-                            resolve({ ID: ID });
-                        } else {
-                            resolve({});
-                        }
-                        }
-                    },
+                        success: (data, status, xhr) => {
+                            if (data && data.ID) {
+                                resolve(data);
+                            } else {
+                                const loc = xhr.getResponseHeader("Location");
+                                if (loc) {
+                                    const match = loc.match(/up__ID=([^) ,]+).*ID=([^) ,]+)/);
+                                    const up__ID = match ? match[1] : null;
+                                    const ID = match ? match[2] : null;
+                                    resolve({ ID: ID });
+                                } else {
+                                    resolve({});
+                                }
+                            }
+                        },
 
-                    error: xhr => reject(new Error(xhr.responseText || "File entry creation failed"))
+                        error: xhr => reject(new Error(xhr.responseText || "File entry creation failed"))
 
                     });
 
                 });
 
-                },
-                
-                _sendFileContent: function (oFile, res, entity) {
+            },
+
+            _sendFileContent: function (oFile, res, entity) {
 
                 const model = this.getOwnerComponent().getModel();
 
                 this.attachmentID = res.ID;
                 const oView = this.getView();
-                 const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
 
                 const url = `${model.sServiceUrl}${entity}_attachments(up__ID=${sInvoiceID},ID=${res.ID},IsActiveEntity=false)/content`;
 
@@ -651,114 +462,151 @@ sap.ui.define([
 
                 uploadSet.setUploadUrl(url);
 
-               
+
                 uploadSet.setHttpRequestMethod("PUT");
-                 uploadSet.setSendXHR(true);
+                uploadSet.setSendXHR(true);
 
                 uploadSet.upload();
 
-                },
-                
-                _updateFileNote: function (noteText, entity) {
+            },
+
+            _updateFileNote: function (noteText, entity) {
 
                 return new Promise((resolve, reject) => {
 
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                 const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
 
                     const noteData = { note: noteText };
 
                     jQuery.ajax({
 
-                    url: `${model.sServiceUrl}${entity}_attachments(up__ID=${sInvoiceID},ID=${this.attachmentID},IsActiveEntity=false)`,
+                        url: `${model.sServiceUrl}${entity}_attachments(up__ID=${sInvoiceID},ID=${this.attachmentID},IsActiveEntity=false)`,
 
-                    type: "PATCH",
+                        type: "PATCH",
 
-                    data: JSON.stringify(noteData),
+                        data: JSON.stringify(noteData),
 
-                    contentType: "application/json",
+                        contentType: "application/json",
 
-                    processData: false,
+                        processData: false,
 
-                    success: resolve,
+                        success: resolve,
 
-                    error: xhr => reject(new Error(xhr.responseText || "Note update failed"))
+                        error: xhr => reject(new Error(xhr.responseText || "Note update failed"))
 
                     });
 
                 });
 
-                },
-                
-                _showError: function (text, err) {
+            },
 
+            _showError: function (text, err) {
+                const FileUploader = this.byId("fileUploader");
+                FileUploader.clear();
                 const msg = `${text}: ${err.message || err}`;
 
                 console.error(msg);
 
                 MessageBox.error(msg);
 
-                },
+            },
 
-                _prepareDraft: function(){
-                    return new Promise((resolve, reject) => {
+            _prepareDraft: function () {
+                return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
                     const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
                     const baseUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)/draftPrepare`;
-                
+
                     jQuery.ajax({
-                    url: baseUrl,
-                    type: "POST",
-                    contentType: "application/json",
-                    processData: false,
-                    success: data => resolve(data),
-                    error: firstErr => {
-                        const draftUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)`;
-                        jQuery.ajax({
-                        url: draftUrl,
-                        type: "GET",
+                        url: baseUrl,
+                        type: "POST",
+                        contentType: "application/json",
+                        processData: false,
                         success: data => resolve(data),
-                        error: xhr => reject(new Error(xhr.responseText || "Unable to start or fetch draft"))
-                        });
-                    }
+                        error: firstErr => {
+                            const draftUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)`;
+                            jQuery.ajax({
+                                url: draftUrl,
+                                type: "GET",
+                                success: data => resolve(data),
+                                error: xhr => reject(new Error(xhr.responseText || "Unable to start or fetch draft"))
+                            });
+                        }
                     });
                 });
 
-                },
+            },
 
-                _activateDraft: function(){
-                     return new Promise((resolve, reject) => {
+            _activateDraft: function () {
+                return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
                     const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
                     const baseUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)/draftActivate?$expand=DraftAdministrativeData`;
-                
+
                     jQuery.ajax({
-                    url: baseUrl,
-                    type: "POST",
-                    contentType: "application/json",
-                    processData: false,
-                    success: data => resolve(data),
-                    error: firstErr => {
-                        const draftUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)`;
-                        jQuery.ajax({
-                        url: draftUrl,
-                        type: "GET",
-                        success: data => resolve(data),
-                        error: xhr => reject(new Error(xhr.responseText || "Unable to start or fetch draft"))
-                        });
-                    }
+                        url: baseUrl,
+                        type: "POST",
+                        contentType: "application/json",
+                        processData: false,
+                        success: data => {
+                            var oAttachmentModel = new sap.ui.model.json.JSONModel({
+                                files: data.attachments || []
+                            });
+                            oView.setModel(oAttachmentModel, "attachments");
+                            var oTable = oView.byId("uploadedFilesTable");
+                            if (oTable.getBinding("items")) {
+                                oTable.getBinding("items").refresh();
+                            }
+
+                            MessageToast.show("Draft activated and attachments loaded.");
+                            resolve(data);
+                        },
+                        error: firstErr => {
+                            const draftUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)`;
+                            jQuery.ajax({
+                                url: draftUrl,
+                                type: "GET",
+                                success: data => resolve(data),
+                                error: xhr => reject(new Error(xhr.responseText || "Unable to start or fetch draft"))
+                            });
+                        }
                     });
                 });
 
-                },
- 
+            },
 
 
 
 
+
+            onOpenAttachment: function (oEvent) {
+
+                const oContext = oEvent.getSource().getBindingContext("Attachments");
+                const sFileId = oContext.getProperty("id");
+                const sFileName = oContext.getProperty("fileName");
+
+                //         const sUrl = "/yourService/InvoiceAttachment(" + sFileId + ")/content";
+
+                // Create PDF Viewer
+                if (!this._pdfViewer) {
+                    this._pdfViewer = new sap.m.PDFViewer({
+                        //     source: sUrl,
+                        title: sFileName,
+                        width: "auto",
+                        height: "800px"
+                    });
+                    this.getView().addDependent(this._pdfViewer);
+                } else {
+                    //  this._pdfViewer.setSource(sUrl);
+                    this._pdfViewer.setTitle(sFileName);
+                }
+
+                this._pdfViewer.open();
+            },
 
 
 
@@ -791,61 +639,9 @@ sap.ui.define([
 
 
 
-            onUploadPress: function () {
-                var oModel = this.getView().getModel(); // OData V2
-                // logic to read upload content is missing
-                var oContext = oModel.createEntry("/Invoice", {
-                    properties: {
-                        companyCode: "",
-                        fiscalYear: new Date().getFullYear(),
-                        documentDate: new Date(),
-                        postingDate: new Date(),
-                        invGrossAmount: 0,
-                        documentCurrency: "",
-                        supInvParty: "",
-                        InvoicingParty: ""
-                    }
-                });
 
-                // Optionally navigate to the new record if using object page pattern
-                //changed view to appView 
-                this.getView().getModel("appView").setProperty("/newContext", oContext);
 
-                sap.m.MessageToast.show("New blank invoice added after upload.");
-            },
 
-            onSave: async function () {
-                var oView = this.getView();
-                var oModel = oView.getModel();
-                var oContext = oView.getBindingContext();
-                var oAppViewModel = oView.getModel("appView");
-
-                try {
-
-                    if (oModel.hasPendingChanges()) {
-                        await oModel.submitChanges({
-                            groupId: "CREATE",
-                            success: function (oData) {
-                                this._toggleEdit();
-                                MessageToast.show("Changes saved successfully!");
-
-                            },
-                            error: function (oError) {
-
-                                MessageToast.show("Error in saving Changes!");
-
-                            }
-                        });
-
-                    } else {
-                        MessageToast.show("Changes Already Saved")
-                    }
-                } catch (error) {
-
-                    console.error("Save failed:", error);
-                    MessageBox.error("Failed to save changes. Please check console logs for details.");
-                }
-            },
 
             _formatToODataDate: function (vDate) {
                 if (!vDate) {
@@ -863,48 +659,52 @@ sap.ui.define([
             },
             onSavePress: function () {
                 sap.ui.core.BusyIndicator.show(0)
-                var oJSON = this.getView().getModel("CreateModel").getData();
+                var oJSON = this.getView().getModel().getData();
+                var sDataPath = this.getView().getBindingContext().getPath();
+                var oDirectPayload = this.getView().getModel().getData(sDataPath);
+                // //add invoice items to the payload
+                oDirectPayload.to_InvoiceItem = this.byId("ItemTable").getBinding("items").getContexts().map(ctx => ctx.getObject());
                 var oODataModel = this.getView().getModel();
-                this._ValidatePayload(oJSON);
+                //this._ValidatePayload(oJSON);
                 var oAppViewModel = this.getModel("appView");
                 var bCreateMode = oAppViewModel.getProperty("/CreateMode")
                 // Prepare deep insert payload
-                var oPayload = {
-                    fiscalYear: oJSON.Header.fiscalYear,
-                    companyCode: oJSON.Header.companyCode,
-                    documentDate: this._formatToODataDate(oJSON.Header.documentDate),
-                    postingDate: this._formatToODataDate(oJSON.Header.postingDate),
-                    supInvParty: oJSON.Header.supInvParty,
-                    documentCurrency_code: oJSON.Header.documentCurrency_code,
-                    invGrossAmount: oJSON.Header.invGrossAmount || "0.00",
-                    DocumentHeaderText: oJSON.Header.DocumentHeaderText,
-                    PaymentTerms: oJSON.Header.PaymentTerms,
-                    AccountingDocumentType: oJSON.Header.AccountingDocumentType,
-                    InvoicingParty: oJSON.Header.InvoicingParty,
-                    statusFlag: oJSON.Header.statusFlag,
+                // var oPayload = {
+                //     fiscalYear: oJSON.Header.fiscalYear,
+                //     companyCode: oJSON.Header.companyCode,
+                //     documentDate: this._formatToODataDate(oJSON.Header.documentDate),
+                //     postingDate: this._formatToODataDate(oJSON.Header.postingDate),
+                //     supInvParty: oJSON.Header.supInvParty,
+                //     documentCurrency_code: oJSON.Header.documentCurrency_code,
+                //     invGrossAmount: oJSON.Header.invGrossAmount || "0.00",
+                //     DocumentHeaderText: oJSON.Header.DocumentHeaderText,
+                //     PaymentTerms: oJSON.Header.PaymentTerms,
+                //     AccountingDocumentType: oJSON.Header.AccountingDocumentType,
+                //     InvoicingParty: oJSON.Header.InvoicingParty,
+                //     statusFlag: oJSON.Header.statusFlag,
 
-                    // deep navigation property for items
-                    to_InvoiceItem: oJSON.Items.map(item => ({
-                        sup_InvoiceItem: item.sup_InvoiceItem,
-                        purchaseOrder: item.purchaseOrder,
-                        purchaseOrderItem: item.purchaseOrderItem,
-                        referenceDocument: item.referenceDocument,
-                        refDocFiscalYear: item.refDocFiscalYear,
-                        refDocItem: item.refDocItem,
-                        taxCode: item.taxCode,
-                        documentCurrency_code: item.documentCurrency_code,
-                        supInvItemAmount: item.supInvItemAmount || 0.0,
-                        poQuantityUnit: item.poQuantityUnit,
-                        quantityPOUnit: item.quantityPOUnit,
-                        Plant: item.Plant,
-                        TaxJurisdiction: item.TaxJurisdiction,
-                        ProductType: item.ProductType
-                    }))
-                };
+                //     // deep navigation property for items
+                //     to_InvoiceItem: oJSON.Items.map(item => ({
+                //         sup_InvoiceItem: item.sup_InvoiceItem,
+                //         purchaseOrder: item.purchaseOrder,
+                //         purchaseOrderItem: item.purchaseOrderItem,
+                //         referenceDocument: item.referenceDocument,
+                //         refDocFiscalYear: item.refDocFiscalYear,
+                //         refDocItem: item.refDocItem,
+                //         taxCode: item.taxCode,
+                //         documentCurrency_code: item.documentCurrency_code,
+                //         supInvItemAmount: item.supInvItemAmount || 0.0,
+                //         poQuantityUnit: item.poQuantityUnit,
+                //         quantityPOUnit: item.quantityPOUnit,
+                //         Plant: item.Plant,
+                //         TaxJurisdiction: item.TaxJurisdiction,
+                //         ProductType: item.ProductType
+                //     }))
+                // };
 
                 if (bCreateMode) {
                     // Perform deep create
-                    oODataModel.create("/Invoice", oPayload, {
+                    oODataModel.create("/Invoice", oDirectPayload, {
                         success: function (oData) {
                             sap.m.MessageToast.show("Invoice Created Successfully");
                             // history.go(-1);
@@ -919,11 +719,11 @@ sap.ui.define([
                         }
                     });
                 } else {
-                    this._InvGUID = this.getView().getModel("CreateModel").getData().Header.ID
+                    // this._InvGUID = this.getView().getModel("CreateModel").getData().Header.ID
                     $.ajax({
-                        url: "/odata/v2/dashboard/Invoice('ID=" + this._InvGUID + "'" + "IsActiveEntity=false" + ")",
+                        url: "/odata/v2/dashboard/Invoice(ID=" + "'" + oDirectPayload.ID + "'," + "IsActiveEntity=true" + ")",
                         type: "PATCH",
-                        data: JSON.stringify(oPayload),
+                        data: JSON.stringify(oDirectPayload),
                         contentType: "application/json",
                         headers: {
                             "If-Match": "*",          // allow update without ETag
@@ -941,6 +741,21 @@ sap.ui.define([
                             sap.ui.core.BusyIndicator.hide(0);
                         }
                     });
+                    // oODataModel.submitChanges({
+                    //     success: function (oData, response) {
+                    //         sap.ui.core.BusyIndicator.hide(0);
+                    //         sap.m.MessageToast.show("Invoice updated successfully!");
+                    //         this._toggleEdit(false);
+                    //         oAppViewModel.setProperty("/isEditable", false);
+                    //         sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
+                    //     }.bind(this),
+
+                    //     error: function (oError) {
+                    //         sap.ui.core.BusyIndicator.hide(0);
+                    //         sap.m.MessageBox.error("Error updating invoice.");
+                    //         console.error(oError);
+                    //     }
+                    // });
                 }
 
             },
@@ -958,69 +773,6 @@ sap.ui.define([
 
 
 
-            /* =========================================================== */
-            /* internal methods                                            */
-            /* =========================================================== */
-            /**
-             * Binds the view to the object path.
-             * @param {sap.ui.base.Event} oEvent pattern match event in route 'object'
-             * @private
-             */
-            _onObjectMatched: function (oEvent) {
-                sap.ui.core.BusyIndicator.hide()
-                var sObjectId = oEvent.getParameter("arguments").objectId;
-                var oViewModel = this.getModel("filesDetailView");
-                var oAppViewModel = this.getModel("appView");
-                var oComponent = this.getOwnerComponent();
-                var oCreateContext = oComponent._oCreateContext; // set earlier by list controller
-
-
-                this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
-
-                if (sObjectId === "new" || sObjectId === "copy") {
-                    this.getModel("appView").setProperty("/bProcessFlowVisible", false);
-                    if (!oCreateContext) {
-                        this.getRouter().navTo("files");
-                        return;
-                    }
-                    this.getView().setBindingContext(oCreateContext);
-                    oAppViewModel.setProperty("/isEditable", true);
-                    var oHeader = this.byId("ObjectPageHeader");
-                    if (oHeader) {
-                        oHeader.setObjectTitle("New Invoice");
-                    }
-
-
-
-                    return;
-                } else {
-                    this.getModel("appView").setProperty("/bProcessFlowVisible", true);
-                }
-                oAppViewModel.setProperty("/isEditable", false);
-                delete oComponent._oCreateContext;
-
-
-                var sObjectPath = this.getModel().createKey("/Invoice", {
-                    DocumentId: sObjectId
-                });
-
-                this.getView().bindElement({
-                    path: sObjectPath,
-                    events: {
-                        change: this._onBindingChange.bind(this),
-                        dataRequested: function () { oViewModel.setProperty("/busy", true); },
-                        dataReceived: function () { oViewModel.setProperty("/busy", false); }
-                    }
-                });
-                const sId = oEvent.getParameter("arguments").ID;
-                const sPath = "/Invoice(" + sId + ")";
-                this.getView().bindElement({
-                    path: sPath,
-                    parameters: {
-                        expand: "to_InvoiceItem,to_InvoiceLogs"
-                    }
-                });
-            },
 
             _createEmptyInvoiceModel: function () {
                 return new sap.ui.model.json.JSONModel({
@@ -1076,15 +828,37 @@ sap.ui.define([
                 this.getModel("appView").setProperty("/layout", sap.f.LayoutType.TwoColumnsBeginExpanded);
 
                 if (sObjectId === "new") {
-                    this.getModel("appView").setProperty("/bProcessFlowVisible", false);
-                    var oJSONModel = this._createEmptyInvoiceModel();
-                    this.getView().setModel(oJSONModel, "CreateModel");
-                    oAppViewModel.setProperty("/isEditable", true);
-                    var oHeader = this.byId("ObjectPageHeader");
-                    if (oHeader) {
-                        oHeader.setObjectTitle("New Invoice");
-                    }
-                    return;
+                    // var oModel = this.getView().getModel();
+
+                    var oContext = oModel.createEntry("/Invoice", {
+                        properties: {
+                            // OPTIONAL initial values
+                            IsActiveEntity: false,
+                            HasActiveEntity: false
+                        },
+                         expand: "to_InvoiceItem"
+                    });
+
+                    this.getView().bindElement({
+                        path: oContext.getPath(), //added expand items
+                        parameters: {
+                            expand: "to_InvoiceItem"
+                        }
+                    });
+                    var oAppView = this.getModel("appView");
+                    oAppView.setProperty("/isEditable", true);
+                    oAppView.setProperty("/bProcessFlowVisible", false);
+
+                    this.byId("ObjectPageHeader").setObjectTitle("New Invoice");
+                    // this.getModel("appView").setProperty("/bProcessFlowVisible", false);
+                    // var oJSONModel = this._createEmptyInvoiceModel();
+                    // this.getView().setModel(oJSONModel, "CreateModel");
+                    // oAppViewModel.setProperty("/isEditable", true);
+                    // var oHeader = this.byId("ObjectPageHeader");
+                    // if (oHeader) {
+                    //     oHeader.setObjectTitle("New Invoice");
+                    // }
+                    // return;
                 } else {
                     this._InvGUID = oEvent.getParameter("arguments").objectId;
                     this.getModel("appView").setProperty("/bProcessFlowVisible", true);

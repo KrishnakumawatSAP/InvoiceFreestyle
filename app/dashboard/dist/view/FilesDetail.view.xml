@@ -21,7 +21,7 @@
             <ObjectPageHeader
                 id="ObjectPageHeader"
                 objectTitle="{DocumentHeaderText}"
-                objectSubtitle="{CreateModel>/Header/companyCode}"
+                objectSubtitle="{companyCode}"
             >
                 <actions>
                     <m:Button
@@ -74,27 +74,27 @@
                 <m:ObjectStatus
                     title="Company Code"
                     id="CompCode"
-                    text="{CreateModel>/Header/companyCode}"
+                    text="{companyCode}"
                 />
                 <m:ObjectStatus
                     title="Gross Amount"
                     id="FiscalYear"
-                    text="{CreateModel>/Header/fiscalYear}"
+                    text="{fiscalYear}"
                 />
                 <m:ObjectStatus
                     title="Create By"
                     id="CreatedBy"
-                    text="{CreateModel>/Header/senderMail}"
+                    text="{senderMail}"
                 />
                 <m:ObjectStatus
                     title="Invoice Number"
                     id="InvoiceNumber"
-                    text="{CreateModel>/Header/documentId}"
+                    text="{documentId}"
                 />
                 <m:ObjectStatus
                     title="Status"
                     id="Status"
-                    text="{CreateModel>/Header/Status}"
+                    text="{Status}"
                 />
             </m:VBox>
             <m:VBox>
@@ -155,16 +155,16 @@
         <m:VBox>
             <!-- Column 1 -->
             <m:Label labelFor="i1" text="Company Code" />
-            <m:Input id="i1" value="{CreateModel>/Header/companyCode}" visible="{appView>/isEditable}" />
-            <m:Text text="{CreateModel>/Header/companyCode}" visible="{= !${appView>/isEditable}}" />
+            <m:Input id="i1" value="{companyCode}" visible="{appView>/isEditable}" />
+            <m:Text text="{companyCode}" visible="{= !${appView>/isEditable}}" />
 
             <m:Label labelFor="i2" text="Fiscal Year" />
-            <m:Input id="i2" value="{CreateModel>/Header/fiscalYear}" visible="{appView>/isEditable}" />
-            <m:Text text="{CreateModel>/Header/fiscalYear}" visible="{= !${appView>/isEditable}}" />
+            <m:Input id="i2" value="{fiscalYear}" visible="{appView>/isEditable}" />
+            <m:Text text="{fiscalYear}" visible="{= !${appView>/isEditable}}" />
 
             <m:Label labelFor="d1" text="Document Date" />
             <m:DatePicker id="d1"
-                value="{ path: 'CreateModel>/Header/documentDate', type: 'sap.ui.model.odata.type.Date' }"
+                value="{ path: 'documentDate', type: 'sap.ui.model.odata.type.Date' }"
                 displayFormat="long"
                 valueFormat="yyyy-MM-dd"
                 visible="{appView>/isEditable}"
@@ -172,50 +172,50 @@
             
             
             <m:Text
-                text="{ path: 'CreateModel>/Header/documentDate', type: 'sap.ui.model.odata.type.Date', formatOptions: { pattern: 'dd MMM yyyy' } }"
+                text="{ path: 'documentDate', type: 'sap.ui.model.odata.type.Date', formatOptions: { pattern: 'dd MMM yyyy' } }"
                 visible="{= !${appView>/isEditable}}"
             />
             </m:VBox>
             <m:VBox>
             <m:Label labelFor="d2" text="Posting Date" />
             <m:DatePicker id="d2"
-                value="{ path: 'CreateModel>/Header/postingDate', type: 'sap.ui.model.odata.type.Date' }"
+                value="{ path: 'postingDate', type: 'sap.ui.model.odata.type.Date' }"
                 displayFormat="long"
                 valueFormat="yyyy-MM-dd"
                 visible="{appView>/isEditable}"
             />
             <m:Text
-                text="{ path: 'CreateModel>/Header/postingDate', type: 'sap.ui.model.odata.type.Date', formatOptions: { pattern: 'dd MMM yyyy' } }"
+                text="{ path: 'postingDate', type: 'sap.ui.model.odata.type.Date', formatOptions: { pattern: 'dd MMM yyyy' } }"
                 visible="{= !${appView>/isEditable}}"
             />
 
             <!-- Row 2 -->
             <m:Label text="Supplier Invoice Party" />
-            <m:Input value="{CreateModel>/Header/supInvParty}" visible="{appView>/isEditable}" />
-            <m:Text text="{CreateModel>/Header/supInvParty}" visible="{= !${appView>/isEditable}}" />
+            <m:Input value="{supInvParty}" visible="{appView>/isEditable}" />
+            <m:Text text="{supInvParty}" visible="{= !${appView>/isEditable}}" />
 
             <m:Label text="Invoicing Party" />
-            <m:Input value="{CreateModel>/Header/InvoicingParty}" visible="{appView>/isEditable}" />
-            <m:Text text="{CreateModel>/Header/InvoicingParty}" visible="{= !${appView>/isEditable}}" />
+            <m:Input value="{InvoicingParty}" visible="{appView>/isEditable}" />
+            <m:Text text="{InvoicingParty}" visible="{= !${appView>/isEditable}}" />
             </m:VBox>
             <m:VBox>
             <m:Label text="Currency" />
             <m:Input
-                value="{CreateModel>/Header/documentCurrency}"
+                value="{documentCurrency}"
                 showValueHelp="true"
                 valueHelpOnly="true"
                 visible="{appView>/isEditable}"
             />
-            <m:Text text="{CreateModel>/Header/documentCurrency}" visible="{= !${appView>/isEditable}}" />
+            <m:Text text="{documentCurrency}" visible="{= !${appView>/isEditable}}" />
 
             <m:Label text="Gross Amount" />
-            <m:Input value="{CreateModel>/Header/invGrossAmount}" visible="{appView>/isEditable}" />
-            <m:Text text="{CreateModel>/Header/invGrossAmount}" visible="{= !${appView>/isEditable}}" />
+            <m:Input value="{invGrossAmount}" visible="{appView>/isEditable}" />
+            <m:Text text="{invGrossAmount}" visible="{= !${appView>/isEditable}}" />
 
             <!-- Row 3 -->
             <m:Label text="Accounting Document Type" />
-            <m:Input value="{CreateModel>/Header/AccountingDocumentType}" visible="{appView>/isEditable}" />
-            <m:Text text="{CreateModel>/Header/AccountingDocumentType}" visible="{= !${appView>/isEditable}}" />
+            <m:Input value="{AccountingDocumentType}" visible="{appView>/isEditable}" />
+            <m:Text text="{AccountingDocumentType}" visible="{= !${appView>/isEditable}}" />
 
             <m:Label text="Document Header Text" />
             <m:Input value="{DocumentHeaderText}" visible="{appView>/isEditable}" />
@@ -238,7 +238,7 @@
                         <blocks>
                             <m:Table
                                 id="ItemTable"
-                                items="{CreateModel>/Items}"
+                                items="{to_InvoiceItem}"
                                 inset="false"
                                 mode="SingleSelectMaster"
                                 growing="true"
@@ -379,11 +379,11 @@
                                         <!-- Purchase Order -->
                                         <m:VBox>
                                             <m:Input
-                                                value="{CreateModel>purchaseOrder}"
+                                                value="{purchaseOrder}"
                                                 visible="{appView>/isEditable}"
                                             />
                                             <m:Text
-                                                text="{CreateModel>purchaseOrder}"
+                                                text="{purchaseOrder}"
                                                 visible="{= !${appView>/isEditable}}"
                                             />
                                         </m:VBox>
@@ -391,11 +391,11 @@
                                         <!-- Unit of Measure -->
                                         <m:VBox>
                                             <m:Input
-                                                value="{CreateModel>poQuantityUnit}"
+                                                value="{poQuantityUnit}"
                                                 visible="{appView>/isEditable}"
                                             />
                                             <m:Text
-                                                text="{CreateModel>poQuantityUnit}"
+                                                text="{poQuantityUnit}"
                                                 visible="{= !${appView>/isEditable}}"
                                             />
                                         </m:VBox>
@@ -403,11 +403,11 @@
                                         <!-- Quantity -->
                                         <m:VBox>
                                             <m:Input
-                                                value="{CreateModel>quantityPOUnit}"
+                                                value="{quantityPOUnit}"
                                                 visible="{appView>/isEditable}"
                                             />
                                             <m:Text
-                                                text="{CreateModel>quantityPOUnit}"
+                                                text="{quantityPOUnit}"
                                                 visible="{= !${appView>/isEditable}}"
                                             />
                                         </m:VBox>
@@ -415,11 +415,11 @@
                                         <!-- Invoice Item -->
                                         <m:VBox>
                                             <m:Input
-                                                value="{CreateModel>sup_InvoiceItem}"
+                                                value="{sup_InvoiceItem}"
                                                 visible="{appView>/isEditable}"
                                             />
                                             <m:Text
-                                                text="{CreateModel>sup_InvoiceItem}"
+                                                text="{sup_InvoiceItem}"
                                                 visible="{= !${appView>/isEditable}}"
                                             />
                                         </m:VBox>
@@ -427,11 +427,11 @@
                                         <!-- Invoice Item Amount -->
                                         <m:VBox>
                                             <m:Input
-                                                value="{CreateModel>supInvItemAmount}"
+                                                value="{supInvItemAmount}"
                                                 visible="{appView>/isEditable}"
                                             />
                                             <m:Text
-                                                text="{CreateModel>supInvItemAmount}"
+                                                text="{supInvItemAmount}"
                                                 visible="{= !${appView>/isEditable}}"
                                             />
                                         </m:VBox>
@@ -439,11 +439,11 @@
                                         <!-- Plant -->
                                         <m:VBox>
                                             <m:Input
-                                                value="{CreateModel>Plant}"
+                                                value="{Plant}"
                                                 visible="{appView>/isEditable}"
                                             />
                                             <m:Text
-                                                text="{CreateModel>Plant}"
+                                                text="{Plant}"
                                                 visible="{= !${appView>/isEditable}}"
                                             />
                                         </m:VBox>
@@ -451,11 +451,11 @@
                                         <!-- Product Type -->
                                         <m:VBox>
                                             <m:Input
-                                                value="{CreateModel>ProductType}"
+                                                value="{ProductType}"
                                                 visible="{appView>/isEditable}"
                                             />
                                             <m:Text
-                                                text="{CreateModel>ProductType}"
+                                                text="{ProductType}"
                                                 visible="{= !${appView>/isEditable}}"
                                             />
                                         </m:VBox>
@@ -463,11 +463,11 @@
                                         <!-- Tax Jurisdiction -->
                                         <m:VBox>
                                             <m:Input
-                                                value="{CreateModel>TaxJurisdiction}"
+                                                value="{TaxJurisdiction}"
                                                 visible="{appView>/isEditable}"
                                             />
                                             <m:Text
-                                                text="{CreateModel>TaxJurisdiction}"
+                                                text="{TaxJurisdiction}"
                                                 visible="{= !${appView>/isEditable}}"
                                             />
                                         </m:VBox>
@@ -475,11 +475,11 @@
                                         <!-- Tax Code -->
                                         <m:VBox>
                                             <m:Input
-                                                value="{CreateModel>taxCode}"
+                                                value="{taxCode}"
                                                 visible="{appView>/isEditable}"
                                             />
                                             <m:Text
-                                                text="{CreateModel>taxCode}"
+                                                text="{taxCode}"
                                                 visible="{= !${appView>/isEditable}}"
                                             />
                                         </m:VBox>
@@ -559,7 +559,7 @@
                                     id="uploadedFilesTable"
                                     inset="false"
                                     growing="true"
-                                    items="{Attachments>/files}"   
+                                    items="{attachments>/files}"   
                                     mode="SingleSelectLeft"                                   
                                     itemPress=""
                                 >
@@ -567,24 +567,33 @@
                                         <m:Column>
                                             <m:Text text="File Name" />
                                         </m:Column>
-                                        <m:Column>
-                                            <m:Text text="Uploaded On" />
+                                         <m:Column>
+                                            <m:Text text="Attachment" />
                                         </m:Column>
                                         <m:Column>
-                                            <m:Text text="Status" />
+                                            <m:Text text="Created On" />
+                                        </m:Column>
+                                         <m:Column>
+                                            <m:Text text="Created By" />
+                                        </m:Column>
+                                        <m:Column>
+                                            <m:Text text="Note" />
                                         </m:Column>
                                     </m:columns>
                                     <m:items>
                                         <m:ColumnListItem>
                                             <m:cells>
-                                               <m:Text text="{Attachments>fileName}" />
-                                               <m:Text text="{Attachments>uploadDate}" />
-                                              <m:Text text="{Attachments>status}" />
-                                               
+                                               <m:Text text="{attachments>fileName}" />
+                                               <m:Link text="{attachments>fileName}" press=".onOpenAttachment" />
+                                              <m:Text text="{attachments>createdOn}" />
+                                               <m:Text text="{attachments>createdBy}" />
+                                                <m:Text text="{attachments>notes}" />
+                                                                                            
                                             </m:cells>
                                         </m:ColumnListItem>
                                     </m:items>
                                 </m:Table>
+                                <m:PDFViewer   id="pdfViewer" source="{attachments>/currentFileUrl}"  title="Attachment Preview"  visible="false"/>
                             </m:VBox>
 
                         </blocks>

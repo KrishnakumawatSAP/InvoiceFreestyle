@@ -42,7 +42,7 @@ sap.ui.define([
 					paramsExpanded: true,
 					sideBarExpanded: true,
 					breadcrumbLinks: [{}],
-					layout: "TwoColumnsBeginExpanded",
+					layout: "OneColumn",
 					isEditable: false,
 					CreateMode: false,
 					bProcessFlowVisible: true,
