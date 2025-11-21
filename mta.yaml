@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: dashboards
 description: Vendor Invoice Administration.
-version: 0.0.7
+version: 0.0.8
 modules:
   - name: dashboards-srv
     type: nodejs

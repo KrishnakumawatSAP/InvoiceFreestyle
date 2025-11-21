@@ -208,7 +208,7 @@ sap.ui.define([
 				oDetailView.bindElement({
 					path: sPath,
 					parameters: {
-						expand: "to_InvoiceItem"
+						expand: "to_InvoiceItem,to_InvoiceLogs,attachments"
 					},
 					events: {
 						dataRequested: function () {

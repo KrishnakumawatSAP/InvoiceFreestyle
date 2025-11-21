@@ -216,7 +216,7 @@ sap.ui.define([
                 oAppView.setProperty("/layout", "OneColumn");
                 oAppView.setProperty("/isFullPage", true);
             },
-            onFileSelectedV4: async function (oEvent) {
+            onFileSelectedV4: async function (oEvent) { //Not used
                 var oFile = oEvent.getParameter("files")[0];
                 if (!oFile) return;
 
@@ -275,7 +275,8 @@ sap.ui.define([
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    // const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    const sInvoiceID =  oView.getBindingContext().getObject("ID") 
                     const baseUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=true)/draftEdit?$expand=DraftAdministrativeData`;
                     const FileUploader = this.byId("fileUploader");
 
@@ -307,7 +308,7 @@ sap.ui.define([
 
                 //const typeKey = this.getView().byId("cmbType").getSelectedKey();
                 const oView = this.getView();
-                const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                const sInvoiceID =  oView.getBindingContext().getObject("ID")
                 const fileMeta = {
 
                     up__ID: sInvoiceID,
@@ -411,7 +412,7 @@ sap.ui.define([
 
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    const sInvoiceID =  oView.getBindingContext().getObject("ID")
 
                     jQuery.ajax({
 
@@ -457,7 +458,7 @@ sap.ui.define([
 
                 this.attachmentID = res.ID;
                 const oView = this.getView();
-                const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                const sInvoiceID =  oView.getBindingContext().getObject("ID")
 
                 const url = `${model.sServiceUrl}${entity}_attachments(up__ID=${sInvoiceID},ID=${res.ID},IsActiveEntity=false)/content`;
 
@@ -479,7 +480,7 @@ sap.ui.define([
 
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    const sInvoiceID =  oView.getBindingContext().getObject("ID")
 
                     const noteData = { note: noteText };
 
@@ -520,7 +521,7 @@ sap.ui.define([
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    var sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    const sInvoiceID =  oView.getBindingContext().getObject("ID")
                     if(!sInvoiceID){
                         sInvoiceID = ID;
                     }
@@ -546,11 +547,11 @@ sap.ui.define([
 
             },
 
-            _activateDraft: function (ID) {
+            _activateDraft: function () {
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    var sInvoiceID = oView.getModel("CreateModel").getProperty("/Header/ID");
+                    const sInvoiceID =  oView.getBindingContext().getObject("ID")
                     if(!sInvoiceID){
                         sInvoiceID = ID;
                     }
