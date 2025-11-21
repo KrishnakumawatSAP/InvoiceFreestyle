@@ -493,6 +493,7 @@ sap.ui.define([
                 uploadSet.setSendXHR(true);
 
                 uploadSet.upload();
+                sap.ui.core.BusyIndicator.hide(0);
 
             },
 
@@ -530,6 +531,7 @@ sap.ui.define([
 
             _showError: function (text, err) {
                 const FileUploader = this.byId("fileUploader");
+                sap.ui.core.BusyIndicator.hide(0);
                 FileUploader.clear();
                 const msg = `${text}: ${err.message || err}`;
 
@@ -543,7 +545,7 @@ sap.ui.define([
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID =  oView.getBindingContext().getObject("ID")
+                    var sInvoiceID =  oView.getBindingContext().getObject("ID")
                     if(!sInvoiceID){
                         sInvoiceID = ID;
                     }
@@ -569,11 +571,11 @@ sap.ui.define([
 
             },
 
-            _activateDraft: function () {
+            _activateDraft: function (ID) {
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID =  oView.getBindingContext().getObject("ID")
+                    var sInvoiceID =  oView.getBindingContext().getObject("ID")
                     if(!sInvoiceID){
                         sInvoiceID = ID;
                     }
@@ -585,19 +587,23 @@ sap.ui.define([
                         contentType: "application/json",
                         processData: false,
                         success: data => {
+                            sap.ui.core.BusyIndicator.hide(0);
+                            this._toggleEdit();
+                            // sap.ui.core.BusyIndicator.hide(0);
+                            sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
                             var oAttachmentModel = new sap.ui.model.json.JSONModel({
                                 files: data.attachments || []
                             });
                             oView.setModel(oAttachmentModel, "attachments");
                             var oTable = oView.byId("uploadedFilesTable");
                             var oTable = oView.byId("uploadedFilesTable");
-                            InvoiceTable
                             if (oTable.getBinding("items")) {
                                 oTable.getBinding("items").refresh();
                             }
 
                             MessageToast.show("Draft activated and attachments loaded.");
                             resolve(data);
+                            this.getRouter().navTo("files");
                         },
                         error: firstErr => {
                             const draftUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)`;
@@ -758,9 +764,9 @@ sap.ui.define([
                         success: function (oData) {
                             sap.m.MessageToast.show("Invoice Created Successfully");
                             // history.go(-1);
-                            this._toggleEdit();
-                            sap.ui.core.BusyIndicator.hide(0);
-                            sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
+                            // this._toggleEdit();
+                            // // sap.ui.core.BusyIndicator.hide(0);
+                            // sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
                             this._aNewItemContexts =[];
                             this._prepareDraft(oData.ID).then(() => this._activateDraft(oData.ID))
                             //this.onNavBack();
@@ -774,7 +780,7 @@ sap.ui.define([
                     // this._InvGUID = this.getView().getModel("CreateModel").getData().Header.ID
                     $.ajax({
                         url: "/odata/v2/dashboard/Invoice(ID=" + "'" + oDirectPayload.ID + "'," + "IsActiveEntity=false" + ")",
-                        type: "PATCH",
+                        type: "POST",
                         data: JSON.stringify(oDirectPayload),
                         contentType: "application/json",
                         headers: {

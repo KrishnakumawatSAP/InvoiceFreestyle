@@ -104,3 +104,129 @@ GET http://localhost:46769/odata/v4/dashboard/Invoice(ID=c1b0ca2e-4999-4a97-9d32
 ###
 pos
 GET https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v4/dashboard/Invoice(ID=140ced70-683d-4aea-8548-3ba7b4ee1ddc,IsActiveEntity=true)
+
+
+
+
+
+###
+POST https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/odata/v2/dashboard/Invoice(ID='a3450c3b-0209-4ebd-85b5-5b0975eba36b',IsActiveEntity=false)
+
+{
+    "AccountingDocumentType": null,
+    "DocumentHeaderText": "New Invoice",
+    "DraftAdministrativeData_DraftUUID": "0b740f70-d39c-4de3-bc8d-8cbf0bc21cc4",
+    "HasActiveEntity": true,
+    "ID": "a3450c3b-0209-4ebd-85b5-5b0975eba36b",
+    "InvoicingParty": "drafts",
+    "PaymentTerms": null,
+    "companyCode": "111",
+    "createdAt": "2025-11-16T09:12:11.088Z",
+    "createdBy": "krishna.kumawat@msitekus.com",
+    "dmsFolder": null,
+    "documentCurrency_code": null,
+    "documentDate": "2025-11-16T00:00:00.000Z",
+    "documentId": null,
+    "editmode": null,
+    "fiscalYear": "2024",
+    "invGrossAmount": "123.000",
+    "logincr": 2,
+    "mode": "manual",
+    "modifiedAt": "2025-11-16T09:12:11.088Z",
+    "modifiedBy": "krishna.kumawat@msitekus.com",
+    "newInvoice": null,
+    "postingDate": "2025-11-16T00:00:00.000Z",
+    "senderMail": null,
+    "status": "Invoice three-way mismatch",
+    "statusFlag": "E",
+    "supInvParty": "11111",
+    "template": null,
+    "url": null,
+    "to_InvoiceItem": [
+        {
+            "DraftAdministrativeData_DraftUUID": "0b740f70-d39c-4de3-bc8d-8cbf0bc21cc4",
+            "HasActiveEntity": true,
+            "ID": "9d06ceb8-87d5-4f37-9c89-babd2b3d0709",
+            "Plant": "",
+            "ProductType": "",
+            "TaxJurisdiction": "",
+            "createdAt": "2025-11-16T09:12:11.088Z",
+            "createdBy": "krishna.kumawat@msitekus.com",
+            "documentCurrency_code": null,
+            "fiscalYear": null,
+            "modifiedAt": "2025-11-16T09:12:11.088Z",
+            "modifiedBy": "krishna.kumawat@msitekus.com",
+            "poQuantityUnit": "PC",
+            "purchaseOrder": "111111",
+            "purchaseOrderItem": null,
+            "quantityPOUnit": "110.000",
+            "refDocFiscalYear": null,
+            "refDocItem": null,
+            "referenceDocument": null,
+            "supInvItemAmount": "1110.000",
+            "sup_InvoiceItem": "0001",
+            "supplierInvoice": null,
+            "taxCode": "",
+            "up__ID": "a3450c3b-0209-4ebd-85b5-5b0975eba36b",
+            "IsActiveEntity": false,
+            "up_": {
+                "__deferred": {
+                    "uri": "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v2/dashboard/InvoiceItem(up__ID=guid'a3450c3b-0209-4ebd-85b5-5b0975eba36b',ID=guid'9d06ceb8-87d5-4f37-9c89-babd2b3d0709',IsActiveEntity=false)/up_"
+                }
+            },
+            "documentCurrency": {
+                "__deferred": {
+                    "uri": "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v2/dashboard/InvoiceItem(up__ID=guid'a3450c3b-0209-4ebd-85b5-5b0975eba36b',ID=guid'9d06ceb8-87d5-4f37-9c89-babd2b3d0709',IsActiveEntity=false)/documentCurrency"
+                }
+            },
+            "DraftAdministrativeData": {
+                "__deferred": {
+                    "uri": "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v2/dashboard/InvoiceItem(up__ID=guid'a3450c3b-0209-4ebd-85b5-5b0975eba36b',ID=guid'9d06ceb8-87d5-4f37-9c89-babd2b3d0709',IsActiveEntity=false)/DraftAdministrativeData"
+                }
+            },
+            "SiblingEntity": {
+                "__deferred": {
+                    "uri": "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v2/dashboard/InvoiceItem(up__ID=guid'a3450c3b-0209-4ebd-85b5-5b0975eba36b',ID=guid'9d06ceb8-87d5-4f37-9c89-babd2b3d0709',IsActiveEntity=false)/SiblingEntity"
+                }
+            },
+            "__metadata": {
+                "type": "DashboardService.InvoiceItem",
+                "uri": "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v2/dashboard/InvoiceItem(up__ID=guid'a3450c3b-0209-4ebd-85b5-5b0975eba36b',ID=guid'9d06ceb8-87d5-4f37-9c89-babd2b3d0709',IsActiveEntity=false)"
+            },
+            "HasDraftEntity": false
+        }
+    ],
+    "to_InvoiceLogs": {
+        "__list": []
+    },
+    "attachments": {
+        "__list": []
+    },
+    "HasDraftEntity": false,
+    "IsActiveEntity": false,
+    "documentCurrency": {
+        "__deferred": {
+            "uri": "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v2/dashboard/Invoice(ID=guid'a3450c3b-0209-4ebd-85b5-5b0975eba36b',IsActiveEntity=false)/documentCurrency"
+        }
+    },
+    "statusColor": {
+        "__deferred": {
+            "uri": "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v2/dashboard/Invoice(ID=guid'a3450c3b-0209-4ebd-85b5-5b0975eba36b',IsActiveEntity=false)/statusColor"
+        }
+    },
+    "DraftAdministrativeData": {
+        "__deferred": {
+            "uri": "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v2/dashboard/Invoice(ID=guid'a3450c3b-0209-4ebd-85b5-5b0975eba36b',IsActiveEntity=false)/DraftAdministrativeData"
+        }
+    },
+    "SiblingEntity": {
+        "__deferred": {
+            "uri": "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v2/dashboard/Invoice(ID=guid'a3450c3b-0209-4ebd-85b5-5b0975eba36b',IsActiveEntity=false)/SiblingEntity"
+        }
+    },
+    "__metadata": {
+        "type": "DashboardService.Invoice",
+        "uri": "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/94d10e88-efc0-4403-ac6d-73d65521b2f0.hanaapp.zdashboard-1.0.0/odata/v2/dashboard/Invoice(ID=guid'a3450c3b-0209-4ebd-85b5-5b0975eba36b',IsActiveEntity=false)",
+        "deepPath": "/Invoice(ID=a3450c3b-0209-4ebd-85b5-5b0975eba36b,IsActiveEntity=false)"
+    }
+}

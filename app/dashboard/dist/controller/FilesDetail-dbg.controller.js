@@ -197,6 +197,24 @@ sap.ui.define([
                 this._toggleEdit();
                 var oAppViewModel = this.getModel("appView");
                 oAppViewModel.setProperty("/CreateMode", false)
+                this.editDraftInitial().then( function(data){
+                var sPath = `/Invoice(ID=${data.ID},IsActiveEntity=${data.IsActiveEntity})`;
+				this.getView().bindElement({
+					path: sPath,
+					parameters: {
+						expand: "to_InvoiceItem,to_InvoiceLogs,attachments"
+					},
+					events: {
+						dataRequested: function () {
+							sap.ui.core.BusyIndicator.show();
+						},
+						dataReceived: function () {
+							sap.ui.core.BusyIndicator.hide();
+						}
+					}
+				});
+                }.bind(this)
+                )
                 //this._bEditMode = true;
             },
 
@@ -287,6 +305,7 @@ sap.ui.define([
                         processData: false,
                         success: data => resolve(data),
                         error: firstErr => {
+                            sap.ui.core.BusyIndicator.hide(0)
                             const draftUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)`;
                             FileUploader.clear();
                             jQuery.ajax({
@@ -303,6 +322,7 @@ sap.ui.define([
             uploadFile: function (fileItem) {
 
                 //     this._oBusyDialog.open();
+                sap.ui.core.BusyIndicator.show(0);
                 const oFile = fileItem.getParameter("files")[0];
                 const entity = "Invoice";
 
@@ -345,11 +365,11 @@ sap.ui.define([
                     oAttachmentsModel.setProperty("/files", aFiles);
 
 
-                    this.editDraftInitial()
+                    // this.editDraftInitial()
 
-                        .then(() =>
+                        // .then(() =>
                             this._createFileEntry(entity, payload)
-                        )
+                        // )
 
                         .then(res => {
 
@@ -371,9 +391,9 @@ sap.ui.define([
 
                         .then(() => new Promise(r => setTimeout(r, 3000)))
 
-                        .then(() => this._prepareDraft())
+                        // .then(() => this._prepareDraft())
 
-                        .then(() => this._activateDraft())
+                        // .then(() => this._activateDraft())
 
                         .then(() => {
 
@@ -444,8 +464,10 @@ sap.ui.define([
                             }
                         },
 
-                        error: xhr => reject(new Error(xhr.responseText || "File entry creation failed"))
-
+                        error: function(xhr){
+                            sap.ui.core.BusyIndicator.hide(0);
+                            reject(new Error(xhr.responseText || "File entry creation failed"))
+                        } 
                     });
 
                 });
@@ -471,6 +493,7 @@ sap.ui.define([
                 uploadSet.setSendXHR(true);
 
                 uploadSet.upload();
+                sap.ui.core.BusyIndicator.hide(0);
 
             },
 
@@ -508,6 +531,7 @@ sap.ui.define([
 
             _showError: function (text, err) {
                 const FileUploader = this.byId("fileUploader");
+                sap.ui.core.BusyIndicator.hide(0);
                 FileUploader.clear();
                 const msg = `${text}: ${err.message || err}`;
 
@@ -521,7 +545,7 @@ sap.ui.define([
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID =  oView.getBindingContext().getObject("ID")
+                    var sInvoiceID =  oView.getBindingContext().getObject("ID")
                     if(!sInvoiceID){
                         sInvoiceID = ID;
                     }
@@ -547,11 +571,11 @@ sap.ui.define([
 
             },
 
-            _activateDraft: function () {
+            _activateDraft: function (ID) {
                 return new Promise((resolve, reject) => {
                     const model = this.getOwnerComponent().getModel();
                     const oView = this.getView();
-                    const sInvoiceID =  oView.getBindingContext().getObject("ID")
+                    var sInvoiceID =  oView.getBindingContext().getObject("ID")
                     if(!sInvoiceID){
                         sInvoiceID = ID;
                     }
@@ -563,10 +587,15 @@ sap.ui.define([
                         contentType: "application/json",
                         processData: false,
                         success: data => {
+                            sap.ui.core.BusyIndicator.hide(0);
+                            this._toggleEdit();
+                            // sap.ui.core.BusyIndicator.hide(0);
+                            sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
                             var oAttachmentModel = new sap.ui.model.json.JSONModel({
                                 files: data.attachments || []
                             });
                             oView.setModel(oAttachmentModel, "attachments");
+                            var oTable = oView.byId("uploadedFilesTable");
                             var oTable = oView.byId("uploadedFilesTable");
                             if (oTable.getBinding("items")) {
                                 oTable.getBinding("items").refresh();
@@ -574,6 +603,7 @@ sap.ui.define([
 
                             MessageToast.show("Draft activated and attachments loaded.");
                             resolve(data);
+                            this.getRouter().navTo("files");
                         },
                         error: firstErr => {
                             const draftUrl = `${model.sServiceUrl}Invoice(ID=${sInvoiceID},IsActiveEntity=false)`;
@@ -734,9 +764,9 @@ sap.ui.define([
                         success: function (oData) {
                             sap.m.MessageToast.show("Invoice Created Successfully");
                             // history.go(-1);
-                            this._toggleEdit();
-                            sap.ui.core.BusyIndicator.hide(0);
-                            sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
+                            // this._toggleEdit();
+                            // // sap.ui.core.BusyIndicator.hide(0);
+                            // sap.ui.getCore().getEventBus().publish("InvoiceChannel", "ReloadList");
                             this._aNewItemContexts =[];
                             this._prepareDraft(oData.ID).then(() => this._activateDraft(oData.ID))
                             //this.onNavBack();
@@ -749,8 +779,8 @@ sap.ui.define([
                 } else {
                     // this._InvGUID = this.getView().getModel("CreateModel").getData().Header.ID
                     $.ajax({
-                        url: "/odata/v2/dashboard/Invoice(ID=" + "'" + oDirectPayload.ID + "'," + "IsActiveEntity=true" + ")",
-                        type: "PATCH",
+                        url: "/odata/v2/dashboard/Invoice(ID=" + "'" + oDirectPayload.ID + "'," + "IsActiveEntity=false" + ")",
+                        type: "POST",
                         data: JSON.stringify(oDirectPayload),
                         contentType: "application/json",
                         headers: {

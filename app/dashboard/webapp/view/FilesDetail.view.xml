@@ -558,7 +558,7 @@
                                     id="uploadedFilesTable"
                                     inset="false"
                                     growing="true"
-                                    items="{attachments>/files}"   
+                                    items="{attachments}"   
                                     mode="SingleSelectLeft"                                   
                                     itemPress=""
                                 >
@@ -582,11 +582,11 @@
                                     <m:items>
                                         <m:ColumnListItem>
                                             <m:cells>
-                                               <m:Text text="{attachments>fileName}" />
-                                               <m:Link text="{attachments>fileName}" press=".onOpenAttachment" />
-                                              <m:Text text="{attachments>createdOn}" />
-                                               <m:Text text="{attachments>createdBy}" />
-                                                <m:Text text="{attachments>notes}" />
+                                               <m:Text text="{fileName}" />
+                                               <m:Link text="{fileName}" press=".onOpenAttachment" />
+                                              <m:Text text="{createdOn}" />
+                                               <m:Text text="{createdBy}" />
+                                                <m:Text text="{notes}" />
                                                                                             
                                             </m:cells>
                                         </m:ColumnListItem>
